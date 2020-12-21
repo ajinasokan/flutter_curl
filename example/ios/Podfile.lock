@@ -1,0 +1,28 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_curl (0.0.1):
+    - Flutter
+  - path_provider (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_curl (from `.symlinks/plugins/flutter_curl/ios`)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_curl:
+    :path: ".symlinks/plugins/flutter_curl/ios"
+  path_provider:
+    :path: ".symlinks/plugins/path_provider/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_curl: f716117fd604c1422a3c69b6c4e502bb27217a0d
+  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+
+COCOAPODS: 1.9.3
