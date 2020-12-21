@@ -49,5 +49,5 @@ def urlFile = { url, name ->
 }
 
 dependencies {
-    implementation urlFile("http://localhost:8000/curl.aar", "curl.aar")
+    implementation urlFile("https://github.com/ajinasokan/flutter_curl/releases/download/v0.0.1-bins/curl.aar", "curl.aar")
 }
