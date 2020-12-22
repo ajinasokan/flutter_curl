@@ -1,3 +1,5 @@
+<a href="https://zerodha.tech"><img src="https://zerodha.tech/static/images/github-badge.svg" align="right" /></a>
+
 # libcurl for Flutter [Alpha]
 
 Flutter plugin to use [libcurl](https://curl.se/libcurl/) for HTTP calls in Flutter Android & iOS apps. HTTP stack built in to Dart as part of `dart:io` supports only HTTP 1.1. This plugin aims to bring upto date features in connectivity available in libcurl such as:
@@ -66,7 +68,7 @@ This plugin uses custom built libcurl libraries distributed via [releases](https
 * NDK min SDK: 21 (armv7a, arm64, x86_64), iOS min SDK: 8.0 (arm64, x86_64)
 * Android binaries are packaged as **aar** and iOS binary as **framework**
 
-This will be downloaded once the project builds for iOS or when pod install happens for iOS. In Android these binaries are dynamically linked and in iOS it is statically linked.
+This will be downloaded once the project builds for Android or when pod install happens for iOS. In Android these binaries are dynamically linked and in iOS it is statically linked.
 
 The cURL APIs are accessed directly in a different isolate in Flutter using the [dart:ffi](https://dart.dev/guides/libraries/c-interop) APIs(beta). Isolate is used to avoid unresponsiveness in the app as the cURL APIs are blocking.
 
