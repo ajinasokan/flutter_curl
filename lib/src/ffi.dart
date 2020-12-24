@@ -1,9 +1,12 @@
 part of 'client.dart';
 
+/// [CURLEasy] holds handle for a single request
 class CURLEasy extends ffi.Struct {}
 
+/// [CURLMulti] holds handle to the request queue
 class CURLMulti extends ffi.Struct {}
 
+/// [CURLMsg] holds the status about a single request
 class CURLMsg extends ffi.Struct {
   @ffi.Int32()
   int messageType;
@@ -15,6 +18,8 @@ class CURLMsg extends ffi.Struct {
         ..messageType = msg
         ..easyHandle = easyHandle;
 }
+
+// C definitions
 
 typedef _multi_init_func = ffi.Pointer<CURLMulti> Function();
 typedef _multi_init = ffi.Pointer<CURLMulti> Function();
@@ -79,27 +84,21 @@ typedef _slist_append = ffi.Pointer Function(ffi.Pointer, ffi.Pointer<Utf8>);
 typedef _slist_free_all_func = ffi.Void Function(ffi.Pointer);
 typedef _slist_free_all = void Function(ffi.Pointer);
 
-// TODO: https://curl.haxx.se/libcurl/c/curl_multi_poll.html
-// TODO: https://curl.haxx.se/libcurl/c/curl_multi_info_read.html
+// Callback functions
 
 typedef _WriteFunc = ffi.Int32 Function(
-  ffi.Pointer<ffi.Uint8>,
-  ffi.Int32,
-  ffi.Int32,
-  ffi.Pointer<Utf8>,
-);
+    ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Int32, ffi.Pointer<Utf8>);
 
-typedef _DebugFunc = ffi.Int32 Function(
-  ffi.Pointer<CURLEasy>,
-  ffi.Int32,
-  ffi.Pointer<ffi.Uint8>,
-  ffi.Int32,
-  ffi.Pointer<Utf8>,
-);
+typedef _DebugFunc = ffi.Int32 Function(ffi.Pointer<CURLEasy>, ffi.Int32,
+    ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Pointer<Utf8>);
 
-class LibCURL {
+/// [_LibCURL] defines and initializes the functions in libcurl
+/// used by the plugin
+class _LibCURL {
+  // handle to the lib
   ffi.DynamicLibrary _dylib;
 
+  // C handles
   _multi_init multi_init;
   _multi_add_handle multi_add_handle;
   _multi_remove_handle multi_remove_handle;
@@ -118,12 +117,21 @@ class LibCURL {
   _slist_append slist_append;
   _slist_free_all slist_free_all;
 
-  void init() {
-    if (Platform.isIOS)
+  void init({String libPath}) {
+    // Load the library depending on the platform. If libPath is
+    // provided it takes the precendence over all.
+    if (libPath != null) {
+      _dylib = ffi.DynamicLibrary.open(libPath);
+    } else if (Platform.isIOS) {
       _dylib = ffi.DynamicLibrary.process();
-    else
-      _dylib = ffi.DynamicLibrary.open(Client.libPath);
+    } else if (Platform.isAndroid) {
+      _dylib = ffi.DynamicLibrary.open("libcurl.so");
+    } else {
+      // TODO: add windows, macos and linux
+      throw Exception("Unsupported platform");
+    }
 
+    // Initialize all functions defined for the plugin
     multi_init = _dylib
         .lookup<ffi.NativeFunction<_multi_init_func>>('curl_multi_init')
         .asFunction();

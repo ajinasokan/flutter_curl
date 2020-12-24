@@ -1,22 +1,28 @@
 part of 'client.dart';
 
+/// [Request] holds request data for the HTTP call. Each request
+/// has a unique id. It is used to track the request throughout the queue.
 class Request {
+  // counter to generate unique ids for each request
   static int _id = 0;
 
   final String id;
-  String url;
-  String method;
-  Map<String, String> headers;
-  List<int> body;
+  final String url;
+  final String method;
+  final Map<String, String> headers;
+  final List<int> body;
+  String userAgent;
   bool verbose;
-  String altSvcCache;
-  String certPath;
+
+  String _altSvcCache;
+  String _certPath;
 
   Request({
     this.url,
     this.method,
     this.headers,
     this.body,
+    this.userAgent,
     this.verbose,
   })  : assert(url != null),
         assert(method != null),

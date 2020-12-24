@@ -1,21 +1,25 @@
 part of 'client.dart';
 
-class _ResponseBuffer {
-  String _requestID;
-  ffi.Pointer _slist;
-  List<int> _bodyBuffer;
-  List<int> _headerBuffer;
-  int _statusCode;
-  int _httpVersion;
+enum HTTPVersion {
+  unknown,
+  http1,
+  http11,
+  http2,
+  http3,
+}
 
-  _ResponseBuffer() {
-    _statusCode = 0;
-    _bodyBuffer = [];
-    _headerBuffer = [];
-  }
+class _ResponseBuffer {
+  String requestID;
+  ffi.Pointer slist;
+  final List<int> bodyBuffer = [];
+  final List<int> headerBuffer = [];
+  int statusCode = 0;
+  int httpVersion = 0;
 
   Response toResponse() {
-    var rawHeaders = utf8.decode(_headerBuffer);
+    // Parse headers
+    // TODO: figure out if there is a better way to do this
+    var rawHeaders = utf8.decode(headerBuffer);
     rawHeaders = rawHeaders.trim();
     var items = rawHeaders.split("\r\n");
     items.removeAt(0); // proto
@@ -32,14 +36,23 @@ class _ResponseBuffer {
       }
     }
 
-    final res = Response(
-      statusCode: _statusCode,
-      body: _bodyBuffer,
+    // Pick HTTP version
+    HTTPVersion httpVer = <int, HTTPVersion>{
+          consts.CURL_HTTP_VERSION_1_0: HTTPVersion.http1,
+          consts.CURL_HTTP_VERSION_1_1: HTTPVersion.http11,
+          consts.CURL_HTTP_VERSION_2TLS: HTTPVersion.http2,
+          consts.CURL_HTTP_VERSION_2_0: HTTPVersion.http2,
+          consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: HTTPVersion.http2,
+          consts.CURL_HTTP_VERSION_3: HTTPVersion.http3,
+        }[httpVersion] ??
+        HTTPVersion.unknown;
+
+    return Response(
+      statusCode: statusCode,
+      body: bodyBuffer,
       headers: headers,
-      httpVersion: _httpVersion,
-    );
-    res._requestID = _requestID;
-    return res;
+      httpVersion: httpVer,
+    ).._requestID = requestID;
   }
 }
 
@@ -47,10 +60,10 @@ class Response {
   String _requestID;
   Request _request;
 
-  int statusCode;
-  Map<String, String> headers;
-  List<int> body;
-  int httpVersion;
+  final int statusCode;
+  final Map<String, String> headers;
+  final List<int> body;
+  final HTTPVersion httpVersion;
 
   Response({
     this.statusCode,

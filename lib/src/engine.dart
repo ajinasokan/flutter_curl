@@ -1,219 +1,233 @@
 part of 'client.dart';
 
-class Engine {
-  final LibCURL _libCurl = LibCURL();
-  ffi.Pointer<CURLMulti> _multiHandle;
+/// [_Engine] handles the request queue in a different isolate
+/// handled by [_isolate] function
+class _Engine {
+  final libCurl = _LibCURL();
+  ffi.Pointer<CURLMulti> multiHandle;
 
-  Isolate poller;
-  static Map<String, _ResponseBuffer> _connData = {};
-  static Map<ffi.Pointer<CURLEasy>, String> _reqIDs = {};
+  static Map<String, _ResponseBuffer> connData = {};
+  static Map<ffi.Pointer<CURLEasy>, String> reqIDs = {};
 
-  void init() {
-    _libCurl.init();
-    _multiHandle = _libCurl.multi_init();
+  void init({String libPath}) {
+    libCurl.init(libPath: libPath);
+    multiHandle = libCurl.multi_init();
   }
 
   void send(Request req) {
-    ffi.Pointer<CURLEasy> _handle = _libCurl.easy_init();
-    _reqIDs[_handle] = req.id;
+    final handle = libCurl.easy_init();
+    reqIDs[handle] = req.id;
+    connData[req.id] = _ResponseBuffer();
+    connData[req.id].requestID = req.id;
 
-    _connData[req.id] = _ResponseBuffer();
-    _connData[req.id]._requestID = req.id;
-
-    _libCurl.easy_setopt_string(
-      _handle,
+    // set basic request params
+    libCurl.easy_setopt_string(
+      handle,
       consts.CURLOPT_CUSTOMREQUEST,
       Utf8.toUtf8(req.method),
     );
-
-    _libCurl.easy_setopt_string(
-      _handle,
+    libCurl.easy_setopt_string(
+      handle,
       consts.CURLOPT_URL,
       Utf8.toUtf8(req.url),
     );
+    if (req.userAgent != null) {
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_USERAGENT,
+        Utf8.toUtf8(req.userAgent),
+      );
+    }
 
-    _libCurl.easy_setopt_string(
-      _handle,
-      consts.CURLOPT_USERAGENT,
-      Utf8.toUtf8("curl/7.42.0"),
-    );
-
-    final CURL_IPRESOLVE_V4 = 1;
-    final CURL_IPRESOLVE_V6 = 2;
-    _libCurl.easy_setopt_int(
-      _handle,
+    // set ip support.
+    // TODO: add this to client config?
+    const CURL_IPRESOLVE_WHATEVER = 0;
+    const CURL_IPRESOLVE_V4 = 1;
+    const CURL_IPRESOLVE_V6 = 2;
+    libCurl.easy_setopt_int(
+      handle,
       consts.CURLOPT_IPRESOLVE,
-      CURL_IPRESOLVE_V4,
+      CURL_IPRESOLVE_WHATEVER,
     );
 
-    _libCurl.easy_setopt_int(
-      _handle,
+    // enable support for all http versions
+    libCurl.easy_setopt_int(
+      handle,
       consts.CURLOPT_HTTP_VERSION,
       consts.CURL_HTTP_VERSION_1_1 |
           consts.CURL_HTTP_VERSION_2_0 |
           consts.CURL_HTTP_VERSION_3,
     );
 
-    if (req.altSvcCache != null) {
-      _libCurl.easy_setopt_string(
-        _handle,
-        consts.CURLOPT_ALTSVC,
-        Utf8.toUtf8(req.altSvcCache),
-      );
-    }
-
+    // in iOS BoringSSL doesn't use SecureTransport. so use the certs from
+    // curl instead.
+    // TODO: verify this is fine in appstore
     if (Platform.isIOS) {
-      _libCurl.easy_setopt_string(
-        _handle,
+      libCurl.easy_setopt_string(
+        handle,
         consts.CURLOPT_CAINFO,
-        Utf8.toUtf8(req.certPath),
+        Utf8.toUtf8(req._certPath),
       );
     }
 
-    _libCurl.easy_setopt_int(
-      _handle,
+    // set alt-svc cache path
+    if (req._altSvcCache != null) {
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_ALTSVC,
+        Utf8.toUtf8(req._altSvcCache),
+      );
+    }
+
+    // enable alt-svc support for all http versions
+    libCurl.easy_setopt_int(
+      handle,
       consts.CURLOPT_ALTSVC_CTRL,
       consts.CURLALTSVC_H1 | consts.CURLALTSVC_H2 | consts.CURLALTSVC_H3,
     );
 
+    // enable verbose and set the callback
+    // TODO: may be provide log to file support?
     if (req.verbose) {
-      _libCurl.easy_setopt_int(
-        _handle,
+      libCurl.easy_setopt_int(
+        handle,
         consts.CURLOPT_VERBOSE,
         1,
       );
-      _libCurl.easy_setopt_ptr(
-        _handle,
+      libCurl.easy_setopt_ptr(
+        handle,
         consts.CURLOPT_DEBUGFUNCTION,
-        ffi.Pointer.fromFunction<_DebugFunc>(debugWriteFunc, 0),
+        ffi.Pointer.fromFunction<_DebugFunc>(_debugWriteFunc, 0),
       );
     }
 
-    _connData[req.id]._slist = ffi.nullptr;
+    // add the headers
+    connData[req.id].slist = ffi.nullptr;
     String encodingHeader = "";
     for (var key in req.headers.keys) {
       if (key.toLowerCase() == "accept-encoding") {
         encodingHeader = req.headers[key];
         continue;
       }
-      final temp = _libCurl.slist_append(
-        _connData[req.id]._slist,
+      final temp = libCurl.slist_append(
+        connData[req.id].slist,
         Utf8.toUtf8("$key: ${req.headers[key]}"),
       );
       if (temp != ffi.nullptr)
-        _connData[req.id]._slist = temp;
+        connData[req.id].slist = temp;
       else
         print("error while adding $key");
     }
 
-    _libCurl.easy_setopt_string(
-      _handle,
+    // accept encoding header is set differently
+    libCurl.easy_setopt_string(
+      handle,
       consts.CURLOPT_ACCEPT_ENCODING,
       Utf8.toUtf8(encodingHeader),
     );
 
-    if (_connData[req.id]._slist != ffi.nullptr) {
-      _libCurl.easy_setopt_ptr(
-        _handle,
+    if (connData[req.id].slist != ffi.nullptr) {
+      libCurl.easy_setopt_ptr(
+        handle,
         consts.CURLOPT_HTTPHEADER,
-        _connData[req.id]._slist,
+        connData[req.id].slist,
       );
     }
 
+    // add post body
     if (req.method.toLowerCase() == "post") {
-      _libCurl.easy_setopt_string(
-        _handle,
+      libCurl.easy_setopt_string(
+        handle,
         consts.CURLOPT_POSTFIELDS,
         Utf8.toUtf8(utf8.decode(req.body)),
       );
     }
 
-    _libCurl.easy_setopt_ptr(
-      _handle,
+    // set callbacks
+    libCurl.easy_setopt_ptr(
+      handle,
       consts.CURLOPT_WRITEFUNCTION,
-      ffi.Pointer.fromFunction<_WriteFunc>(dataWriteFunc, 0),
+      ffi.Pointer.fromFunction<_WriteFunc>(_dataWriteFunc, 0),
     );
 
-    _libCurl.easy_setopt_string(
-      _handle,
+    libCurl.easy_setopt_string(
+      handle,
       consts.CURLOPT_WRITEDATA,
       Utf8.toUtf8(req.id),
     );
 
-    _libCurl.easy_setopt_ptr(
-      _handle,
+    libCurl.easy_setopt_ptr(
+      handle,
       consts.CURLOPT_HEADERFUNCTION,
-      ffi.Pointer.fromFunction<_WriteFunc>(headerWriteFunc, 0),
+      ffi.Pointer.fromFunction<_WriteFunc>(_headerWriteFunc, 0),
     );
 
-    _libCurl.easy_setopt_string(
-      _handle,
+    libCurl.easy_setopt_string(
+      handle,
       consts.CURLOPT_HEADERDATA,
       Utf8.toUtf8(req.id),
     );
 
-    _libCurl.multi_add_handle(_multiHandle, _handle);
+    // add request to queue
+    libCurl.multi_add_handle(multiHandle, handle);
   }
 
+  /// [perform] runs the libcurl processing to handle incoming
+  /// data and collects these data to dart objects and frees the
+  /// C resources once it is done
   ffi.Pointer<ffi.Int32> _tempCounter = allocate();
   Future<Response> perform() async {
-    _libCurl.multi_perform(_multiHandle, _tempCounter);
-    final msgPtr = _libCurl.multi_info_read(_multiHandle, _tempCounter);
+    libCurl.multi_perform(multiHandle, _tempCounter);
+    final msgPtr = libCurl.multi_info_read(multiHandle, _tempCounter);
     if (msgPtr != ffi.nullptr) {
       final msg = msgPtr.ref;
       if (msg.messageType == consts.CURLMSG_DONE) {
-        String requestID = _reqIDs[msg.easyHandle];
-        final buffer = _connData[requestID];
+        String requestID = reqIDs[msg.easyHandle];
+        final buffer = connData[requestID];
 
         ffi.Pointer<ffi.Int64> _tempLong = allocate();
-        _libCurl.easy_getinfo(
+        libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
-        buffer._statusCode = _tempLong.value;
-        _libCurl.easy_getinfo(
+        buffer.statusCode = _tempLong.value;
+        libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_HTTP_VERSION, _tempLong);
-        buffer._httpVersion = _tempLong.value;
+        buffer.httpVersion = _tempLong.value;
         free(_tempLong);
 
-        _libCurl.slist_free_all(_connData[requestID]._slist);
-        _libCurl.multi_remove_handle(_multiHandle, msg.easyHandle);
-        _libCurl.easy_cleanup(msg.easyHandle);
-        _reqIDs.remove(msg.easyHandle);
-        _connData.remove(requestID);
+        libCurl.slist_free_all(connData[requestID].slist);
+        libCurl.multi_remove_handle(multiHandle, msg.easyHandle);
+        libCurl.easy_cleanup(msg.easyHandle);
+        reqIDs.remove(msg.easyHandle);
+        connData.remove(requestID);
         return buffer.toResponse();
       }
     }
     return null;
   }
 
-  // void poll() {
-  //   _libCurl.multi_poll(_multiHandle, ffi.nullptr, 0, 50, ffi.nullptr);
-  // }
-
   void dispose() {}
 }
 
+/// [_isolate] function runs in a different isolate and sends
+/// requests and responses to and from libcurl to the main
+/// Flutter isolate
 void _isolate(SendPort sendPort) async {
   final receivePort = ReceivePort();
   sendPort.send(receivePort.sendPort);
 
-  final c = Engine();
-
-  receivePort.listen((req) {
-    c.send(req);
-  });
-
-  c.init();
+  final engine = _Engine();
+  receivePort.listen((req) => engine.send(req));
+  engine.init();
 
   while (true) {
-    final res = await c.perform();
-    if (res != null) {
-      sendPort.send(res);
-    }
+    final res = await engine.perform();
+    if (res != null) sendPort.send(res);
     await Future.delayed(Duration(milliseconds: 10));
   }
 }
 
-int dataWriteFunc(
+/// [_dataWriteFunc] collects response body to body buffer
+int _dataWriteFunc(
   ffi.Pointer<ffi.Uint8> data,
   int size,
   int nmemb,
@@ -221,13 +235,14 @@ int dataWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  Engine._connData[Utf8.fromUtf8(requestID)]._bodyBuffer
+  _Engine.connData[Utf8.fromUtf8(requestID)].bodyBuffer
       .addAll(data.asTypedList(realsize));
 
   return realsize;
 }
 
-int headerWriteFunc(
+/// [_headerWriteFunc] collects header data to the header buffer
+int _headerWriteFunc(
   ffi.Pointer<ffi.Uint8> data,
   int size,
   int nmemb,
@@ -235,22 +250,23 @@ int headerWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  Engine._connData[Utf8.fromUtf8(requestID)]._headerBuffer
+  _Engine.connData[Utf8.fromUtf8(requestID)].headerBuffer
       .addAll(data.asTypedList(realsize));
 
   return realsize;
 }
 
-int debugWriteFunc(
+/// [_debugWriteFunc] prints the logs to Flutter logs
+int _debugWriteFunc(
   ffi.Pointer<CURLEasy> handle,
   int type,
   ffi.Pointer<ffi.Uint8> data,
   int size,
   ffi.Pointer<Utf8> requestID,
 ) {
-  final CURLINFO_TEXT = 0;
-  final CURLINFO_HEADER_IN = 1;
-  final CURLINFO_HEADER_OUT = 2;
+  const CURLINFO_TEXT = 0;
+  const CURLINFO_HEADER_IN = 1;
+  const CURLINFO_HEADER_OUT = 2;
   if (type == CURLINFO_TEXT ||
       type == CURLINFO_HEADER_IN ||
       type == CURLINFO_HEADER_OUT) {
