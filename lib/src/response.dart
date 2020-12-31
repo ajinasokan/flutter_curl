@@ -15,6 +15,7 @@ class _ResponseBuffer {
   final List<int> headerBuffer = [];
   int statusCode = 0;
   int httpVersion = 0;
+  String errorMessage;
 
   Response toResponse() {
     // Parse headers
@@ -52,6 +53,7 @@ class _ResponseBuffer {
       body: bodyBuffer,
       headers: headers,
       httpVersion: httpVer,
+      errorMessage: errorMessage,
     ).._requestID = requestID;
   }
 }
@@ -64,12 +66,14 @@ class Response {
   final Map<String, String> headers;
   final List<int> body;
   final HTTPVersion httpVersion;
+  final String errorMessage;
 
   Response({
     this.statusCode,
     this.headers,
     this.body,
     this.httpVersion,
+    this.errorMessage,
   });
 
   Request get request => _request;
