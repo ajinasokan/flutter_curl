@@ -18,13 +18,13 @@ class Request {
   String _certPath;
   int _timeout;
   int _connectTimeout;
+  String _downloadPath;
 
   Request({
     this.url,
     this.method,
     this.headers,
     this.body,
-    this.userAgent,
     this.verbose,
   })  : assert(url != null),
         assert(method != null),

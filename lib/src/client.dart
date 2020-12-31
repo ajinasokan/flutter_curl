@@ -4,7 +4,7 @@ import 'package:ffi/ffi.dart';
 import 'dart:isolate';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:io' show Platform, File;
+import 'dart:io' show Platform, File, IOSink;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as paths;
 import 'package:flutter/services.dart' show rootBundle;
@@ -110,6 +110,11 @@ class Client {
       await i.afterResponse(res);
     }
     return res;
+  }
+
+  Future<Response> download({Request request, String path}) async {
+    request._downloadPath = path;
+    return send(request);
   }
 
   void dispose() {

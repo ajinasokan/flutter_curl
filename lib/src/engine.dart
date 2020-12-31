@@ -7,6 +7,7 @@ class _Engine {
   ffi.Pointer<CURLMulti> multiHandle;
 
   static Map<String, _ResponseBuffer> connData = {};
+  static Map<String, IOSink> downloadFiles = {};
   static Map<ffi.Pointer<CURLEasy>, String> reqIDs = {};
 
   void init({String libPath}) {
@@ -19,6 +20,10 @@ class _Engine {
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
     connData[req.id].requestID = req.id;
+
+    if (req._downloadPath != null) {
+      downloadFiles[req.id] = File(req._downloadPath).openWrite();
+    }
 
     // set basic request params
     libCurl.easy_setopt_string(
@@ -214,6 +219,8 @@ class _Engine {
         libCurl.easy_cleanup(msg.easyHandle);
         reqIDs.remove(msg.easyHandle);
         connData.remove(requestID);
+        downloadFiles[requestID].close();
+        downloadFiles.remove(requestID);
         return buffer.toResponse();
       }
     }
@@ -250,8 +257,13 @@ int _dataWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  _Engine.connData[Utf8.fromUtf8(requestID)].bodyBuffer
-      .addAll(data.asTypedList(realsize));
+  final _requestID = Utf8.fromUtf8(requestID);
+  final _byteData = data.asTypedList(realsize);
+  if (_Engine.downloadFiles.containsKey(_requestID)) {
+    _Engine.downloadFiles[_requestID].add(_byteData);
+  } else {
+    _Engine.connData[_requestID].bodyBuffer.addAll(_byteData);
+  }
 
   return realsize;
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_curl/flutter_curl.dart';
+import 'package:path_provider/path_provider.dart' as paths;
 
 void main() {
   runApp(MyApp());
@@ -29,13 +30,20 @@ class _MyAppState extends State<MyApp> {
   void _incrementCounter() async {
     state = "Sending request";
     setState(() {});
-    final res = await curl.send(Request(
-      method: "GET",
-      url: "https://ajinasokan.com/",
-      headers: {},
-      body: [],
-      verbose: true,
-    ));
+    final downloadPath =
+        (await paths.getApplicationDocumentsDirectory()).path + "/index.html";
+
+    print("Downloading to $downloadPath");
+    final res = await curl.download(
+      path: downloadPath,
+      request: Request(
+        method: "GET",
+        url: "https://ajinasokan.com/",
+        headers: {},
+        body: [],
+        verbose: true,
+      ),
+    );
 
     print("Status: ${res.statusCode}");
     print("HTTP: ${res.httpVersion}");
@@ -45,7 +53,8 @@ class _MyAppState extends State<MyApp> {
         encoding = value;
       }
     });
-    print(res.errorMessage);
+    print("Text: " + res.text());
+    print("Error: ${res.errorMessage}");
 
     statusCode = "${res.statusCode}";
     httpVersion = "${res.httpVersion}";
