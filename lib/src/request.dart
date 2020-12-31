@@ -16,6 +16,8 @@ class Request {
 
   String _altSvcCache;
   String _certPath;
+  int _timeout;
+  int _connectTimeout;
 
   Request({
     this.url,

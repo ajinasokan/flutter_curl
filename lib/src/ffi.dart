@@ -13,10 +13,15 @@ class CURLMsg extends ffi.Struct {
 
   ffi.Pointer<CURLEasy> easyHandle;
 
-  factory CURLMsg.allocate(int msg, ffi.Pointer<CURLEasy> easyHandle) =>
+  @ffi.Int32()
+  int result;
+
+  factory CURLMsg.allocate(
+          int msg, ffi.Pointer<CURLEasy> easyHandle, int result) =>
       allocate<CURLMsg>().ref
         ..messageType = msg
-        ..easyHandle = easyHandle;
+        ..easyHandle = easyHandle
+        ..result = result;
 }
 
 // C definitions
@@ -84,6 +89,9 @@ typedef _slist_append = ffi.Pointer Function(ffi.Pointer, ffi.Pointer<Utf8>);
 typedef _slist_free_all_func = ffi.Void Function(ffi.Pointer);
 typedef _slist_free_all = void Function(ffi.Pointer);
 
+typedef _curl_easy_strerror_func = ffi.Pointer<Utf8> Function(ffi.Int32);
+typedef _curl_easy_strerror = ffi.Pointer<Utf8> Function(int);
+
 // Callback functions
 
 typedef _WriteFunc = ffi.Int32 Function(
@@ -116,6 +124,8 @@ class _LibCURL {
 
   _slist_append slist_append;
   _slist_free_all slist_free_all;
+
+  _curl_easy_strerror easy_strerror;
 
   void init({String libPath}) {
     // Load the library depending on the platform. If libPath is
@@ -194,6 +204,11 @@ class _LibCURL {
 
     slist_free_all = _dylib
         .lookup<ffi.NativeFunction<_slist_free_all_func>>('curl_slist_free_all')
+        .asFunction();
+
+    easy_strerror = _dylib
+        .lookup<ffi.NativeFunction<_curl_easy_strerror_func>>(
+            'curl_easy_strerror')
         .asFunction();
   }
 }

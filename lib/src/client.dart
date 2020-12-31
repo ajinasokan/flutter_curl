@@ -27,6 +27,8 @@ class Client {
 
   final bool verbose;
   final String userAgent;
+  final Duration timeout;
+  final Duration connectTimeout;
   final List<HTTPInterceptor> interceptors;
   String libPath;
   String certPath = "";
@@ -36,6 +38,8 @@ class Client {
     this.userAgent,
     this.libPath,
     this.interceptors = const [],
+    this.timeout = Duration.zero,
+    this.connectTimeout = const Duration(seconds: 300),
   });
 
   Future<void> init() async {
@@ -91,6 +95,8 @@ class Client {
     }
     req._altSvcCache ??= _altSvcCache;
     req._certPath ??= certPath;
+    req._timeout ??= timeout.inMilliseconds;
+    req._connectTimeout ??= connectTimeout.inMilliseconds;
     req.userAgent ??= userAgent;
     req.verbose = req.verbose ?? verbose ?? false;
     _queue[req.id] = req;

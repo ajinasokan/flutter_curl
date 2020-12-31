@@ -38,6 +38,16 @@ class _Engine {
         Utf8.toUtf8(req.userAgent),
       );
     }
+    libCurl.easy_setopt_int(
+      handle,
+      consts.CURLOPT_TIMEOUT_MS,
+      req._timeout,
+    );
+    libCurl.easy_setopt_int(
+      handle,
+      consts.CURLOPT_CONNECTTIMEOUT_MS,
+      req._connectTimeout,
+    );
 
     // set ip support.
     // TODO: add this to client config?
@@ -193,6 +203,11 @@ class _Engine {
             msg.easyHandle, consts.CURLINFO_HTTP_VERSION, _tempLong);
         buffer.httpVersion = _tempLong.value;
         free(_tempLong);
+
+        if (msg.result != consts.CURLE_OK) {
+          buffer.errorMessage =
+              Utf8.fromUtf8(libCurl.easy_strerror(msg.result));
+        }
 
         libCurl.slist_free_all(connData[requestID].slist);
         libCurl.multi_remove_handle(multiHandle, msg.easyHandle);

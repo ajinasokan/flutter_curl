@@ -18,7 +18,11 @@ class _MyAppState extends State<MyApp> {
   String encoding = "NA";
 
   void init() async {
-    curl = Client(verbose: true);
+    curl = Client(
+      verbose: true,
+      timeout: Duration(seconds: 10),
+      connectTimeout: Duration(seconds: 4),
+    );
     await curl.init();
   }
 
@@ -41,7 +45,7 @@ class _MyAppState extends State<MyApp> {
         encoding = value;
       }
     });
-    // print(res.text());
+    print(res.errorMessage);
 
     statusCode = "${res.statusCode}";
     httpVersion = "${res.httpVersion}";
