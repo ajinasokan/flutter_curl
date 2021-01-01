@@ -14,6 +14,7 @@ class Request {
   String userAgent;
   bool verbose;
 
+  String _cookiePath;
   String _altSvcCache;
   String _certPath;
   int _timeout;

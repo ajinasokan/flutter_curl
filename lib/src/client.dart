@@ -30,12 +30,14 @@ class Client {
   final Duration timeout;
   final Duration connectTimeout;
   final List<HTTPInterceptor> interceptors;
+  final String cookiePath;
   String libPath;
   String certPath = "";
 
   Client({
     this.verbose,
     this.userAgent,
+    this.cookiePath,
     this.libPath,
     this.interceptors = const [],
     this.timeout = Duration.zero,
@@ -93,6 +95,7 @@ class Client {
     for (var i in interceptors) {
       await i.beforeRequest(req);
     }
+    req._cookiePath ??= cookiePath;
     req._altSvcCache ??= _altSvcCache;
     req._certPath ??= certPath;
     req._timeout ??= timeout.inMilliseconds;

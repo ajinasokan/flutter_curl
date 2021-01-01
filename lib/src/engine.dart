@@ -54,6 +54,22 @@ class _Engine {
       req._connectTimeout,
     );
 
+    // set cookie path
+    if (req._cookiePath != null) {
+      // for reading
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_COOKIEFILE,
+        Utf8.toUtf8(req._cookiePath),
+      );
+      // for storing
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_COOKIEJAR,
+        Utf8.toUtf8(req._cookiePath),
+      );
+    }
+
     // set ip support.
     // TODO: add this to client config?
     const CURL_IPRESOLVE_WHATEVER = 0;
@@ -260,6 +276,8 @@ int _dataWriteFunc(
 
   final _requestID = Utf8.fromUtf8(requestID);
   final _byteData = data.asTypedList(realsize);
+  // if this is suppose to be a download then add the data
+  // to IOSink of file. otherwise add it to the response buffer
   if (_Engine.downloadFiles.containsKey(_requestID)) {
     _Engine.downloadFiles[_requestID].add(_byteData);
   } else {
