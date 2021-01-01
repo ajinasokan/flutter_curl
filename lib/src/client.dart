@@ -4,7 +4,7 @@ import 'package:ffi/ffi.dart';
 import 'dart:isolate';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:io' show Platform, File, IOSink;
+import 'dart:io' show Platform, File, IOSink, RandomAccessFile;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as paths;
 import 'package:flutter/services.dart' show rootBundle;
@@ -13,6 +13,7 @@ import 'const.dart' as consts;
 
 part 'ffi.dart';
 part 'request.dart';
+part 'request_body.dart';
 part 'response.dart';
 part 'engine.dart';
 

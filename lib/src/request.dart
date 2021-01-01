@@ -10,7 +10,7 @@ class Request {
   final String url;
   final String method;
   final Map<String, String> headers;
-  final List<int> body;
+  final RequestBody body;
   String userAgent;
   bool verbose;
 
@@ -41,7 +41,7 @@ class Request {
         method: "GET",
         url: url,
         headers: headers ?? {},
-        body: [],
+        body: RequestBody._(),
       );
 
   factory Request.delete({
@@ -52,30 +52,30 @@ class Request {
         method: "DELETE",
         url: url,
         headers: headers ?? {},
-        body: [],
+        body: RequestBody._(),
       );
 
   factory Request.post({
     String url,
     Map<String, String> headers,
-    String body,
+    RequestBody body,
   }) =>
       Request(
         method: "POST",
         url: url,
         headers: headers ?? {},
-        body: utf8.encode(body),
+        body: body,
       );
 
   factory Request.put({
     String url,
     Map<String, String> headers,
-    String body,
+    RequestBody body,
   }) =>
       Request(
         method: "PUT",
         url: url,
         headers: headers ?? {},
-        body: utf8.encode(body),
+        body: body,
       );
 }

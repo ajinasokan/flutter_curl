@@ -8,6 +8,7 @@ class _Engine {
 
   static Map<String, _ResponseBuffer> connData = {};
   static Map<String, IOSink> downloadFiles = {};
+  static Map<String, RandomAccessFile> uploadFiles = {};
   static Map<ffi.Pointer<CURLEasy>, String> reqIDs = {};
 
   void init({String libPath}) {
@@ -20,6 +21,10 @@ class _Engine {
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
     connData[req.id].requestID = req.id;
+
+    if (req.body._type == _BodyType.file) {
+      uploadFiles[req.id] = File(req.body._file).openSync();
+    }
 
     if (req._downloadPath != null) {
       downloadFiles[req.id] = File(req._downloadPath).openWrite();
@@ -168,11 +173,48 @@ class _Engine {
     // add post body
     if (req.method.toLowerCase() == "post" ||
         req.method.toLowerCase() == "put") {
-      libCurl.easy_setopt_string(
-        handle,
-        consts.CURLOPT_POSTFIELDS,
-        Utf8.toUtf8(utf8.decode(req.body)),
-      );
+      if (req.body._type == _BodyType.string) {
+        libCurl.easy_setopt_string(
+          handle,
+          consts.CURLOPT_POSTFIELDS,
+          Utf8.toUtf8(req.body._string),
+        );
+      } else if (req.body._type == _BodyType.raw) {
+        libCurl.easy_setopt_string(
+          handle,
+          consts.CURLOPT_POSTFIELDS,
+          Utf8.toUtf8(utf8.decode(req.body._raw, allowMalformed: true)),
+        );
+      } else if (req.body._type == _BodyType.form) {
+        libCurl.easy_setopt_string(
+          handle,
+          consts.CURLOPT_POSTFIELDS,
+          Utf8.toUtf8(Uri(queryParameters: req.body._form).query),
+        );
+      } else if (req.body._type == _BodyType.file) {
+        libCurl.easy_setopt_int(
+          handle,
+          consts.CURLOPT_UPLOAD,
+          1,
+        );
+        libCurl.easy_setopt_int(
+          handle,
+          consts.CURLOPT_INFILESIZE_LARGE,
+          uploadFiles[req.id].lengthSync(),
+        );
+        libCurl.easy_setopt_ptr(
+          handle,
+          consts.CURLOPT_READFUNCTION,
+          ffi.Pointer.fromFunction<_ReadFunc>(_dataReadFunc, 0),
+        );
+        libCurl.easy_setopt_string(
+          handle,
+          consts.CURLOPT_READDATA,
+          Utf8.toUtf8(req.id),
+        );
+      } else if (req.body._type == _BodyType.multipart) {
+        // TODO
+      }
     }
 
     // set callbacks
@@ -217,6 +259,8 @@ class _Engine {
         String requestID = reqIDs[msg.easyHandle];
         final buffer = connData[requestID];
 
+        // get response code and http version used. this needs
+        // an int reference. it is being reused for both calls
         ffi.Pointer<ffi.Int64> _tempLong = allocate();
         libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
@@ -231,13 +275,23 @@ class _Engine {
               Utf8.fromUtf8(libCurl.easy_strerror(msg.result));
         }
 
+        // cleanup everything
         libCurl.slist_free_all(connData[requestID].slist);
         libCurl.multi_remove_handle(multiHandle, msg.easyHandle);
         libCurl.easy_cleanup(msg.easyHandle);
         reqIDs.remove(msg.easyHandle);
         connData.remove(requestID);
-        downloadFiles[requestID].close();
-        downloadFiles.remove(requestID);
+
+        if (uploadFiles.containsKey(requestID)) {
+          uploadFiles[requestID].closeSync();
+          uploadFiles.remove(requestID);
+        }
+
+        if (downloadFiles.containsKey(requestID)) {
+          downloadFiles[requestID].close();
+          downloadFiles.remove(requestID);
+        }
+
         return buffer.toResponse();
       }
     }
@@ -263,6 +317,20 @@ void _isolate(SendPort sendPort) async {
     if (res != null) sendPort.send(res);
     await Future.delayed(Duration(milliseconds: 10));
   }
+}
+
+/// [_dataReadFunc] sends data from file for upload
+int _dataReadFunc(
+  ffi.Pointer<ffi.Uint8> data,
+  int size,
+  int nmemb,
+  ffi.Pointer<Utf8> requestID,
+) {
+  int realsize = size * nmemb;
+
+  final _requestID = Utf8.fromUtf8(requestID);
+  return _Engine.uploadFiles[_requestID]
+      .readIntoSync(data.asTypedList(realsize), 0, realsize);
 }
 
 /// [_dataWriteFunc] collects response body to body buffer

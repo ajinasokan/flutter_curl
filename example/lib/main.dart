@@ -40,7 +40,6 @@ class _MyAppState extends State<MyApp> {
         method: "GET",
         url: "https://ajinasokan.com/",
         headers: {},
-        body: [],
         verbose: true,
       ),
     );

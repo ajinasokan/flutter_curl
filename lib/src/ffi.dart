@@ -92,7 +92,19 @@ typedef _slist_free_all = void Function(ffi.Pointer);
 typedef _curl_easy_strerror_func = ffi.Pointer<Utf8> Function(ffi.Int32);
 typedef _curl_easy_strerror = ffi.Pointer<Utf8> Function(int);
 
+// struct curl_mime
+// struct curl_mimepart
+// curl_mime_init
+// curl_mime_addpart
+// curl_mime_filename
+// curl_mime_filedata
+// curl_mime_data
+// curl_mime_name
+
 // Callback functions
+
+typedef _ReadFunc = ffi.Int32 Function(
+    ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Int32, ffi.Pointer<Utf8>);
 
 typedef _WriteFunc = ffi.Int32 Function(
     ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Int32, ffi.Pointer<Utf8>);
