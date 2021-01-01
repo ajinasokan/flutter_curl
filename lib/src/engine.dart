@@ -150,7 +150,8 @@ class _Engine {
     }
 
     // add post body
-    if (req.method.toLowerCase() == "post") {
+    if (req.method.toLowerCase() == "post" ||
+        req.method.toLowerCase() == "put") {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_POSTFIELDS,
