@@ -30,7 +30,6 @@ class Request {
   })  : assert(url != null),
         assert(method != null),
         assert(headers != null),
-        assert(body != null),
         id = "${++_id}";
 
   factory Request.get({
@@ -41,7 +40,6 @@ class Request {
         method: "GET",
         url: url,
         headers: headers ?? {},
-        body: RequestBody._(),
       );
 
   factory Request.delete({
@@ -52,7 +50,6 @@ class Request {
         method: "DELETE",
         url: url,
         headers: headers ?? {},
-        body: RequestBody._(),
       );
 
   factory Request.post({

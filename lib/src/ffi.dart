@@ -26,6 +26,9 @@ class CURLMsg extends ffi.Struct {
 
 // C definitions
 
+typedef _version_func = ffi.Pointer<Utf8> Function();
+typedef _version = ffi.Pointer<Utf8> Function();
+
 typedef _multi_init_func = ffi.Pointer<CURLMulti> Function();
 typedef _multi_init = ffi.Pointer<CURLMulti> Function();
 
@@ -92,14 +95,48 @@ typedef _slist_free_all = void Function(ffi.Pointer);
 typedef _curl_easy_strerror_func = ffi.Pointer<Utf8> Function(ffi.Int32);
 typedef _curl_easy_strerror = ffi.Pointer<Utf8> Function(int);
 
-// struct curl_mime
-// struct curl_mimepart
-// curl_mime_init
-// curl_mime_addpart
-// curl_mime_filename
-// curl_mime_filedata
-// curl_mime_data
-// curl_mime_name
+/// [CURLMime] holds handle for mime context
+class CURLMime extends ffi.Struct {}
+
+/// [CURLMimePart] holds handle for mime part context
+class CURLMimePart extends ffi.Struct {}
+
+typedef _curl_mime_init_func = ffi.Pointer<CURLMime> Function(
+    ffi.Pointer<CURLEasy>);
+typedef _curl_mime_init = ffi.Pointer<CURLMime> Function(ffi.Pointer<CURLEasy>);
+
+typedef _curl_mime_free_func = ffi.Void Function(ffi.Pointer<CURLMime>);
+typedef _curl_mime_free = void Function(ffi.Pointer<CURLMime>);
+
+typedef _curl_mime_addpart_func = ffi.Pointer<CURLMimePart> Function(
+    ffi.Pointer<CURLMime>);
+typedef _curl_mime_addpart = ffi.Pointer<CURLMimePart> Function(
+    ffi.Pointer<CURLMime>);
+
+typedef _curl_mime_name_func = ffi.Int32 Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+typedef _curl_mime_name = int Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+
+typedef _curl_mime_filename_func = ffi.Int32 Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+typedef _curl_mime_filename = int Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+
+typedef _curl_mime_type_func = ffi.Int32 Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+typedef _curl_mime_type = int Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+
+typedef _curl_mime_filedata_func = ffi.Int32 Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+typedef _curl_mime_filedata = int Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+
+typedef _curl_mime_data_func = ffi.Int32 Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>, ffi.Int32);
+typedef _curl_mime_data = int Function(
+    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>, int);
 
 // Callback functions
 
@@ -119,6 +156,7 @@ class _LibCURL {
   ffi.DynamicLibrary _dylib;
 
   // C handles
+  _version version;
   _multi_init multi_init;
   _multi_add_handle multi_add_handle;
   _multi_remove_handle multi_remove_handle;
@@ -139,6 +177,14 @@ class _LibCURL {
 
   _curl_easy_strerror easy_strerror;
 
+  _curl_mime_init mime_init;
+  _curl_mime_addpart mime_addpart;
+  _curl_mime_filename mime_filename;
+  _curl_mime_filedata mime_filedata;
+  _curl_mime_data mime_data;
+  _curl_mime_name mime_name;
+  _curl_mime_free mime_free;
+
   void init({String libPath}) {
     // Load the library depending on the platform. If libPath is
     // provided it takes the precendence over all.
@@ -154,6 +200,10 @@ class _LibCURL {
     }
 
     // Initialize all functions defined for the plugin
+    version = _dylib
+        .lookup<ffi.NativeFunction<_version_func>>('curl_version')
+        .asFunction();
+
     multi_init = _dylib
         .lookup<ffi.NativeFunction<_multi_init_func>>('curl_multi_init')
         .asFunction();
@@ -221,6 +271,31 @@ class _LibCURL {
     easy_strerror = _dylib
         .lookup<ffi.NativeFunction<_curl_easy_strerror_func>>(
             'curl_easy_strerror')
+        .asFunction();
+
+    mime_init = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_init_func>>('curl_mime_init')
+        .asFunction();
+    mime_addpart = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_addpart_func>>(
+            'curl_mime_addpart')
+        .asFunction();
+    mime_filename = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_filename_func>>(
+            'curl_mime_filename')
+        .asFunction();
+    mime_filedata = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_filedata_func>>(
+            'curl_mime_filedata')
+        .asFunction();
+    mime_data = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_data_func>>('curl_mime_data')
+        .asFunction();
+    mime_name = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_name_func>>('curl_mime_name')
+        .asFunction();
+    mime_free = _dylib
+        .lookup<ffi.NativeFunction<_curl_mime_free_func>>('curl_mime_free')
         .asFunction();
   }
 }

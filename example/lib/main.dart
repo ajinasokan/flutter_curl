@@ -23,6 +23,7 @@ class _MyAppState extends State<MyApp> {
       verbose: true,
       timeout: Duration(seconds: 10),
       connectTimeout: Duration(seconds: 4),
+      userAgent: "Test agent",
     );
     await curl.init();
   }
@@ -30,17 +31,33 @@ class _MyAppState extends State<MyApp> {
   void _incrementCounter() async {
     state = "Sending request";
     setState(() {});
-    final downloadPath =
-        (await paths.getApplicationDocumentsDirectory()).path + "/index.html";
+    // final downloadPath =
+    //     (await paths.getApplicationDocumentsDirectory()).path + "/index.html";
 
-    print("Downloading to $downloadPath");
-    final res = await curl.download(
-      path: downloadPath,
-      request: Request(
+    // print("Downloading to $downloadPath");
+    // final res = await curl.download(
+    //   // path: downloadPath,
+    //   request: Request.post(
+    //     // method: "GET",
+    //     url: "",
+    //     headers: {},
+    //     body: RequestBody.multipart(data: [
+    //       Multipart("name", "hello"),
+    //       Multipart("age", "21"),
+    //       Multipart.file("file", "file.html",
+    //           "/data/user/0/com.ajinasokan.flutter_curl_example/app_flutter/index.html"),
+    //     ]),
+    //     // body: RequestBody.string(content: "hello world"),
+    //     // body: RequestBody.form(params: {"name": "hello"}),
+    //     // verbose: true,
+    //   ),
+    // );
+
+    final res = await curl.send(
+      Request(
         method: "GET",
-        url: "https://ajinasokan.com/",
+        url: "https://ajinasokan.com",
         headers: {},
-        verbose: true,
       ),
     );
 

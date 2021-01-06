@@ -14,7 +14,7 @@ class RequestBody {
   String _string;
   String _file;
   Map<String, dynamic> _form;
-  String _multipart;
+  List<Multipart> _multipart;
 
   RequestBody._();
 
@@ -42,9 +42,35 @@ class RequestBody {
       .._form = params;
   }
 
-  factory RequestBody.multipart({String data}) {
+  factory RequestBody.multipart({List<Multipart> data}) {
     return RequestBody._()
       .._type = _BodyType.multipart
       .._multipart = data;
+  }
+}
+
+enum MultipartType {
+  raw,
+  file,
+}
+
+class Multipart {
+  String _name;
+  String _data;
+  String _filename;
+  String _filepath;
+  MultipartType _type;
+
+  Multipart(String name, String data) {
+    _name = name;
+    _data = data;
+    _type = MultipartType.raw;
+  }
+
+  factory Multipart.file(String name, String filename, String path) {
+    return Multipart(name, null)
+      .._filename = filename
+      .._filepath = path
+      .._type = MultipartType.file;
   }
 }

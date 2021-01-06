@@ -9,6 +9,7 @@ class _Engine {
   static Map<String, _ResponseBuffer> connData = {};
   static Map<String, IOSink> downloadFiles = {};
   static Map<String, RandomAccessFile> uploadFiles = {};
+  static Map<String, ffi.Pointer<CURLMime>> mimes = {};
   static Map<ffi.Pointer<CURLEasy>, String> reqIDs = {};
 
   void init({String libPath}) {
@@ -17,12 +18,16 @@ class _Engine {
   }
 
   void send(Request req) {
+    if (req.verbose) {
+      print(Utf8.fromUtf8(libCurl.version()));
+    }
+
     final handle = libCurl.easy_init();
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
     connData[req.id].requestID = req.id;
 
-    if (req.body._type == _BodyType.file) {
+    if (req.body?._type == _BodyType.file) {
       uploadFiles[req.id] = File(req.body._file).openSync();
     }
 
@@ -213,7 +218,19 @@ class _Engine {
           Utf8.toUtf8(req.id),
         );
       } else if (req.body._type == _BodyType.multipart) {
-        // TODO
+        final mime = libCurl.mime_init(handle);
+        for (var p in req.body._multipart) {
+          final mimepart = libCurl.mime_addpart(mime);
+          libCurl.mime_name(mimepart, Utf8.toUtf8(p._name));
+          if (p._type == MultipartType.raw) {
+            libCurl.mime_data(mimepart, Utf8.toUtf8(p._data), p._data.length);
+          } else {
+            libCurl.mime_filename(mimepart, Utf8.toUtf8(p._filename));
+            libCurl.mime_filedata(mimepart, Utf8.toUtf8(p._filepath));
+          }
+        }
+        libCurl.easy_setopt_ptr(handle, consts.CURLOPT_MIMEPOST, mime);
+        mimes[req.id] = mime;
       }
     }
 
@@ -285,6 +302,11 @@ class _Engine {
         if (uploadFiles.containsKey(requestID)) {
           uploadFiles[requestID].closeSync();
           uploadFiles.remove(requestID);
+        }
+
+        if (mimes.containsKey(requestID)) {
+          libCurl.mime_free(mimes[requestID]);
+          mimes.remove(requestID);
         }
 
         if (downloadFiles.containsKey(requestID)) {
