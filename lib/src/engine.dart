@@ -225,8 +225,8 @@ class _Engine {
           if (p._type == MultipartType.raw) {
             libCurl.mime_data(mimepart, Utf8.toUtf8(p._data), p._data.length);
           } else {
-            libCurl.mime_filename(mimepart, Utf8.toUtf8(p._filename));
             libCurl.mime_filedata(mimepart, Utf8.toUtf8(p._filepath));
+            libCurl.mime_filename(mimepart, Utf8.toUtf8(p._filename));
           }
         }
         libCurl.easy_setopt_ptr(handle, consts.CURLOPT_MIMEPOST, mime);
