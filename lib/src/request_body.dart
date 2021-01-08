@@ -18,31 +18,31 @@ class RequestBody {
 
   RequestBody._();
 
-  factory RequestBody.raw({List<int> data}) {
+  factory RequestBody.raw(List<int> data) {
     return RequestBody._()
       .._type = _BodyType.raw
       .._raw = data;
   }
 
-  factory RequestBody.file({String path}) {
+  factory RequestBody.file(String path) {
     return RequestBody._()
       .._type = _BodyType.raw
       .._file = path;
   }
 
-  factory RequestBody.string({String content}) {
+  factory RequestBody.string(String content) {
     return RequestBody._()
       .._type = _BodyType.string
       .._string = content;
   }
 
-  factory RequestBody.form({Map<String, dynamic> params}) {
+  factory RequestBody.form(Map<String, String> params) {
     return RequestBody._()
       .._type = _BodyType.form
       .._form = params;
   }
 
-  factory RequestBody.multipart({List<Multipart> data}) {
+  factory RequestBody.multipart(List<Multipart> data) {
     return RequestBody._()
       .._type = _BodyType.multipart
       .._multipart = data;
@@ -61,14 +61,14 @@ class Multipart {
   String _filepath;
   MultipartType _type;
 
-  Multipart(String name, String data) {
+  Multipart({String name, String data}) {
     _name = name;
     _data = data;
     _type = MultipartType.raw;
   }
 
-  factory Multipart.file(String name, String filename, String path) {
-    return Multipart(name, null)
+  factory Multipart.file({String name, String path, String filename}) {
+    return Multipart(name: name)
       .._filename = filename
       .._filepath = path
       .._type = MultipartType.file;
