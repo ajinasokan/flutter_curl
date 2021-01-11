@@ -54,6 +54,6 @@ def urlImplementation = { url, name ->
 
 dependencies {
     implementation urlImplementation(
-        "https://github.com/ajinasokan/flutter_curl/releases/download/v0.0.1-bins/curl.aar", "curlmaven/com/ajinasokan/flutter_curl/0.0.1/flutter_curl-0.0.1.aar"
+        "https://github.com/ajinasokan/flutter_curl/releases/download/v0.0.1-bins/curl_h3.aar", "curlmaven/com/ajinasokan/flutter_curl/0.0.1/flutter_curl-0.0.1.aar"
     )
 }
