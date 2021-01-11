@@ -37,7 +37,7 @@ List<Test> tests = [
   Test(
     title: "http 2",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verbose: true);
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",

@@ -33,7 +33,6 @@ class Client {
   final List<HTTPInterceptor> interceptors;
   final String cookiePath;
   String libPath;
-  String certPath = "";
 
   Client({
     this.verbose,
@@ -53,7 +52,6 @@ class Client {
     final completer = Completer<void>();
 
     _altSvcCache = await _getAltSvcPath();
-    if (Platform.isIOS) certPath = await _getCertPath();
 
     _portSubscription = receivePort.listen((item) {
       if (item is SendPort) {
@@ -77,28 +75,12 @@ class Client {
     return path.join(tempDir.path, "altsvc.txt");
   }
 
-  /// [_getCertPath] copies the certificate from bundle to a file
-  /// in the temporary directory and then returns its path. Used for
-  /// iOS since BoringSSL doesn't use the SecureTransport
-  Future<String> _getCertPath() async {
-    final tempDir = await paths.getTemporaryDirectory();
-    var certPath = path.join(tempDir.path, "cert.pem");
-    if (File(certPath).existsSync()) return certPath;
-    ByteData data =
-        await rootBundle.load("packages/flutter_curl/certs/cacert.pem");
-    List<int> bytes =
-        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-    await File(certPath).writeAsBytes(bytes);
-    return certPath;
-  }
-
   Future<Response> send(Request req) async {
     for (var i in interceptors) {
       await i.beforeRequest(req);
     }
     req._cookiePath ??= cookiePath;
     req._altSvcCache ??= _altSvcCache;
-    req._certPath ??= certPath;
     req._timeout ??= timeout.inMilliseconds;
     req._connectTimeout ??= connectTimeout.inMilliseconds;
     req.userAgent ??= userAgent;

@@ -16,7 +16,6 @@ class Request {
 
   String _cookiePath;
   String _altSvcCache;
-  String _certPath;
   int _timeout;
   int _connectTimeout;
   String _downloadPath;
