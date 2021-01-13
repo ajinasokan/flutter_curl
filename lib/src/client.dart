@@ -3,11 +3,9 @@ import 'dart:ffi' as ffi;
 import 'package:ffi/ffi.dart';
 import 'dart:isolate';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:io' show Platform, File, IOSink, RandomAccessFile;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as paths;
-import 'package:flutter/services.dart' show rootBundle;
 
 import 'const.dart' as consts;
 
@@ -76,23 +74,32 @@ class Client {
   }
 
   Future<Response> send(Request req) async {
+    Response res;
+
     for (var i in interceptors) {
-      await i.beforeRequest(req);
+      await i.beforeRequest(req, (Response _res) {
+        res = _res;
+      });
+      if (res != null) break;
     }
-    req._cookiePath ??= cookiePath;
-    req._altSvcCache ??= _altSvcCache;
-    req._timeout ??= timeout.inMilliseconds;
-    req._connectTimeout ??= connectTimeout.inMilliseconds;
-    req.userAgent ??= userAgent;
-    req.verbose = req.verbose ?? verbose ?? false;
-    _queue[req.id] = req;
 
-    final completer = Completer<Response>();
-    _completers[req.id] = completer;
-    _sendPort.send(req);
+    if (res == null) {
+      req._cookiePath ??= cookiePath;
+      req._altSvcCache ??= _altSvcCache;
+      req._timeout ??= timeout.inMilliseconds;
+      req._connectTimeout ??= connectTimeout.inMilliseconds;
+      req.userAgent ??= userAgent;
+      req.verbose = req.verbose ?? verbose ?? false;
+      _queue[req.id] = req;
 
-    final res = await completer.future;
-    for (var i in interceptors) {
+      final completer = Completer<Response>();
+      _completers[req.id] = completer;
+      _sendPort.send(req);
+
+      res = await completer.future;
+    }
+
+    for (var i in interceptors.reversed) {
       await i.afterResponse(res);
     }
     return res;
@@ -110,6 +117,6 @@ class Client {
 }
 
 abstract class HTTPInterceptor {
-  Future<void> beforeRequest(Request request);
+  Future<void> beforeRequest(Request request, void Function(Response) cancel);
   Future<void> afterResponse(Response response);
 }
