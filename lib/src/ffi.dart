@@ -29,6 +29,10 @@ class CURLMsg extends ffi.Struct {
 typedef _version_func = ffi.Pointer<Utf8> Function();
 typedef _version = ffi.Pointer<Utf8> Function();
 
+typedef _getdate_func = ffi.Int64 Function(
+    ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
+typedef _getdate = int Function(ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
+
 typedef _multi_init_func = ffi.Pointer<CURLMulti> Function();
 typedef _multi_init = ffi.Pointer<CURLMulti> Function();
 
@@ -157,6 +161,7 @@ class _LibCURL {
 
   // C handles
   _version version;
+  _getdate getdate;
   _multi_init multi_init;
   _multi_add_handle multi_add_handle;
   _multi_remove_handle multi_remove_handle;
@@ -202,6 +207,10 @@ class _LibCURL {
     // Initialize all functions defined for the plugin
     version = _dylib
         .lookup<ffi.NativeFunction<_version_func>>('curl_version')
+        .asFunction();
+
+    getdate = _dylib
+        .lookup<ffi.NativeFunction<_getdate_func>>('curl_getdate')
         .asFunction();
 
     multi_init = _dylib
