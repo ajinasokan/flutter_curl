@@ -26,6 +26,24 @@ void _serve() async {
     if (customStatusCode != null)
       request.response.statusCode = int.parse(customStatusCode);
 
+    String customEtag = request.headers.value("X-Etag");
+    if (customEtag != null) {
+      request.response.headers.set("etag", customEtag);
+      if (customEtag == request.headers.value("If-None-Match")) {
+        request.response.statusCode = 304;
+      }
+    }
+
+    String customLastModified = request.headers.value("X-LastModified");
+    if (customLastModified != null) {
+      request.response.headers.set("last-modified", customLastModified);
+      if (request.headers.ifModifiedSince != null &&
+          HttpDate.parse(customLastModified).millisecondsSinceEpoch <=
+              request.headers.ifModifiedSince.millisecondsSinceEpoch) {
+        request.response.statusCode = 304;
+      }
+    }
+
     String encoding = request.headers.value("X-Encoding");
     if (encoding != null) {
       if (encoding == "gzip") {

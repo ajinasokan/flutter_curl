@@ -301,6 +301,142 @@ List<Test> tests = [
     },
     expect: (ctx) => true,
   ),
+  Test(
+    title: "etag cache hit",
+    exec: (ctx) async {
+      final memCache = <String, String>{};
+      final caching = curl.HTTPCaching(
+        getter: (key) async => memCache[key],
+        setter: (key, val) async => memCache[key] = val,
+      );
+      final c = curl.Client(
+        interceptors: [
+          caching,
+        ],
+      );
+      await c.init();
+      var res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-Etag": "abcd",
+        },
+      ));
+      final firstStatus = res.statusCode;
+      res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-Etag": "abcd",
+        },
+      ));
+      c.dispose();
+      return firstStatus == 200 && res.headers[":from_cache"] == "true";
+    },
+    expect: (ctx) => true,
+  ),
+  Test(
+    title: "etag cache miss",
+    exec: (ctx) async {
+      final memCache = <String, String>{};
+      final caching = curl.HTTPCaching(
+        getter: (key) async => memCache[key],
+        setter: (key, val) async => memCache[key] = val,
+      );
+      final c = curl.Client(
+        interceptors: [
+          caching,
+        ],
+      );
+      await c.init();
+      var res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-Etag": "abcd",
+        },
+      ));
+      final firstStatus = res.statusCode;
+      res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-Etag": "xyz",
+        },
+      ));
+      c.dispose();
+      return firstStatus == 200 && res.headers[":from_cache"] == null;
+    },
+    expect: (ctx) => true,
+  ),
+  Test(
+    title: "last modified cache hit",
+    exec: (ctx) async {
+      final memCache = <String, String>{};
+      final caching = curl.HTTPCaching(
+        getter: (key) async => memCache[key],
+        setter: (key, val) async => memCache[key] = val,
+      );
+      final c = curl.Client(
+        interceptors: [
+          caching,
+        ],
+      );
+      await c.init();
+      var res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
+        },
+      ));
+      final firstStatus = res.statusCode;
+      res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
+        },
+      ));
+      c.dispose();
+      return firstStatus == 200 && res.headers[":from_cache"] == "true";
+    },
+    expect: (ctx) => true,
+  ),
+  Test(
+    title: "last modified cache miss",
+    exec: (ctx) async {
+      final memCache = <String, String>{};
+      final caching = curl.HTTPCaching(
+        getter: (key) async => memCache[key],
+        setter: (key, val) async => memCache[key] = val,
+      );
+      final c = curl.Client(
+        interceptors: [
+          caching,
+        ],
+      );
+      await c.init();
+      var res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
+        },
+      ));
+      final firstStatus = res.statusCode;
+      res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {
+          "X-LastModified": "Wed, 21 Oct 2015 07:28:01 GMT",
+        },
+      ));
+      c.dispose();
+      return firstStatus == 200 && res.headers[":from_cache"] == null;
+    },
+    expect: (ctx) => true,
+  ),
 ];
 
 // TODO: caching, http2, http2 multiplex, http3, altsvc

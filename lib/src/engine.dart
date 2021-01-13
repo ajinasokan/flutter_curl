@@ -303,7 +303,7 @@ class _Engine {
           downloadFiles.remove(requestID);
         }
 
-        return buffer.toResponse();
+        return buffer.toResponse(this);
       }
     }
     return null;

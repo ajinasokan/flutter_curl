@@ -17,7 +17,7 @@ class _ResponseBuffer {
   int httpVersion = 0;
   String errorMessage;
 
-  Response toResponse() {
+  Response toResponse(_Engine engine) {
     // Parse headers
     // TODO: figure out if there is a better way to do this
     var rawHeaders = utf8.decode(headerBuffer);
@@ -26,6 +26,7 @@ class _ResponseBuffer {
     items.removeAt(0); // proto
 
     Map<String, String> headers = {};
+    DateTime lastModified;
     for (var item in items) {
       int pos = item.indexOf(": ");
       String key = item.substring(0, pos).toLowerCase();
@@ -34,6 +35,10 @@ class _ResponseBuffer {
         headers[key] = value;
       } else {
         headers[key] += "; " + value;
+      }
+      if (key == "last-modified") {
+        lastModified = DateTime.fromMillisecondsSinceEpoch(
+            engine.libCurl.getdate(Utf8.toUtf8(value), ffi.nullptr) * 1000);
       }
     }
 
@@ -54,6 +59,7 @@ class _ResponseBuffer {
       headers: headers,
       httpVersion: httpVer,
       errorMessage: errorMessage,
+      lastModified: lastModified,
     ).._requestID = requestID;
   }
 }
@@ -62,11 +68,12 @@ class Response {
   String _requestID;
   Request _request;
 
-  final int statusCode;
+  int statusCode;
   final Map<String, String> headers;
-  final List<int> body;
+  List<int> body;
   final HTTPVersion httpVersion;
   final String errorMessage;
+  final DateTime lastModified;
 
   Response({
     this.statusCode,
@@ -74,6 +81,7 @@ class Response {
     this.body,
     this.httpVersion,
     this.errorMessage,
+    this.lastModified,
   });
 
   Request get request => _request;
