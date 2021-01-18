@@ -131,6 +131,14 @@ class _Engine {
       );
     }
 
+    if (!req.verifySSL) {
+      libCurl.easy_setopt_int(
+        handle,
+        consts.CURLOPT_SSL_VERIFYPEER,
+        0,
+      );
+    }
+
     // add the headers
     connData[req.id].slist = ffi.nullptr;
     String encodingHeader = "";

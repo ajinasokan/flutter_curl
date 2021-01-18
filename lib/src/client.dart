@@ -30,10 +30,12 @@ class Client {
   final Duration connectTimeout;
   final List<HTTPInterceptor> interceptors;
   final String cookiePath;
+  final bool verifySSL;
   String libPath;
 
   Client({
     this.verbose,
+    this.verifySSL,
     this.userAgent,
     this.cookiePath,
     this.libPath,
@@ -90,6 +92,7 @@ class Client {
       req._connectTimeout ??= connectTimeout.inMilliseconds;
       req.userAgent ??= userAgent;
       req.verbose = req.verbose ?? verbose ?? false;
+      req.verifySSL = req.verifySSL ?? verifySSL ?? true;
       _queue[req.id] = req;
 
       final completer = Completer<Response>();

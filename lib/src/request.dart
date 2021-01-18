@@ -13,6 +13,7 @@ class Request {
   final RequestBody body;
   String userAgent;
   bool verbose;
+  bool verifySSL;
 
   String _cookiePath;
   String _altSvcCache;
@@ -26,6 +27,7 @@ class Request {
     this.headers,
     this.body,
     this.verbose,
+    this.verifySSL,
   })  : assert(url != null),
         assert(method != null),
         assert(headers != null),
