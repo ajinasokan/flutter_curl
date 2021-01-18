@@ -1,14 +1,13 @@
 <a href="https://zerodha.tech"><img src="https://zerodha.tech/static/images/github-badge.svg" align="right" /></a>
 
-# libcurl for Flutter [Alpha]
+# libcurl for Flutter
 
 Flutter plugin to use [libcurl](https://curl.se/libcurl/) for HTTP calls in Flutter Android & iOS apps. HTTP stack built in to Dart as part of `dart:io` supports only HTTP 1.1. This plugin aims to bring upto date features in connectivity available in libcurl such as:
 
 * HTTP2 with [Nghttp2](https://nghttp2.org)
 * Automatic upgrade to HTTP2 from 1.1 with [ALPN](https://www.keycdn.com/support/alpn) TLS extension
-* **Experimental** HTTP3 support with [quiche](https://github.com/cloudflare/quiche)
-* Automatic upgrade to HTTP3 using [alt-svc](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Alt-Svc) header
 * [Brotli](https://github.com/google/brotli) compression
+* **Experimental** HTTP3 and alt-svc support ([http3](https://github.com/ajinasokan/flutter_curl/blob/http3/README.md) branch)
 
 ## Getting started
 
@@ -32,7 +31,6 @@ import 'package:path_provider/path_provider.dart' as paths;
 // Initialize client
 final altSvcPath = (await paths.getTemporaryDirectory()).path;
 Client client = Client(
-      altSvcCache: path.join(altSvcPath, "altsvc.txt"),
       verbose: true,
       interceptors: [
         // HTTPCaching(),
@@ -51,7 +49,7 @@ final res = await c.send(Request(
 
 // Read response
 print("Status: ${res.statusCode}");
-print("HTTP: ${res.httpVersion}"); // 3 => H2, 30 => H3
+print("HTTP: ${res.httpVersion}");
 res.headers.forEach((key, value) {
     print("$key: $value");
 });
@@ -62,7 +60,6 @@ print(res.text());
 
 This plugin uses custom built libcurl libraries distributed via [releases](https://github.com/ajinasokan/flutter_curl/releases). If you would like to build these by yourself follow [instructions](https://github.com/curl/curl/blob/master/docs/HTTP3.md) in cURL project. The configuration used for above mentioned builds is:
 
-* [BoringSSL+quiche](https://github.com/cloudflare/quiche) for SSL and HTTP3
 * [Ngtcp2](https://github.com/ngtcp2/ngtcp2) for HTTP2
 * [libbrotli](https://github.com/bagder/libbrotli)
 * NDK min SDK: 21 (armv7a, arm64, x86_64), iOS min SDK: 8.0 (arm64, x86_64)
