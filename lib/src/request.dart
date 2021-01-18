@@ -14,6 +14,7 @@ class Request {
   String userAgent;
   bool verbose;
   bool verifySSL;
+  List<HTTPVersion> httpVersions;
 
   String _cookiePath;
   String _altSvcCache;
@@ -28,6 +29,7 @@ class Request {
     this.body,
     this.verbose,
     this.verifySSL,
+    this.httpVersions,
   })  : assert(url != null),
         assert(method != null),
         assert(headers != null),

@@ -31,6 +31,7 @@ class Client {
   final List<HTTPInterceptor> interceptors;
   final String cookiePath;
   final bool verifySSL;
+  final List<HTTPVersion> httpVersions;
   String libPath;
 
   Client({
@@ -38,6 +39,7 @@ class Client {
     this.verifySSL,
     this.userAgent,
     this.cookiePath,
+    this.httpVersions,
     this.libPath,
     this.interceptors = const [],
     this.timeout = Duration.zero,
@@ -93,6 +95,7 @@ class Client {
       req.userAgent ??= userAgent;
       req.verbose = req.verbose ?? verbose ?? false;
       req.verifySSL = req.verifySSL ?? verifySSL ?? true;
+      req.httpVersions = req.httpVersions ?? httpVersions ?? [];
       _queue[req.id] = req;
 
       final completer = Completer<Response>();

@@ -92,13 +92,33 @@ class _Engine {
     );
 
     // enable support for all http versions
-    libCurl.easy_setopt_int(
-      handle,
-      consts.CURLOPT_HTTP_VERSION,
-      consts.CURL_HTTP_VERSION_1_1 |
-          consts.CURL_HTTP_VERSION_2_0 |
-          consts.CURL_HTTP_VERSION_3,
-    );
+    // READ: https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
+    if (req.httpVersions.isNotEmpty) {
+      int flag = 0;
+      if (req.httpVersions.contains(HTTPVersion.http1)) {
+        flag |= consts.CURL_HTTP_VERSION_1_0;
+      }
+      if (req.httpVersions.contains(HTTPVersion.http11)) {
+        flag |= consts.CURL_HTTP_VERSION_1_1;
+      }
+      if (req.httpVersions.contains(HTTPVersion.http2)) {
+        flag |= consts.CURL_HTTP_VERSION_2_0;
+      }
+      if (req.httpVersions.contains(HTTPVersion.http3)) {
+        flag |= consts.CURL_HTTP_VERSION_3;
+      }
+      libCurl.easy_setopt_int(
+        handle,
+        consts.CURLOPT_HTTP_VERSION,
+        flag,
+      );
+    } else {
+      libCurl.easy_setopt_int(
+        handle,
+        consts.CURLOPT_HTTP_VERSION,
+        consts.CURL_HTTP_VERSION_NONE, // let curl figure it out
+      );
+    }
 
     // set alt-svc cache path
     if (req._altSvcCache != null) {
