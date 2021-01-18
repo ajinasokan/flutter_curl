@@ -22,7 +22,10 @@ List<Test> tests = [
   Test(
     title: "http 1.1",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(
+        verifySSL: false,
+        httpVersions: [curl.HTTPVersion.http11],
+      );
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -37,11 +40,11 @@ List<Test> tests = [
   Test(
     title: "http 2",
     exec: (ctx) async {
-      final c = curl.Client(verbose: true);
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: "https://http2.akamai.com/",
+        url: echo.url,
         headers: {},
       ));
       c.dispose();
@@ -50,9 +53,39 @@ List<Test> tests = [
     expect: (ctx) => curl.HTTPVersion.http2,
   ),
   Test(
+    title: "ssl verification",
+    exec: (ctx) async {
+      final c = curl.Client(); // verifySSL: true
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {},
+      ));
+      c.dispose();
+      return res.errorMessage;
+    },
+    expect: (ctx) => "SSL peer certificate or SSH remote key was not OK",
+  ),
+  Test(
+    title: "ssl verification disabled",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url,
+        headers: {},
+      ));
+      c.dispose();
+      return res.statusCode;
+    },
+    expect: (ctx) => 200,
+  ),
+  Test(
     title: "status 200",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -67,7 +100,7 @@ List<Test> tests = [
   Test(
     title: "status 400",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -84,7 +117,7 @@ List<Test> tests = [
   Test(
     title: "custom request method",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request(
         method: "xyz",
@@ -101,7 +134,7 @@ List<Test> tests = [
   Test(
     title: "default user agent",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -116,7 +149,7 @@ List<Test> tests = [
   Test(
     title: "custom user agent",
     exec: (ctx) async {
-      final c = curl.Client(userAgent: "custom agent");
+      final c = curl.Client(verifySSL: false, userAgent: "custom agent");
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -131,7 +164,7 @@ List<Test> tests = [
   Test(
     title: "custom user agent header",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -149,7 +182,7 @@ List<Test> tests = [
   Test(
     title: "custom user agent header override",
     exec: (ctx) async {
-      final c = curl.Client(userAgent: "custom agent");
+      final c = curl.Client(verifySSL: false, userAgent: "custom agent");
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
@@ -166,7 +199,7 @@ List<Test> tests = [
   Test(
     title: "post raw",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
         url: echo.url,
@@ -180,7 +213,7 @@ List<Test> tests = [
   Test(
     title: "post string",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
         url: echo.url,
@@ -194,7 +227,7 @@ List<Test> tests = [
   Test(
     title: "post form",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
         url: echo.url,
@@ -215,7 +248,7 @@ List<Test> tests = [
     exec: (ctx) async {
       final f = (await paths.getTemporaryDirectory()).path + "/multipart.txt";
       File(f).writeAsStringSync("text content");
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
         url: echo.url,
@@ -249,7 +282,7 @@ List<Test> tests = [
   Test(
     title: "brotli compression",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.get(
         url: echo.url,
@@ -266,7 +299,7 @@ List<Test> tests = [
   Test(
     title: "gzip compression",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.get(
         url: echo.url,
@@ -283,7 +316,7 @@ List<Test> tests = [
   Test(
     title: "multiple request",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verifySSL: false);
       await c.init();
       final res1Fut = c.send(curl.Request(
         method: "get",
@@ -310,6 +343,7 @@ List<Test> tests = [
         setter: (key, val) async => memCache[key] = val,
       );
       final c = curl.Client(
+        verifySSL: false,
         interceptors: [
           caching,
         ],
@@ -344,6 +378,7 @@ List<Test> tests = [
         setter: (key, val) async => memCache[key] = val,
       );
       final c = curl.Client(
+        verifySSL: false,
         interceptors: [
           caching,
         ],
@@ -378,6 +413,7 @@ List<Test> tests = [
         setter: (key, val) async => memCache[key] = val,
       );
       final c = curl.Client(
+        verifySSL: false,
         interceptors: [
           caching,
         ],
@@ -412,6 +448,7 @@ List<Test> tests = [
         setter: (key, val) async => memCache[key] = val,
       );
       final c = curl.Client(
+        verifySSL: false,
         interceptors: [
           caching,
         ],
@@ -439,7 +476,7 @@ List<Test> tests = [
   ),
 ];
 
-// TODO: caching, http2, http2 multiplex, http3, altsvc
+// TODO: http3, altsvc
 
 class Test {
   final String title;
