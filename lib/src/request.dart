@@ -18,8 +18,8 @@ class Request {
 
   String _cookiePath;
   String _altSvcCache;
-  int _timeout;
-  int _connectTimeout;
+  Duration timeout;
+  Duration connectTimeout;
   String _downloadPath;
 
   Request({
@@ -30,6 +30,8 @@ class Request {
     this.verbose,
     this.verifySSL,
     this.httpVersions,
+    this.timeout,
+    this.connectTimeout,
   })  : assert(url != null),
         assert(method != null),
         assert(headers != null),

@@ -56,12 +56,12 @@ class _Engine {
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_TIMEOUT_MS,
-      req._timeout,
+      req.timeout.inMilliseconds,
     );
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_CONNECTTIMEOUT_MS,
-      req._connectTimeout,
+      req.connectTimeout.inMilliseconds,
     );
 
     // set cookie path

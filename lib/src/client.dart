@@ -90,8 +90,8 @@ class Client {
     if (res == null) {
       req._cookiePath ??= cookiePath;
       req._altSvcCache ??= _altSvcCache;
-      req._timeout ??= timeout.inMilliseconds;
-      req._connectTimeout ??= connectTimeout.inMilliseconds;
+      req.timeout ??= timeout;
+      req.connectTimeout ??= connectTimeout;
       req.userAgent ??= userAgent;
       req.verbose = req.verbose ?? verbose ?? false;
       req.verifySSL = req.verifySSL ?? verifySSL ?? true;
