@@ -4,8 +4,6 @@ import 'package:ffi/ffi.dart';
 import 'dart:isolate';
 import 'dart:convert';
 import 'dart:io' show Platform, File, IOSink, RandomAccessFile;
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart' as paths;
 
 import 'const.dart' as consts;
 
@@ -22,7 +20,6 @@ class Client {
   StreamSubscription _portSubscription;
   Map<String, Request> _queue;
   Map<String, Completer> _completers;
-  String _altSvcCache;
 
   final bool verbose;
   final String userAgent;
@@ -31,6 +28,7 @@ class Client {
   final List<HTTPInterceptor> interceptors;
   final String cookiePath;
   final bool verifySSL;
+  final String altSvcCache;
   final List<HTTPVersion> httpVersions;
   String libPath;
 
@@ -44,6 +42,7 @@ class Client {
     this.interceptors = const [],
     this.timeout = Duration.zero,
     this.connectTimeout = const Duration(seconds: 300),
+    this.altSvcCache,
   });
 
   Future<void> init() async {
@@ -52,8 +51,6 @@ class Client {
     final receivePort = ReceivePort();
     _engine = await Isolate.spawn(_isolate, receivePort.sendPort);
     final completer = Completer<void>();
-
-    _altSvcCache = await _getAltSvcPath();
 
     _portSubscription = receivePort.listen((item) {
       if (item is SendPort) {
@@ -69,14 +66,6 @@ class Client {
     return completer.future;
   }
 
-  /// [_getAltSvcPath] provides path to the file where
-  /// alt-svc header specifications are kept. This will be used
-  /// for protocol upgrades if possible
-  Future<String> _getAltSvcPath() async {
-    final tempDir = await paths.getTemporaryDirectory();
-    return path.join(tempDir.path, "altsvc.txt");
-  }
-
   Future<Response> send(Request req) async {
     Response res;
 
@@ -89,7 +78,7 @@ class Client {
 
     if (res == null) {
       req._cookiePath ??= cookiePath;
-      req._altSvcCache ??= _altSvcCache;
+      req._altSvcCache ??= altSvcCache;
       req.timeout ??= timeout;
       req.connectTimeout ??= connectTimeout;
       req.userAgent ??= userAgent;

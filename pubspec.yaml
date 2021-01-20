@@ -1,5 +1,5 @@
 name: flutter_curl
-description: A new flutter plugin project.
+description: Flutter plugin to use libcurl for HTTP calls
 version: 0.0.1
 author:
 homepage:
@@ -12,7 +12,6 @@ dependencies:
   flutter:
     sdk: flutter
   ffi: ^0.1.3
-  path_provider: ^1.6.24
 
 dev_dependencies:
   flutter_test:

@@ -127,14 +127,13 @@ class _Engine {
         consts.CURLOPT_ALTSVC,
         Utf8.toUtf8(req._altSvcCache),
       );
+      // enable alt-svc support for all http versions
+      libCurl.easy_setopt_int(
+        handle,
+        consts.CURLOPT_ALTSVC_CTRL,
+        consts.CURLALTSVC_H1 | consts.CURLALTSVC_H2 | consts.CURLALTSVC_H3,
+      );
     }
-
-    // enable alt-svc support for all http versions
-    libCurl.easy_setopt_int(
-      handle,
-      consts.CURLOPT_ALTSVC_CTRL,
-      consts.CURLALTSVC_H1 | consts.CURLALTSVC_H2 | consts.CURLALTSVC_H3,
-    );
 
     // enable verbose and set the callback
     // TODO: may be provide log to file support?
