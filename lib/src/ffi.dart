@@ -1,24 +1,24 @@
 part of 'client.dart';
 
-/// [CURLEasy] holds handle for a single request
-class CURLEasy extends ffi.Struct {}
+/// [_CURLEasy] holds handle for a single request
+class _CURLEasy extends ffi.Struct {}
 
-/// [CURLMulti] holds handle to the request queue
-class CURLMulti extends ffi.Struct {}
+/// [_CURLMulti] holds handle to the request queue
+class _CURLMulti extends ffi.Struct {}
 
-/// [CURLMsg] holds the status about a single request
-class CURLMsg extends ffi.Struct {
+/// [_CURLMsg] holds the status about a single request
+class _CURLMsg extends ffi.Struct {
   @ffi.Int32()
   int messageType;
 
-  ffi.Pointer<CURLEasy> easyHandle;
+  ffi.Pointer<_CURLEasy> easyHandle;
 
   @ffi.Int32()
   int result;
 
-  factory CURLMsg.allocate(
-          int msg, ffi.Pointer<CURLEasy> easyHandle, int result) =>
-      allocate<CURLMsg>().ref
+  factory _CURLMsg.allocate(
+          int msg, ffi.Pointer<_CURLEasy> easyHandle, int result) =>
+      allocate<_CURLMsg>().ref
         ..messageType = msg
         ..easyHandle = easyHandle
         ..result = result;
@@ -33,61 +33,61 @@ typedef _getdate_func = ffi.Int64 Function(
     ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
 typedef _getdate = int Function(ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
 
-typedef _multi_init_func = ffi.Pointer<CURLMulti> Function();
-typedef _multi_init = ffi.Pointer<CURLMulti> Function();
+typedef _multi_init_func = ffi.Pointer<_CURLMulti> Function();
+typedef _multi_init = ffi.Pointer<_CURLMulti> Function();
 
 typedef _multi_add_handle_func = ffi.Void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<CURLEasy>);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
 typedef _multi_add_handle = void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<CURLEasy>);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
 
 typedef _multi_remove_handle_func = ffi.Void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<CURLEasy>);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
 typedef _multi_remove_handle = void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<CURLEasy>);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
 
 typedef _multi_perform_func = ffi.Void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<ffi.Int32>);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
 typedef _multi_perform = void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<ffi.Int32>);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
 
 typedef _multi_poll_func = ffi.Void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer, ffi.Int32, ffi.Int32, ffi.Pointer);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer, ffi.Int32, ffi.Int32, ffi.Pointer);
 typedef _multi_poll = void Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer, int, int, ffi.Pointer);
+    ffi.Pointer<_CURLMulti>, ffi.Pointer, int, int, ffi.Pointer);
 
-typedef _multi_info_read_func = ffi.Pointer<CURLMsg> Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<ffi.Int32>);
-typedef _multi_info_read = ffi.Pointer<CURLMsg> Function(
-    ffi.Pointer<CURLMulti>, ffi.Pointer<ffi.Int32>);
+typedef _multi_info_read_func = ffi.Pointer<_CURLMsg> Function(
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
+typedef _multi_info_read = ffi.Pointer<_CURLMsg> Function(
+    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
 
-typedef _easy_init_func = ffi.Pointer<CURLEasy> Function();
-typedef _easy_init = ffi.Pointer<CURLEasy> Function();
+typedef _easy_init_func = ffi.Pointer<_CURLEasy> Function();
+typedef _easy_init = ffi.Pointer<_CURLEasy> Function();
 
-typedef _easy_cleanup_func = ffi.Int32 Function(ffi.Pointer<CURLEasy>);
-typedef _easy_clenup = int Function(ffi.Pointer<CURLEasy>);
+typedef _easy_cleanup_func = ffi.Int32 Function(ffi.Pointer<_CURLEasy>);
+typedef _easy_clenup = int Function(ffi.Pointer<_CURLEasy>);
 
-typedef _easy_perform_func = ffi.Int32 Function(ffi.Pointer<CURLEasy>);
-typedef _easy_perform = int Function(ffi.Pointer<CURLEasy>);
+typedef _easy_perform_func = ffi.Int32 Function(ffi.Pointer<_CURLEasy>);
+typedef _easy_perform = int Function(ffi.Pointer<_CURLEasy>);
 
 typedef _easy_setopt_string_func = ffi.Void Function(
-    ffi.Pointer<CURLEasy>, ffi.Int32, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer<Utf8>);
 typedef _easy_setopt_string = void Function(
-    ffi.Pointer<CURLEasy>, int, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLEasy>, int, ffi.Pointer<Utf8>);
 
 typedef _easy_setopt_int_func = ffi.Void Function(
-    ffi.Pointer<CURLEasy>, ffi.Int32, ffi.Int32);
-typedef _easy_setopt_int = void Function(ffi.Pointer<CURLEasy>, int, int);
+    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Int32);
+typedef _easy_setopt_int = void Function(ffi.Pointer<_CURLEasy>, int, int);
 
 typedef _easy_setopt_ptr_func = ffi.Void Function(
-    ffi.Pointer<CURLEasy>, ffi.Int32, ffi.Pointer);
+    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer);
 typedef _easy_setopt_ptr = void Function(
-    ffi.Pointer<CURLEasy>, int, ffi.Pointer);
+    ffi.Pointer<_CURLEasy>, int, ffi.Pointer);
 
 typedef _easy_getinfo_func = ffi.Void Function(
-    ffi.Pointer<CURLEasy>, ffi.Int32, ffi.Pointer<ffi.Int64>);
+    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer<ffi.Int64>);
 typedef _easy_getinfo = void Function(
-    ffi.Pointer<CURLEasy>, int, ffi.Pointer<ffi.Int64>);
+    ffi.Pointer<_CURLEasy>, int, ffi.Pointer<ffi.Int64>);
 
 typedef _slist_append_func = ffi.Pointer Function(
     ffi.Pointer, ffi.Pointer<Utf8>);
@@ -99,48 +99,49 @@ typedef _slist_free_all = void Function(ffi.Pointer);
 typedef _curl_easy_strerror_func = ffi.Pointer<Utf8> Function(ffi.Int32);
 typedef _curl_easy_strerror = ffi.Pointer<Utf8> Function(int);
 
-/// [CURLMime] holds handle for mime context
-class CURLMime extends ffi.Struct {}
+/// [_CURLMime] holds handle for mime context
+class _CURLMime extends ffi.Struct {}
 
-/// [CURLMimePart] holds handle for mime part context
-class CURLMimePart extends ffi.Struct {}
+/// [_CURLMimePart] holds handle for mime part context
+class _CURLMimePart extends ffi.Struct {}
 
-typedef _curl_mime_init_func = ffi.Pointer<CURLMime> Function(
-    ffi.Pointer<CURLEasy>);
-typedef _curl_mime_init = ffi.Pointer<CURLMime> Function(ffi.Pointer<CURLEasy>);
+typedef _curl_mime_init_func = ffi.Pointer<_CURLMime> Function(
+    ffi.Pointer<_CURLEasy>);
+typedef _curl_mime_init = ffi.Pointer<_CURLMime> Function(
+    ffi.Pointer<_CURLEasy>);
 
-typedef _curl_mime_free_func = ffi.Void Function(ffi.Pointer<CURLMime>);
-typedef _curl_mime_free = void Function(ffi.Pointer<CURLMime>);
+typedef _curl_mime_free_func = ffi.Void Function(ffi.Pointer<_CURLMime>);
+typedef _curl_mime_free = void Function(ffi.Pointer<_CURLMime>);
 
-typedef _curl_mime_addpart_func = ffi.Pointer<CURLMimePart> Function(
-    ffi.Pointer<CURLMime>);
-typedef _curl_mime_addpart = ffi.Pointer<CURLMimePart> Function(
-    ffi.Pointer<CURLMime>);
+typedef _curl_mime_addpart_func = ffi.Pointer<_CURLMimePart> Function(
+    ffi.Pointer<_CURLMime>);
+typedef _curl_mime_addpart = ffi.Pointer<_CURLMimePart> Function(
+    ffi.Pointer<_CURLMime>);
 
 typedef _curl_mime_name_func = ffi.Int32 Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 typedef _curl_mime_name = int Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 
 typedef _curl_mime_filename_func = ffi.Int32 Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 typedef _curl_mime_filename = int Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 
 typedef _curl_mime_type_func = ffi.Int32 Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 typedef _curl_mime_type = int Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 
 typedef _curl_mime_filedata_func = ffi.Int32 Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 typedef _curl_mime_filedata = int Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
 
 typedef _curl_mime_data_func = ffi.Int32 Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>, ffi.Int32);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>, ffi.Int32);
 typedef _curl_mime_data = int Function(
-    ffi.Pointer<CURLMimePart>, ffi.Pointer<Utf8>, int);
+    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>, int);
 
 // Callback functions
 
@@ -150,7 +151,7 @@ typedef _ReadFunc = ffi.Int32 Function(
 typedef _WriteFunc = ffi.Int32 Function(
     ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Int32, ffi.Pointer<Utf8>);
 
-typedef _DebugFunc = ffi.Int32 Function(ffi.Pointer<CURLEasy>, ffi.Int32,
+typedef _DebugFunc = ffi.Int32 Function(ffi.Pointer<_CURLEasy>, ffi.Int32,
     ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Pointer<Utf8>);
 
 /// [_LibCURL] defines and initializes the functions in libcurl

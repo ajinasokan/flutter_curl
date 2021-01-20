@@ -4,13 +4,13 @@ part of 'client.dart';
 /// handled by [_isolate] function
 class _Engine {
   final libCurl = _LibCURL();
-  ffi.Pointer<CURLMulti> multiHandle;
+  ffi.Pointer<_CURLMulti> multiHandle;
 
   static Map<String, _ResponseBuffer> connData = {};
   static Map<String, IOSink> downloadFiles = {};
   static Map<String, RandomAccessFile> uploadFiles = {};
-  static Map<String, ffi.Pointer<CURLMime>> mimes = {};
-  static Map<ffi.Pointer<CURLEasy>, String> reqIDs = {};
+  static Map<String, ffi.Pointer<_CURLMime>> mimes = {};
+  static Map<ffi.Pointer<_CURLEasy>, String> reqIDs = {};
 
   void init({String libPath}) {
     libCurl.init(libPath: libPath);
@@ -411,7 +411,7 @@ int _headerWriteFunc(
 
 /// [_debugWriteFunc] prints the logs to Flutter logs
 int _debugWriteFunc(
-  ffi.Pointer<CURLEasy> handle,
+  ffi.Pointer<_CURLEasy> handle,
   int type,
   ffi.Pointer<ffi.Uint8> data,
   int size,
