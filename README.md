@@ -16,9 +16,7 @@ Add to project using git source:
 ```yaml
 dependencies:
   ...
-  flutter_curl:
-    git:
-      url: https://github.com/ajinasokan/flutter_curl
+  flutter_curl: ^0.0.1
 ```
 
 Example usage:
@@ -29,7 +27,6 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as paths;
 
 // Initialize client
-final altSvcPath = (await paths.getTemporaryDirectory()).path;
 Client client = Client(
       verbose: true,
       interceptors: [
@@ -42,10 +39,24 @@ await client.init();
 final res = await c.send(Request(
       method: "GET",
       url: "https://ajinasokan.com/",
-      headers: {},
-      body: [],
-      verbose: true,
-    ));
+      headers: {
+          "user-agent": "myapp-v1.0/android9"
+      },
+      // body
+      // body: RequestBody.raw(utf8.encode("hello world")),
+      // body: RequestBody.string("hello world"),
+      // body: RequestBody.form({"age": "10", "hello": "world"}),
+      // body: RequestBody.multipart([
+      //    Multipart(name: "age", data: "24"),
+      //    Multipart(name: "hello", data: "world"),
+      //    Multipart.file(
+      //      name: "fieldname",
+      //      path: "/sdcard/todo.txt",
+      //      filename: "filename.txt",
+      //    ),
+      //  ]),
+    },
+));
 
 // Read response
 print("Status: ${res.statusCode}");
