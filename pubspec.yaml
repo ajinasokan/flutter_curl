@@ -32,6 +32,8 @@ flutter:
         pluginClass: FlutterCurlPlugin
       ios:
         pluginClass: FlutterCurlPlugin
+      macos:
+        pluginClass: FlutterCurlPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   #

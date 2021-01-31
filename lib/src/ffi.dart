@@ -198,6 +198,8 @@ class _LibCURL {
       _dylib = ffi.DynamicLibrary.open(libPath);
     } else if (Platform.isIOS) {
       _dylib = ffi.DynamicLibrary.process();
+    } else if (Platform.isMacOS) {
+      _dylib = ffi.DynamicLibrary.process();
     } else if (Platform.isAndroid) {
       _dylib = ffi.DynamicLibrary.open("libcurl.so");
     } else {
