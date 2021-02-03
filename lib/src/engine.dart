@@ -282,7 +282,7 @@ class _Engine {
   /// [perform] runs the libcurl processing to handle incoming
   /// data and collects these data to dart objects and frees the
   /// C resources once it is done
-  ffi.Pointer<ffi.Int32> _tempCounter = allocate();
+  ffi.Pointer<ffi.Int32> _tempCounter = allocate()..value = 0;
   Future<Response> perform() async {
     libCurl.multi_perform(multiHandle, _tempCounter);
     final msgPtr = libCurl.multi_info_read(multiHandle, _tempCounter);
@@ -295,9 +295,11 @@ class _Engine {
         // get response code and http version used. this needs
         // an int reference. it is being reused for both calls
         ffi.Pointer<ffi.Int64> _tempLong = allocate();
+        _tempLong.value = 0;
         libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
         buffer.statusCode = _tempLong.value;
+        _tempLong.value = 0;
         libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_HTTP_VERSION, _tempLong);
         buffer.httpVersion = _tempLong.value;
