@@ -6,6 +6,7 @@ class _Engine {
   final libCurl = _LibCURL();
   ffi.Pointer<_CURLMulti> multiHandle;
 
+  static Map<String, StreamController<LogInfo>> logData = {};
   static Map<String, _ResponseBuffer> connData = {};
   static Map<String, IOSink> downloadFiles = {};
   static Map<String, RandomAccessFile> uploadFiles = {};
@@ -26,6 +27,8 @@ class _Engine {
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
     connData[req.id].requestID = req.id;
+
+    logData[req.id] = StreamController<LogInfo>();
 
     if (req.body?._type == _BodyType.file) {
       uploadFiles[req.id] = File(req.body._file).openSync();
@@ -147,6 +150,11 @@ class _Engine {
         handle,
         consts.CURLOPT_DEBUGFUNCTION,
         ffi.Pointer.fromFunction<_DebugFunc>(_debugWriteFunc, 0),
+      );
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_DEBUGDATA,
+        Utf8.toUtf8(req.id),
       );
     }
 
@@ -316,6 +324,7 @@ class _Engine {
         libCurl.easy_cleanup(msg.easyHandle);
         reqIDs.remove(msg.easyHandle);
         connData.remove(requestID);
+        logData[requestID].close();
 
         if (uploadFiles.containsKey(requestID)) {
           uploadFiles[requestID].closeSync();
@@ -349,7 +358,12 @@ void _isolate(SendPort sendPort) async {
   sendPort.send(receivePort.sendPort);
 
   final engine = _Engine();
-  receivePort.listen((req) => engine.send(req));
+  receivePort.listen((req) async {
+    engine.send(req);
+    await for (var data in _Engine.logData[req.id].stream) {
+      sendPort.send(data);
+    }
+  });
   engine.init();
 
   while (true) {
@@ -424,7 +438,13 @@ int _debugWriteFunc(
   if (type == CURLINFO_TEXT ||
       type == CURLINFO_HEADER_IN ||
       type == CURLINFO_HEADER_OUT) {
-    print(utf8.decode(data.asTypedList(size)));
+    final requestIDStr = Utf8.fromUtf8(requestID);
+    final content = utf8.decode(data.asTypedList(size));
+    print(content);
+    _Engine.logData[requestIDStr].add(LogInfo(
+      requestID: requestIDStr,
+      content: content,
+    ));
   }
   return 0;
 }

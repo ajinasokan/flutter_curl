@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi' as ffi;
 import 'package:ffi/ffi.dart';
+import 'package:flutter_curl/flutter_curl.dart';
 import 'dart:isolate';
 import 'dart:convert';
 import 'dart:io' show Platform, File, IOSink, RandomAccessFile;
@@ -12,6 +13,7 @@ part 'request.dart';
 part 'request_body.dart';
 part 'response.dart';
 part 'engine.dart';
+part 'log_info.dart';
 
 /// [Client] handles all the HTTP calls. Add [Request] to [Client] and await for [Response]. Call [init] before use and [dispose] after use.
 class Client {
@@ -31,6 +33,13 @@ class Client {
   final String altSvcCache;
   final List<HTTPVersion> httpVersions;
   String libPath;
+
+  final _logs = StreamController<LogInfo>();
+
+  Stream<LogInfo> logsFor(Request request) =>
+      _logs.stream.asBroadcastStream().where((e) {
+        return e.requestID == request.id;
+      });
 
   Client({
     this.verbose,
@@ -61,6 +70,8 @@ class Client {
         _completers[item._requestID].complete(item);
         _queue.remove(item._requestID);
         _completers.remove(item._requestID);
+      } else if (item is LogInfo) {
+        _logs.add(item);
       }
     });
     return completer.future;
@@ -108,6 +119,7 @@ class Client {
   void dispose() {
     _portSubscription.cancel();
     _engine.kill();
+    _logs.close();
   }
 }
 
