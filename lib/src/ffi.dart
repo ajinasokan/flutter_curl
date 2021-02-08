@@ -200,6 +200,9 @@ class _LibCURL {
       _dylib = ffi.DynamicLibrary.process();
     } else if (Platform.isMacOS) {
       _dylib = ffi.DynamicLibrary.process();
+    } else if (Platform.isLinux) {
+      _dylib = ffi.DynamicLibrary.open(path.join(
+          path.dirname(Platform.resolvedExecutable), "lib", "libcurl.so"));
     } else if (Platform.isAndroid) {
       _dylib = ffi.DynamicLibrary.open("libcurl.so");
     } else {
