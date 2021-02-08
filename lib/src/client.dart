@@ -4,7 +4,8 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter_curl/flutter_curl.dart';
 import 'dart:isolate';
 import 'dart:convert';
-import 'dart:io' show Platform, File, IOSink, RandomAccessFile;
+import 'dart:io' show Directory, Platform, File, IOSink, RandomAccessFile;
+import 'package:path/path.dart' as path;
 
 import 'const.dart' as consts;
 
@@ -35,11 +36,14 @@ class Client {
   String libPath;
 
   final _logs = StreamController<LogInfo>();
+  Stream<LogInfo> _broadcast;
+  Stream<LogInfo> get _logStream {
+    if (_broadcast == null) _broadcast = _logs.stream.asBroadcastStream();
+    return _broadcast;
+  }
 
   Stream<LogInfo> logsFor(Request request) =>
-      _logs.stream.asBroadcastStream().where((e) {
-        return e.requestID == request.id;
-      });
+      _logStream.where((event) => event.requestID == request.id);
 
   Client({
     this.verbose,

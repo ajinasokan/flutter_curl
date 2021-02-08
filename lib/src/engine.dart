@@ -440,7 +440,7 @@ int _debugWriteFunc(
       type == CURLINFO_HEADER_OUT) {
     final requestIDStr = Utf8.fromUtf8(requestID);
     final content = utf8.decode(data.asTypedList(size));
-    print(content);
+
     _Engine.logData[requestIDStr].add(LogInfo(
       requestID: requestIDStr,
       content: content,
