@@ -38,7 +38,7 @@ class _ResponseBuffer {
       }
       if (key == "last-modified") {
         lastModified = DateTime.fromMillisecondsSinceEpoch(
-            engine.libCurl.getdate(Utf8.toUtf8(value), ffi.nullptr) * 1000);
+            engine.libCurl.getdate(value.toNativeUtf8(), ffi.nullptr) * 1000);
       }
     }
 

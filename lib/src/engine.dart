@@ -20,7 +20,7 @@ class _Engine {
 
   void send(Request req) {
     if (req.verbose) {
-      print(Utf8.fromUtf8(libCurl.version()));
+      print(libCurl.version().toDartString());
     }
 
     final handle = libCurl.easy_init();
@@ -42,18 +42,18 @@ class _Engine {
     libCurl.easy_setopt_string(
       handle,
       consts.CURLOPT_CUSTOMREQUEST,
-      Utf8.toUtf8(req.method),
+      req.method.toNativeUtf8(),
     );
     libCurl.easy_setopt_string(
       handle,
       consts.CURLOPT_URL,
-      Utf8.toUtf8(req.url),
+      req.url.toNativeUtf8(),
     );
     if (req.userAgent != null) {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_USERAGENT,
-        Utf8.toUtf8(req.userAgent),
+        req.userAgent.toNativeUtf8(),
       );
     }
     libCurl.easy_setopt_int(
@@ -73,13 +73,13 @@ class _Engine {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_COOKIEFILE,
-        Utf8.toUtf8(req._cookiePath),
+        req._cookiePath.toNativeUtf8(),
       );
       // for storing
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_COOKIEJAR,
-        Utf8.toUtf8(req._cookiePath),
+        req._cookiePath.toNativeUtf8(),
       );
     }
 
@@ -128,7 +128,7 @@ class _Engine {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_ALTSVC,
-        Utf8.toUtf8(req._altSvcCache),
+        req._altSvcCache.toNativeUtf8(),
       );
       // enable alt-svc support for all http versions
       libCurl.easy_setopt_int(
@@ -154,7 +154,7 @@ class _Engine {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_DEBUGDATA,
-        Utf8.toUtf8(req.id),
+        req.id.toNativeUtf8(),
       );
     }
 
@@ -176,7 +176,7 @@ class _Engine {
       }
       final temp = libCurl.slist_append(
         connData[req.id].slist,
-        Utf8.toUtf8("$key: ${req.headers[key]}"),
+        "$key: ${req.headers[key]}".toNativeUtf8(),
       );
       if (temp != ffi.nullptr)
         connData[req.id].slist = temp;
@@ -188,7 +188,7 @@ class _Engine {
     libCurl.easy_setopt_string(
       handle,
       consts.CURLOPT_ACCEPT_ENCODING,
-      Utf8.toUtf8(encodingHeader),
+      encodingHeader.toNativeUtf8(),
     );
 
     if (connData[req.id].slist != ffi.nullptr) {
@@ -206,19 +206,19 @@ class _Engine {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_POSTFIELDS,
-          Utf8.toUtf8(req.body._string),
+          req.body._string.toNativeUtf8(),
         );
       } else if (req.body._type == _BodyType.raw) {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_POSTFIELDS,
-          Utf8.toUtf8(utf8.decode(req.body._raw, allowMalformed: true)),
+          utf8.decode(req.body._raw, allowMalformed: true).toNativeUtf8(),
         );
       } else if (req.body._type == _BodyType.form) {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_POSTFIELDS,
-          Utf8.toUtf8(Uri(queryParameters: req.body._form).query),
+          Uri(queryParameters: req.body._form).query.toNativeUtf8(),
         );
       } else if (req.body._type == _BodyType.file) {
         libCurl.easy_setopt_int(
@@ -239,18 +239,18 @@ class _Engine {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_READDATA,
-          Utf8.toUtf8(req.id),
+          req.id.toNativeUtf8(),
         );
       } else if (req.body._type == _BodyType.multipart) {
         final mime = libCurl.mime_init(handle);
         for (var p in req.body._multipart) {
           final mimepart = libCurl.mime_addpart(mime);
-          libCurl.mime_name(mimepart, Utf8.toUtf8(p._name));
+          libCurl.mime_name(mimepart, p._name.toNativeUtf8());
           if (p._type == MultipartType.raw) {
-            libCurl.mime_data(mimepart, Utf8.toUtf8(p._data), p._data.length);
+            libCurl.mime_data(mimepart, p._data.toNativeUtf8(), p._data.length);
           } else {
-            libCurl.mime_filedata(mimepart, Utf8.toUtf8(p._filepath));
-            libCurl.mime_filename(mimepart, Utf8.toUtf8(p._filename));
+            libCurl.mime_filedata(mimepart, p._filepath.toNativeUtf8());
+            libCurl.mime_filename(mimepart, p._filename.toNativeUtf8());
           }
         }
         libCurl.easy_setopt_ptr(handle, consts.CURLOPT_MIMEPOST, mime);
@@ -268,7 +268,7 @@ class _Engine {
     libCurl.easy_setopt_string(
       handle,
       consts.CURLOPT_WRITEDATA,
-      Utf8.toUtf8(req.id),
+      req.id.toNativeUtf8(),
     );
 
     libCurl.easy_setopt_ptr(
@@ -280,7 +280,7 @@ class _Engine {
     libCurl.easy_setopt_string(
       handle,
       consts.CURLOPT_HEADERDATA,
-      Utf8.toUtf8(req.id),
+      req.id.toNativeUtf8(),
     );
 
     // add request to queue
@@ -290,7 +290,8 @@ class _Engine {
   /// [perform] runs the libcurl processing to handle incoming
   /// data and collects these data to dart objects and frees the
   /// C resources once it is done
-  ffi.Pointer<ffi.Int32> _tempCounter = allocate()..value = 0;
+  ffi.Pointer<ffi.Int32> _tempCounter = malloc.allocate(ffi.sizeOf<ffi.Int32>())
+    ..value = 0;
   Future<Response> perform() async {
     libCurl.multi_perform(multiHandle, _tempCounter);
     final msgPtr = libCurl.multi_info_read(multiHandle, _tempCounter);
@@ -302,7 +303,8 @@ class _Engine {
 
         // get response code and http version used. this needs
         // an int reference. it is being reused for both calls
-        ffi.Pointer<ffi.Int64> _tempLong = allocate();
+        ffi.Pointer<ffi.Int64> _tempLong =
+            malloc.allocate(ffi.sizeOf<ffi.Int64>());
         _tempLong.value = 0;
         libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
@@ -311,11 +313,11 @@ class _Engine {
         libCurl.easy_getinfo(
             msg.easyHandle, consts.CURLINFO_HTTP_VERSION, _tempLong);
         buffer.httpVersion = _tempLong.value;
-        free(_tempLong);
+        malloc.free(_tempLong);
 
         if (msg.result != consts.CURLE_OK) {
           buffer.errorMessage =
-              Utf8.fromUtf8(libCurl.easy_strerror(msg.result));
+              libCurl.easy_strerror(msg.result).toDartString();
         }
 
         // cleanup everything
@@ -382,7 +384,7 @@ int _dataReadFunc(
 ) {
   int realsize = size * nmemb;
 
-  final _requestID = Utf8.fromUtf8(requestID);
+  final _requestID = requestID.toDartString();
   return _Engine.uploadFiles[_requestID]
       .readIntoSync(data.asTypedList(realsize), 0, realsize);
 }
@@ -396,7 +398,7 @@ int _dataWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  final _requestID = Utf8.fromUtf8(requestID);
+  final _requestID = requestID.toDartString();
   final _byteData = data.asTypedList(realsize);
   // if this is suppose to be a download then add the data
   // to IOSink of file. otherwise add it to the response buffer
@@ -418,7 +420,7 @@ int _headerWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  _Engine.connData[Utf8.fromUtf8(requestID)].headerBuffer
+  _Engine.connData[requestID.toDartString()].headerBuffer
       .addAll(data.asTypedList(realsize));
 
   return realsize;
@@ -438,7 +440,7 @@ int _debugWriteFunc(
   if (type == CURLINFO_TEXT ||
       type == CURLINFO_HEADER_IN ||
       type == CURLINFO_HEADER_OUT) {
-    final requestIDStr = Utf8.fromUtf8(requestID);
+    final requestIDStr = requestID.toDartString();
     final content = utf8.decode(data.asTypedList(size));
 
     _Engine.logData[requestIDStr].add(LogInfo(
