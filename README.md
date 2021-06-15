@@ -16,7 +16,7 @@ Add to project using git source:
 ```yaml
 dependencies:
   ...
-  flutter_curl: ^0.0.1
+  flutter_curl: ^0.1.0
 ```
 
 Example usage:
