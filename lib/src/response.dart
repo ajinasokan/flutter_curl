@@ -69,19 +69,19 @@ class Response {
   Request _request;
 
   int statusCode;
-  final Map<String, String> headers;
   List<int> body;
+  final Map<String, String> headers;
   final HTTPVersion httpVersion;
   final String errorMessage;
   final DateTime lastModified;
 
   Response({
-    this.statusCode,
-    this.headers,
-    this.body,
-    this.httpVersion,
-    this.errorMessage,
-    this.lastModified,
+    @required this.statusCode,
+    @required this.headers,
+    @required this.body,
+    @required this.httpVersion,
+    @required this.errorMessage,
+    @required this.lastModified,
   });
 
   Request get request => _request;

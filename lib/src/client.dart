@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ffi' as ffi;
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_curl/flutter_curl.dart';
 import 'dart:isolate';
 import 'dart:convert';
@@ -46,11 +47,15 @@ class Client {
       _logStream.where((event) => event.requestID == request.id);
 
   Client({
-    this.verbose,
-    this.verifySSL,
+    this.verbose = false,
+    this.verifySSL = true,
     this.userAgent,
     this.cookiePath,
-    this.httpVersions,
+    this.httpVersions = const [
+      HTTPVersion.http1,
+      HTTPVersion.http11,
+      HTTPVersion.http2,
+    ],
     this.libPath,
     this.interceptors = const [],
     this.timeout = Duration.zero,
@@ -82,7 +87,7 @@ class Client {
   }
 
   Future<Response> send(Request req) async {
-    Response res;
+    /*late*/ Response res;
 
     for (var i in interceptors) {
       await i.beforeRequest(req, (Response _res) {
@@ -115,7 +120,10 @@ class Client {
     return res;
   }
 
-  Future<Response> download({Request request, String path}) async {
+  Future<Response> download({
+    @required Request request,
+    @required String path,
+  }) async {
     request._downloadPath = path;
     return send(request);
   }

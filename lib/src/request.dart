@@ -23,15 +23,19 @@ class Request {
   String _downloadPath;
 
   Request({
-    this.url,
-    this.method,
-    this.headers,
+    @required this.url,
+    this.method = "GET",
+    this.headers = const {},
     this.body,
-    this.verbose,
-    this.verifySSL,
-    this.httpVersions,
-    this.timeout,
-    this.connectTimeout,
+    this.verbose = false,
+    this.verifySSL = true,
+    this.httpVersions = const [
+      HTTPVersion.http1,
+      HTTPVersion.http11,
+      HTTPVersion.http2,
+    ],
+    this.timeout = Duration.zero,
+    this.connectTimeout = const Duration(seconds: 300),
   })  : assert(url != null),
         assert(method != null),
         assert(headers != null),

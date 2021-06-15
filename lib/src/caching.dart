@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_curl/flutter_curl.dart';
 import 'dart:convert' as convert;
 
@@ -6,8 +7,8 @@ class HTTPCaching extends HTTPInterceptor {
   final Future<String> Function(String key, String value) setter;
 
   HTTPCaching({
-    this.getter,
-    this.setter,
+    @required this.getter,
+    @required this.setter,
   });
 
   @override
