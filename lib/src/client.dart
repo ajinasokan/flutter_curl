@@ -7,7 +7,9 @@ import 'dart:isolate';
 import 'dart:convert';
 import 'dart:io' show Directory, Platform, File, IOSink, RandomAccessFile;
 import 'package:path/path.dart' as path;
-
+import 'dart:typed_data';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path_provider/path_provider.dart' as paths;
 import 'const.dart' as consts;
 
 part 'ffi.dart';
@@ -35,6 +37,7 @@ class Client {
   final String? altSvcCache;
   final List<HTTPVersion> httpVersions;
   String? libPath;
+  String certPath = "";
 
   final _logs = StreamController<LogInfo>();
   Stream<LogInfo>? _broadcast;
@@ -70,6 +73,8 @@ class Client {
     _engine = await Isolate.spawn(_isolate, receivePort.sendPort);
     final completer = Completer<void>();
 
+    if (Platform.isIOS) certPath = await _getCertPath();
+
     _portSubscription = receivePort.listen((item) {
       if (item is SendPort) {
         _sendPort = item;
@@ -84,6 +89,21 @@ class Client {
       }
     });
     return completer.future;
+  }
+
+  /// [_getCertPath] copies the certificate from bundle to a file
+  /// in the temporary directory and then returns its path. Used for
+  /// iOS since BoringSSL doesn't use the SecureTransport
+  Future<String> _getCertPath() async {
+    final tempDir = await paths.getTemporaryDirectory();
+    var certPath = path.join(tempDir.path, "cert.pem");
+    if (File(certPath).existsSync()) return certPath;
+    ByteData data =
+        await rootBundle.load("packages/flutter_curl/certs/cacert.pem");
+    List<int> bytes =
+        data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    await File(certPath).writeAsBytes(bytes);
+    return certPath;
   }
 
   Future<Response> send(Request req) async {
