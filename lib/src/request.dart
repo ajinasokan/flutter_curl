@@ -10,40 +10,33 @@ class Request {
   final String url;
   final String method;
   final Map<String, String> headers;
-  final RequestBody body;
-  String userAgent;
-  bool verbose;
-  bool verifySSL;
-  List<HTTPVersion> httpVersions;
+  final RequestBody? body;
+  String? userAgent;
+  bool? verbose;
+  bool? verifySSL;
+  List<HTTPVersion>? httpVersions;
 
-  String _cookiePath;
-  String _altSvcCache;
-  Duration timeout;
-  Duration connectTimeout;
-  String _downloadPath;
+  String? _cookiePath;
+  String? _altSvcCache;
+  Duration? timeout;
+  Duration? connectTimeout;
+  String? _downloadPath;
 
   Request({
-    @required this.url,
+    required this.url,
     this.method = "GET",
     this.headers = const {},
     this.body,
-    this.verbose = false,
-    this.verifySSL = true,
-    this.httpVersions = const [
-      HTTPVersion.http1,
-      HTTPVersion.http11,
-      HTTPVersion.http2,
-    ],
-    this.timeout = Duration.zero,
-    this.connectTimeout = const Duration(seconds: 300),
-  })  : assert(url != null),
-        assert(method != null),
-        assert(headers != null),
-        id = "${++_id}";
+    this.verbose,
+    this.verifySSL,
+    this.httpVersions,
+    this.timeout,
+    this.connectTimeout,
+  }) : id = "${++_id}";
 
   factory Request.get({
-    String url,
-    Map<String, String> headers,
+    required String url,
+    Map<String, String>? headers,
   }) =>
       Request(
         method: "GET",
@@ -52,8 +45,8 @@ class Request {
       );
 
   factory Request.delete({
-    String url,
-    Map<String, String> headers,
+    required String url,
+    Map<String, String>? headers,
   }) =>
       Request(
         method: "DELETE",
@@ -62,9 +55,9 @@ class Request {
       );
 
   factory Request.post({
-    String url,
-    Map<String, String> headers,
-    RequestBody body,
+    required String url,
+    Map<String, String>? headers,
+    RequestBody? body,
   }) =>
       Request(
         method: "POST",
@@ -74,9 +67,9 @@ class Request {
       );
 
   factory Request.put({
-    String url,
-    Map<String, String> headers,
-    RequestBody body,
+    required String url,
+    Map<String, String>? headers,
+    RequestBody? body,
   }) =>
       Request(
         method: "PUT",

@@ -9,13 +9,13 @@ enum HTTPVersion {
 }
 
 class _ResponseBuffer {
-  String requestID;
-  ffi.Pointer slist;
+  String? requestID;
+  ffi.Pointer? slist;
   final List<int> bodyBuffer = [];
   final List<int> headerBuffer = [];
   int statusCode = 0;
   int httpVersion = 0;
-  String errorMessage;
+  String? errorMessage;
 
   Response toResponse(_Engine engine) {
     // Parse headers
@@ -26,7 +26,7 @@ class _ResponseBuffer {
     items.removeAt(0); // proto
 
     Map<String, String> headers = {};
-    DateTime lastModified;
+    DateTime? lastModified;
     for (var item in items) {
       int pos = item.indexOf(": ");
       String key = item.substring(0, pos).toLowerCase();
@@ -34,7 +34,7 @@ class _ResponseBuffer {
       if (headers[key] == null) {
         headers[key] = value;
       } else {
-        headers[key] += "; " + value;
+        headers[key] = headers[key]! + "; " + value;
       }
       if (key == "last-modified") {
         lastModified = DateTime.fromMillisecondsSinceEpoch(
@@ -65,26 +65,26 @@ class _ResponseBuffer {
 }
 
 class Response {
-  String _requestID;
-  Request _request;
+  String? _requestID;
+  Request? _request;
 
   int statusCode;
   List<int> body;
   final Map<String, String> headers;
   final HTTPVersion httpVersion;
-  final String errorMessage;
-  final DateTime lastModified;
+  final String? errorMessage;
+  final DateTime? lastModified;
 
   Response({
-    @required this.statusCode,
-    @required this.headers,
-    @required this.body,
-    @required this.httpVersion,
-    @required this.errorMessage,
-    @required this.lastModified,
+    required this.statusCode,
+    required this.headers,
+    required this.body,
+    required this.httpVersion,
+    required this.errorMessage,
+    required this.lastModified,
   });
 
-  Request get request => _request;
+  Request? get request => _request;
 
   int get length => body.length;
 

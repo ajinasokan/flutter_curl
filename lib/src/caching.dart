@@ -4,11 +4,11 @@ import 'dart:convert' as convert;
 
 class HTTPCaching extends HTTPInterceptor {
   final Future<String> Function(String key) getter;
-  final Future<String> Function(String key, String value) setter;
+  final Future<String> Function(String key, String? value) setter;
 
   HTTPCaching({
-    @required this.getter,
-    @required this.setter,
+    required this.getter,
+    required this.setter,
   });
 
   @override
@@ -30,7 +30,7 @@ class HTTPCaching extends HTTPInterceptor {
   }
 
   afterResponse(Response response) async {
-    var slug = response.request.url.replaceAll(RegExp("[^A-Za-z0-9-]+"), "-");
+    var slug = response.request!.url.replaceAll(RegExp("[^A-Za-z0-9-]+"), "-");
     var etagKey = "etag_" + slug;
     var dateKey = "etag_" + slug;
     var dataKey = "data_" + slug;

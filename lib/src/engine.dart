@@ -4,7 +4,7 @@ part of 'client.dart';
 /// handled by [_isolate] function
 class _Engine {
   final libCurl = _LibCURL();
-  ffi.Pointer<_CURLMulti> multiHandle;
+  late ffi.Pointer<_CURLMulti> multiHandle;
 
   static Map<String, StreamController<LogInfo>> logData = {};
   static Map<String, _ResponseBuffer> connData = {};
@@ -13,29 +13,29 @@ class _Engine {
   static Map<String, ffi.Pointer<_CURLMime>> mimes = {};
   static Map<ffi.Pointer<_CURLEasy>, String> reqIDs = {};
 
-  void init({String libPath}) {
+  void init({String? libPath}) {
     libCurl.init(libPath: libPath);
     multiHandle = libCurl.multi_init();
   }
 
   void send(Request req) {
-    if (req.verbose) {
+    if (req.verbose!) {
       print(libCurl.version().toDartString());
     }
 
     final handle = libCurl.easy_init();
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
-    connData[req.id].requestID = req.id;
+    connData[req.id]!.requestID = req.id;
 
     logData[req.id] = StreamController<LogInfo>();
 
     if (req.body?._type == _BodyType.file) {
-      uploadFiles[req.id] = File(req.body._file).openSync();
+      uploadFiles[req.id] = File(req.body!._file).openSync();
     }
 
     if (req._downloadPath != null) {
-      downloadFiles[req.id] = File(req._downloadPath).openWrite();
+      downloadFiles[req.id] = File(req._downloadPath!).openWrite();
     }
 
     // set basic request params
@@ -53,18 +53,18 @@ class _Engine {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_USERAGENT,
-        req.userAgent.toNativeUtf8(),
+        req.userAgent!.toNativeUtf8(),
       );
     }
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_TIMEOUT_MS,
-      req.timeout.inMilliseconds,
+      req.timeout!.inMilliseconds,
     );
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_CONNECTTIMEOUT_MS,
-      req.connectTimeout.inMilliseconds,
+      req.connectTimeout!.inMilliseconds,
     );
 
     // set cookie path
@@ -73,13 +73,13 @@ class _Engine {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_COOKIEFILE,
-        req._cookiePath.toNativeUtf8(),
+        req._cookiePath!.toNativeUtf8(),
       );
       // for storing
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_COOKIEJAR,
-        req._cookiePath.toNativeUtf8(),
+        req._cookiePath!.toNativeUtf8(),
       );
     }
 
@@ -96,18 +96,18 @@ class _Engine {
 
     // enable support for all http versions
     // READ: https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
-    if (req.httpVersions.isNotEmpty) {
+    if (req.httpVersions!.isNotEmpty) {
       int flag = 0;
-      if (req.httpVersions.contains(HTTPVersion.http1)) {
+      if (req.httpVersions!.contains(HTTPVersion.http1)) {
         flag |= consts.CURL_HTTP_VERSION_1_0;
       }
-      if (req.httpVersions.contains(HTTPVersion.http11)) {
+      if (req.httpVersions!.contains(HTTPVersion.http11)) {
         flag |= consts.CURL_HTTP_VERSION_1_1;
       }
-      if (req.httpVersions.contains(HTTPVersion.http2)) {
+      if (req.httpVersions!.contains(HTTPVersion.http2)) {
         flag |= consts.CURL_HTTP_VERSION_2_0;
       }
-      if (req.httpVersions.contains(HTTPVersion.http3)) {
+      if (req.httpVersions!.contains(HTTPVersion.http3)) {
         flag |= consts.CURL_HTTP_VERSION_3;
       }
       libCurl.easy_setopt_int(
@@ -128,7 +128,7 @@ class _Engine {
       libCurl.easy_setopt_string(
         handle,
         consts.CURLOPT_ALTSVC,
-        req._altSvcCache.toNativeUtf8(),
+        req._altSvcCache!.toNativeUtf8(),
       );
       // enable alt-svc support for all http versions
       libCurl.easy_setopt_int(
@@ -140,7 +140,7 @@ class _Engine {
 
     // enable verbose and set the callback
     // TODO: may be provide log to file support?
-    if (req.verbose) {
+    if (req.verbose!) {
       libCurl.easy_setopt_int(
         handle,
         consts.CURLOPT_VERBOSE,
@@ -158,7 +158,7 @@ class _Engine {
       );
     }
 
-    if (!req.verifySSL) {
+    if (!req.verifySSL!) {
       libCurl.easy_setopt_int(
         handle,
         consts.CURLOPT_SSL_VERIFYPEER,
@@ -167,19 +167,19 @@ class _Engine {
     }
 
     // add the headers
-    connData[req.id].slist = ffi.nullptr;
-    String encodingHeader = "";
+    connData[req.id]!.slist = ffi.nullptr;
+    String? encodingHeader = "";
     for (var key in req.headers.keys) {
       if (key.toLowerCase() == "accept-encoding") {
         encodingHeader = req.headers[key];
         continue;
       }
       final temp = libCurl.slist_append(
-        connData[req.id].slist,
+        connData[req.id]!.slist!,
         "$key: ${req.headers[key]}".toNativeUtf8(),
       );
       if (temp != ffi.nullptr)
-        connData[req.id].slist = temp;
+        connData[req.id]!.slist = temp;
       else
         print("error while adding $key");
     }
@@ -188,39 +188,39 @@ class _Engine {
     libCurl.easy_setopt_string(
       handle,
       consts.CURLOPT_ACCEPT_ENCODING,
-      encodingHeader.toNativeUtf8(),
+      encodingHeader!.toNativeUtf8(),
     );
 
-    if (connData[req.id].slist != ffi.nullptr) {
+    if (connData[req.id]!.slist != ffi.nullptr) {
       libCurl.easy_setopt_ptr(
         handle,
         consts.CURLOPT_HTTPHEADER,
-        connData[req.id].slist,
+        connData[req.id]!.slist!,
       );
     }
 
     // add post body
     if (req.method.toLowerCase() == "post" ||
         req.method.toLowerCase() == "put") {
-      if (req.body._type == _BodyType.string) {
+      if (req.body!._type == _BodyType.string) {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_POSTFIELDS,
-          req.body._string.toNativeUtf8(),
+          req.body!._string.toNativeUtf8(),
         );
-      } else if (req.body._type == _BodyType.raw) {
+      } else if (req.body!._type == _BodyType.raw) {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_POSTFIELDS,
-          utf8.decode(req.body._raw, allowMalformed: true).toNativeUtf8(),
+          utf8.decode(req.body!._raw, allowMalformed: true).toNativeUtf8(),
         );
-      } else if (req.body._type == _BodyType.form) {
+      } else if (req.body!._type == _BodyType.form) {
         libCurl.easy_setopt_string(
           handle,
           consts.CURLOPT_POSTFIELDS,
-          Uri(queryParameters: req.body._form).query.toNativeUtf8(),
+          Uri(queryParameters: req.body!._form).query.toNativeUtf8(),
         );
-      } else if (req.body._type == _BodyType.file) {
+      } else if (req.body!._type == _BodyType.file) {
         libCurl.easy_setopt_int(
           handle,
           consts.CURLOPT_UPLOAD,
@@ -229,7 +229,7 @@ class _Engine {
         libCurl.easy_setopt_int(
           handle,
           consts.CURLOPT_INFILESIZE_LARGE,
-          uploadFiles[req.id].lengthSync(),
+          uploadFiles[req.id]!.lengthSync(),
         );
         libCurl.easy_setopt_ptr(
           handle,
@@ -241,16 +241,17 @@ class _Engine {
           consts.CURLOPT_READDATA,
           req.id.toNativeUtf8(),
         );
-      } else if (req.body._type == _BodyType.multipart) {
+      } else if (req.body!._type == _BodyType.multipart) {
         final mime = libCurl.mime_init(handle);
-        for (var p in req.body._multipart) {
+        for (var p in req.body!._multipart) {
           final mimepart = libCurl.mime_addpart(mime);
-          libCurl.mime_name(mimepart, p._name.toNativeUtf8());
+          libCurl.mime_name(mimepart, p._name!.toNativeUtf8());
           if (p._type == MultipartType.raw) {
-            libCurl.mime_data(mimepart, p._data.toNativeUtf8(), p._data.length);
+            libCurl.mime_data(
+                mimepart, p._data!.toNativeUtf8(), p._data!.length);
           } else {
-            libCurl.mime_filedata(mimepart, p._filepath.toNativeUtf8());
-            libCurl.mime_filename(mimepart, p._filename.toNativeUtf8());
+            libCurl.mime_filedata(mimepart, p._filepath!.toNativeUtf8());
+            libCurl.mime_filename(mimepart, p._filename!.toNativeUtf8());
           }
         }
         libCurl.easy_setopt_ptr(handle, consts.CURLOPT_MIMEPOST, mime);
@@ -292,14 +293,14 @@ class _Engine {
   /// C resources once it is done
   ffi.Pointer<ffi.Int32> _tempCounter = malloc.allocate(ffi.sizeOf<ffi.Int32>())
     ..value = 0;
-  Future<Response> perform() async {
+  Future<Response?> perform() async {
     libCurl.multi_perform(multiHandle, _tempCounter);
     final msgPtr = libCurl.multi_info_read(multiHandle, _tempCounter);
     if (msgPtr != ffi.nullptr) {
       final msg = msgPtr.ref;
       if (msg.messageType == consts.CURLMSG_DONE) {
-        String requestID = reqIDs[msg.easyHandle];
-        final buffer = connData[requestID];
+        String? requestID = reqIDs[msg.easyHandle];
+        final buffer = connData[requestID!]!;
 
         // get response code and http version used. this needs
         // an int reference. it is being reused for both calls
@@ -307,39 +308,39 @@ class _Engine {
             malloc.allocate(ffi.sizeOf<ffi.Int64>());
         _tempLong.value = 0;
         libCurl.easy_getinfo(
-            msg.easyHandle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
+            msg.easyHandle!, consts.CURLINFO_RESPONSE_CODE, _tempLong);
         buffer.statusCode = _tempLong.value;
         _tempLong.value = 0;
         libCurl.easy_getinfo(
-            msg.easyHandle, consts.CURLINFO_HTTP_VERSION, _tempLong);
+            msg.easyHandle!, consts.CURLINFO_HTTP_VERSION, _tempLong);
         buffer.httpVersion = _tempLong.value;
         malloc.free(_tempLong);
 
         if (msg.result != consts.CURLE_OK) {
           buffer.errorMessage =
-              libCurl.easy_strerror(msg.result).toDartString();
+              libCurl.easy_strerror(msg.result!).toDartString();
         }
 
         // cleanup everything
-        libCurl.slist_free_all(connData[requestID].slist);
-        libCurl.multi_remove_handle(multiHandle, msg.easyHandle);
-        libCurl.easy_cleanup(msg.easyHandle);
+        libCurl.slist_free_all(connData[requestID]!.slist!);
+        libCurl.multi_remove_handle(multiHandle, msg.easyHandle!);
+        libCurl.easy_cleanup(msg.easyHandle!);
         reqIDs.remove(msg.easyHandle);
         connData.remove(requestID);
-        logData[requestID].close();
+        logData[requestID]!.close();
 
         if (uploadFiles.containsKey(requestID)) {
-          uploadFiles[requestID].closeSync();
+          uploadFiles[requestID]!.closeSync();
           uploadFiles.remove(requestID);
         }
 
         if (mimes.containsKey(requestID)) {
-          libCurl.mime_free(mimes[requestID]);
+          libCurl.mime_free(mimes[requestID]!);
           mimes.remove(requestID);
         }
 
         if (downloadFiles.containsKey(requestID)) {
-          downloadFiles[requestID].close();
+          downloadFiles[requestID]!.close();
           downloadFiles.remove(requestID);
         }
 
@@ -362,7 +363,7 @@ void _isolate(SendPort sendPort) async {
   final engine = _Engine();
   receivePort.listen((req) async {
     engine.send(req);
-    await for (var data in _Engine.logData[req.id].stream) {
+    await for (var data in _Engine.logData[req.id]!.stream) {
       sendPort.send(data);
     }
   });
@@ -385,7 +386,7 @@ int _dataReadFunc(
   int realsize = size * nmemb;
 
   final _requestID = requestID.toDartString();
-  return _Engine.uploadFiles[_requestID]
+  return _Engine.uploadFiles[_requestID]!
       .readIntoSync(data.asTypedList(realsize), 0, realsize);
 }
 
@@ -403,9 +404,9 @@ int _dataWriteFunc(
   // if this is suppose to be a download then add the data
   // to IOSink of file. otherwise add it to the response buffer
   if (_Engine.downloadFiles.containsKey(_requestID)) {
-    _Engine.downloadFiles[_requestID].add(_byteData);
+    _Engine.downloadFiles[_requestID]!.add(_byteData);
   } else {
-    _Engine.connData[_requestID].bodyBuffer.addAll(_byteData);
+    _Engine.connData[_requestID]!.bodyBuffer.addAll(_byteData);
   }
 
   return realsize;
@@ -420,7 +421,7 @@ int _headerWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  _Engine.connData[requestID.toDartString()].headerBuffer
+  _Engine.connData[requestID.toDartString()]!.headerBuffer
       .addAll(data.asTypedList(realsize));
 
   return realsize;
@@ -443,7 +444,7 @@ int _debugWriteFunc(
     final requestIDStr = requestID.toDartString();
     final content = utf8.decode(data.asTypedList(size));
 
-    _Engine.logData[requestIDStr].add(LogInfo(
+    _Engine.logData[requestIDStr]!.add(LogInfo(
       requestID: requestIDStr,
       content: content,
     ));

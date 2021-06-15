@@ -19,32 +19,32 @@ part 'log_info.dart';
 
 /// [Client] handles all the HTTP calls. Add [Request] to [Client] and await for [Response]. Call [init] before use and [dispose] after use.
 class Client {
-  Isolate _engine;
-  SendPort _sendPort;
-  StreamSubscription _portSubscription;
-  Map<String, Request> _queue;
-  Map<String, Completer> _completers;
+  late Isolate _engine;
+  late SendPort _sendPort;
+  late StreamSubscription _portSubscription;
+  late Map<String, Request> _queue;
+  late Map<String, Completer> _completers;
 
   final bool verbose;
-  final String userAgent;
+  final String? userAgent;
   final Duration timeout;
   final Duration connectTimeout;
   final List<HTTPInterceptor> interceptors;
-  final String cookiePath;
+  final String? cookiePath;
   final bool verifySSL;
-  final String altSvcCache;
+  final String? altSvcCache;
   final List<HTTPVersion> httpVersions;
-  String libPath;
+  String? libPath;
 
   final _logs = StreamController<LogInfo>();
-  Stream<LogInfo> _broadcast;
-  Stream<LogInfo> get _logStream {
+  Stream<LogInfo>? _broadcast;
+  Stream<LogInfo>? get _logStream {
     if (_broadcast == null) _broadcast = _logs.stream.asBroadcastStream();
     return _broadcast;
   }
 
   Stream<LogInfo> logsFor(Request request) =>
-      _logStream.where((event) => event.requestID == request.id);
+      _logStream!.where((event) => event.requestID == request.id);
 
   Client({
     this.verbose = false,
@@ -75,8 +75,8 @@ class Client {
         _sendPort = item;
         completer.complete();
       } else if (item is Response) {
-        item._request = _queue[item._requestID];
-        _completers[item._requestID].complete(item);
+        item._request = _queue[item._requestID!];
+        _completers[item._requestID!]!.complete(item);
         _queue.remove(item._requestID);
         _completers.remove(item._requestID);
       } else if (item is LogInfo) {
@@ -87,7 +87,7 @@ class Client {
   }
 
   Future<Response> send(Request req) async {
-    /*late*/ Response res;
+    Response? res;
 
     for (var i in interceptors) {
       await i.beforeRequest(req, (Response _res) {
@@ -102,9 +102,9 @@ class Client {
       req.timeout ??= timeout;
       req.connectTimeout ??= connectTimeout;
       req.userAgent ??= userAgent;
-      req.verbose = req.verbose ?? verbose ?? false;
-      req.verifySSL = req.verifySSL ?? verifySSL ?? true;
-      req.httpVersions = req.httpVersions ?? httpVersions ?? [];
+      req.verbose = req.verbose ?? verbose;
+      req.verifySSL = req.verifySSL ?? verifySSL;
+      req.httpVersions = req.httpVersions ?? httpVersions;
       _queue[req.id] = req;
 
       final completer = Completer<Response>();
@@ -115,14 +115,14 @@ class Client {
     }
 
     for (var i in interceptors.reversed) {
-      await i.afterResponse(res);
+      await i.afterResponse(res!);
     }
-    return res;
+    return res!;
   }
 
   Future<Response> download({
-    @required Request request,
-    @required String path,
+    required Request request,
+    required String path,
   }) async {
     request._downloadPath = path;
     return send(request);

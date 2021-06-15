@@ -9,12 +9,12 @@ enum _BodyType {
 }
 
 class RequestBody {
-  _BodyType _type;
-  List<int> _raw;
-  String _string;
-  String _file;
-  Map<String, dynamic> _form;
-  List<Multipart> _multipart;
+  _BodyType? _type;
+  late List<int> _raw;
+  late String _string;
+  late String _file;
+  Map<String, dynamic>? _form;
+  late List<Multipart> _multipart;
 
   RequestBody._();
 
@@ -55,19 +55,19 @@ enum MultipartType {
 }
 
 class Multipart {
-  String _name;
-  String _data;
-  String _filename;
-  String _filepath;
-  MultipartType _type;
+  String? _name;
+  String? _data;
+  String? _filename;
+  String? _filepath;
+  MultipartType? _type;
 
-  Multipart({String name, String data}) {
+  Multipart({String? name, String? data}) {
     _name = name;
     _data = data;
     _type = MultipartType.raw;
   }
 
-  factory Multipart.file({String name, String path, String filename}) {
+  factory Multipart.file({String? name, String? path, String? filename}) {
     return Multipart(name: name)
       .._filename = filename
       .._filepath = path

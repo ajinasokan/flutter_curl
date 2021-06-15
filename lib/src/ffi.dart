@@ -9,12 +9,12 @@ class _CURLMulti extends ffi.Opaque {}
 /// [_CURLMsg] holds the status about a single request
 class _CURLMsg extends ffi.Struct {
   @ffi.Int32()
-  int messageType;
+  int? messageType;
 
-  ffi.Pointer<_CURLEasy> easyHandle;
+  ffi.Pointer<_CURLEasy>? easyHandle;
 
   @ffi.Int32()
-  int result;
+  int? result;
 
   factory _CURLMsg.allocate(
           int msg, ffi.Pointer<_CURLEasy> easyHandle, int result) =>
@@ -158,40 +158,40 @@ typedef _DebugFunc = ffi.Int32 Function(ffi.Pointer<_CURLEasy>, ffi.Int32,
 /// used by the plugin
 class _LibCURL {
   // handle to the lib
-  ffi.DynamicLibrary _dylib;
+  late ffi.DynamicLibrary _dylib;
 
   // C handles
-  _version version;
-  _getdate getdate;
-  _multi_init multi_init;
-  _multi_add_handle multi_add_handle;
-  _multi_remove_handle multi_remove_handle;
-  _multi_perform multi_perform;
-  _multi_poll multi_poll;
-  _multi_info_read multi_info_read;
+  late _version version;
+  late _getdate getdate;
+  late _multi_init multi_init;
+  late _multi_add_handle multi_add_handle;
+  late _multi_remove_handle multi_remove_handle;
+  late _multi_perform multi_perform;
+  late _multi_poll multi_poll;
+  late _multi_info_read multi_info_read;
 
-  _easy_init easy_init;
-  _easy_clenup easy_cleanup;
-  _easy_perform easy_perform;
-  _easy_setopt_string easy_setopt_string;
-  _easy_setopt_int easy_setopt_int;
-  _easy_setopt_ptr easy_setopt_ptr;
-  _easy_getinfo easy_getinfo;
+  late _easy_init easy_init;
+  late _easy_clenup easy_cleanup;
+  late _easy_perform easy_perform;
+  late _easy_setopt_string easy_setopt_string;
+  late _easy_setopt_int easy_setopt_int;
+  late _easy_setopt_ptr easy_setopt_ptr;
+  late _easy_getinfo easy_getinfo;
 
-  _slist_append slist_append;
-  _slist_free_all slist_free_all;
+  late _slist_append slist_append;
+  late _slist_free_all slist_free_all;
 
-  _curl_easy_strerror easy_strerror;
+  late _curl_easy_strerror easy_strerror;
 
-  _curl_mime_init mime_init;
-  _curl_mime_addpart mime_addpart;
-  _curl_mime_filename mime_filename;
-  _curl_mime_filedata mime_filedata;
-  _curl_mime_data mime_data;
-  _curl_mime_name mime_name;
-  _curl_mime_free mime_free;
+  late _curl_mime_init mime_init;
+  late _curl_mime_addpart mime_addpart;
+  late _curl_mime_filename mime_filename;
+  late _curl_mime_filedata mime_filedata;
+  late _curl_mime_data mime_data;
+  late _curl_mime_name mime_name;
+  late _curl_mime_free mime_free;
 
-  void init({String libPath}) {
+  void init({String? libPath}) {
     // Load the library depending on the platform. If libPath is
     // provided it takes the precendence over all.
     if (libPath != null) {
