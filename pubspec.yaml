@@ -69,3 +69,24 @@ ffigen:
   headers:
     entry-points:
       - "include/*.h"
+  functions:
+    include:
+      - "curl_version"
+      - "curl_easy_init"
+      - "curl_multi_init"
+      - "curl_slist_append"
+      - "curl_mime_init"
+      - "curl_mime_addpart"
+      - "curl_mime_name"
+      - "curl_mime_data"
+      - "curl_mime_filedata"
+      - "curl_mime_filename"
+      - "curl_mime_free"
+      - "curl_multi_add_handle"
+      - "curl_multi_perform"
+      - "curl_multi_info_read"
+      - "curl_slist_free_all"
+      - "curl_multi_remove_handle"
+      - "curl_easy_cleanup"
+      - "curl_easy_strerror"
+      - "curl_getdate"
