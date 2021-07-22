@@ -1,316 +1,9918 @@
-part of 'client.dart';
-
-/// [_CURLEasy] holds handle for a single request
-class _CURLEasy extends ffi.Opaque {}
-
-/// [_CURLMulti] holds handle to the request queue
-class _CURLMulti extends ffi.Opaque {}
-
-/// [_CURLMsg] holds the status about a single request
-class _CURLMsg extends ffi.Struct {
-  @ffi.Int32()
-  int? messageType;
-
-  ffi.Pointer<_CURLEasy>? easyHandle;
-
-  @ffi.Int32()
-  int? result;
-
-  factory _CURLMsg.allocate(
-          int msg, ffi.Pointer<_CURLEasy> easyHandle, int result) =>
-      malloc.allocate<_CURLMsg>(ffi.sizeOf<_CURLMsg>()).ref
-        ..messageType = msg
-        ..easyHandle = easyHandle
-        ..result = result;
-}
-
-// C definitions
-
-typedef _version_func = ffi.Pointer<Utf8> Function();
-typedef _version = ffi.Pointer<Utf8> Function();
-
-typedef _getdate_func = ffi.Int64 Function(
-    ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
-typedef _getdate = int Function(ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
-
-typedef _multi_init_func = ffi.Pointer<_CURLMulti> Function();
-typedef _multi_init = ffi.Pointer<_CURLMulti> Function();
-
-typedef _multi_add_handle_func = ffi.Void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
-typedef _multi_add_handle = void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
-
-typedef _multi_remove_handle_func = ffi.Void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
-typedef _multi_remove_handle = void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<_CURLEasy>);
-
-typedef _multi_perform_func = ffi.Void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
-typedef _multi_perform = void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
-
-typedef _multi_poll_func = ffi.Void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer, ffi.Int32, ffi.Int32, ffi.Pointer);
-typedef _multi_poll = void Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer, int, int, ffi.Pointer);
-
-typedef _multi_info_read_func = ffi.Pointer<_CURLMsg> Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
-typedef _multi_info_read = ffi.Pointer<_CURLMsg> Function(
-    ffi.Pointer<_CURLMulti>, ffi.Pointer<ffi.Int32>);
-
-typedef _easy_init_func = ffi.Pointer<_CURLEasy> Function();
-typedef _easy_init = ffi.Pointer<_CURLEasy> Function();
-
-typedef _easy_cleanup_func = ffi.Int32 Function(ffi.Pointer<_CURLEasy>);
-typedef _easy_clenup = int Function(ffi.Pointer<_CURLEasy>);
-
-typedef _easy_perform_func = ffi.Int32 Function(ffi.Pointer<_CURLEasy>);
-typedef _easy_perform = int Function(ffi.Pointer<_CURLEasy>);
-
-typedef _easy_setopt_string_func = ffi.Void Function(
-    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer<Utf8>);
-typedef _easy_setopt_string = void Function(
-    ffi.Pointer<_CURLEasy>, int, ffi.Pointer<Utf8>);
-
-typedef _easy_setopt_int_func = ffi.Void Function(
-    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Int32);
-typedef _easy_setopt_int = void Function(ffi.Pointer<_CURLEasy>, int, int);
-
-typedef _easy_setopt_ptr_func = ffi.Void Function(
-    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer);
-typedef _easy_setopt_ptr = void Function(
-    ffi.Pointer<_CURLEasy>, int, ffi.Pointer);
-
-typedef _easy_getinfo_func = ffi.Void Function(
-    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer<ffi.Int64>);
-typedef _easy_getinfo = void Function(
-    ffi.Pointer<_CURLEasy>, int, ffi.Pointer<ffi.Int64>);
-
-typedef _slist_append_func = ffi.Pointer Function(
-    ffi.Pointer, ffi.Pointer<Utf8>);
-typedef _slist_append = ffi.Pointer Function(ffi.Pointer, ffi.Pointer<Utf8>);
-
-typedef _slist_free_all_func = ffi.Void Function(ffi.Pointer);
-typedef _slist_free_all = void Function(ffi.Pointer);
-
-typedef _curl_easy_strerror_func = ffi.Pointer<Utf8> Function(ffi.Int32);
-typedef _curl_easy_strerror = ffi.Pointer<Utf8> Function(int);
-
-/// [_CURLMime] holds handle for mime context
-class _CURLMime extends ffi.Opaque {}
-
-/// [_CURLMimePart] holds handle for mime part context
-class _CURLMimePart extends ffi.Opaque {}
-
-typedef _curl_mime_init_func = ffi.Pointer<_CURLMime> Function(
-    ffi.Pointer<_CURLEasy>);
-typedef _curl_mime_init = ffi.Pointer<_CURLMime> Function(
-    ffi.Pointer<_CURLEasy>);
-
-typedef _curl_mime_free_func = ffi.Void Function(ffi.Pointer<_CURLMime>);
-typedef _curl_mime_free = void Function(ffi.Pointer<_CURLMime>);
-
-typedef _curl_mime_addpart_func = ffi.Pointer<_CURLMimePart> Function(
-    ffi.Pointer<_CURLMime>);
-typedef _curl_mime_addpart = ffi.Pointer<_CURLMimePart> Function(
-    ffi.Pointer<_CURLMime>);
-
-typedef _curl_mime_name_func = ffi.Int32 Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-typedef _curl_mime_name = int Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-
-typedef _curl_mime_filename_func = ffi.Int32 Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-typedef _curl_mime_filename = int Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-
-typedef _curl_mime_type_func = ffi.Int32 Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-typedef _curl_mime_type = int Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-
-typedef _curl_mime_filedata_func = ffi.Int32 Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-typedef _curl_mime_filedata = int Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>);
-
-typedef _curl_mime_data_func = ffi.Int32 Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>, ffi.Int32);
-typedef _curl_mime_data = int Function(
-    ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>, int);
-
-// Callback functions
-
-typedef _ReadFunc = ffi.Int32 Function(
-    ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Int32, ffi.Pointer<Utf8>);
-
-typedef _WriteFunc = ffi.Int32 Function(
-    ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Int32, ffi.Pointer<Utf8>);
-
-typedef _DebugFunc = ffi.Int32 Function(ffi.Pointer<_CURLEasy>, ffi.Int32,
-    ffi.Pointer<ffi.Uint8>, ffi.Int32, ffi.Pointer<Utf8>);
-
-/// [_LibCURL] defines and initializes the functions in libcurl
-/// used by the plugin
-class _LibCURL {
-  // handle to the lib
-  late ffi.DynamicLibrary _dylib;
-
-  // C handles
-  late _version version;
-  late _getdate getdate;
-  late _multi_init multi_init;
-  late _multi_add_handle multi_add_handle;
-  late _multi_remove_handle multi_remove_handle;
-  late _multi_perform multi_perform;
-  late _multi_poll multi_poll;
-  late _multi_info_read multi_info_read;
-
-  late _easy_init easy_init;
-  late _easy_clenup easy_cleanup;
-  late _easy_perform easy_perform;
-  late _easy_setopt_string easy_setopt_string;
-  late _easy_setopt_int easy_setopt_int;
-  late _easy_setopt_ptr easy_setopt_ptr;
-  late _easy_getinfo easy_getinfo;
-
-  late _slist_append slist_append;
-  late _slist_free_all slist_free_all;
-
-  late _curl_easy_strerror easy_strerror;
-
-  late _curl_mime_init mime_init;
-  late _curl_mime_addpart mime_addpart;
-  late _curl_mime_filename mime_filename;
-  late _curl_mime_filedata mime_filedata;
-  late _curl_mime_data mime_data;
-  late _curl_mime_name mime_name;
-  late _curl_mime_free mime_free;
-
-  void init({String? libPath}) {
-    // Load the library depending on the platform. If libPath is
-    // provided it takes the precendence over all.
-    if (libPath != null) {
-      _dylib = ffi.DynamicLibrary.open(libPath);
-    } else if (Platform.isIOS) {
-      _dylib = ffi.DynamicLibrary.process();
-    } else if (Platform.isMacOS) {
-      _dylib = ffi.DynamicLibrary.process();
-    } else if (Platform.isLinux) {
-      _dylib = ffi.DynamicLibrary.open(path.join(
-          path.dirname(Platform.resolvedExecutable), "lib", "libcurl.so"));
-    } else if (Platform.isAndroid) {
-      _dylib = ffi.DynamicLibrary.open("libcurl.so");
-    } else {
-      // TODO: add windows, macos and linux
-      throw Exception("Unsupported platform");
-    }
-
-    // Initialize all functions defined for the plugin
-    version = _dylib
-        .lookup<ffi.NativeFunction<_version_func>>('curl_version')
-        .asFunction();
-
-    getdate = _dylib
-        .lookup<ffi.NativeFunction<_getdate_func>>('curl_getdate')
-        .asFunction();
-
-    multi_init = _dylib
-        .lookup<ffi.NativeFunction<_multi_init_func>>('curl_multi_init')
-        .asFunction();
-
-    multi_add_handle = _dylib
-        .lookup<ffi.NativeFunction<_multi_add_handle_func>>(
-            'curl_multi_add_handle')
-        .asFunction();
-
-    multi_remove_handle = _dylib
-        .lookup<ffi.NativeFunction<_multi_remove_handle_func>>(
-            'curl_multi_remove_handle')
-        .asFunction();
-
-    multi_perform = _dylib
-        .lookup<ffi.NativeFunction<_multi_perform_func>>('curl_multi_perform')
-        .asFunction();
-
-    multi_poll = _dylib
-        .lookup<ffi.NativeFunction<_multi_poll_func>>('curl_multi_poll')
-        .asFunction();
-
-    multi_info_read = _dylib
-        .lookup<ffi.NativeFunction<_multi_info_read_func>>(
-            'curl_multi_info_read')
-        .asFunction();
-
-    easy_init = _dylib
-        .lookup<ffi.NativeFunction<_easy_init_func>>('curl_easy_init')
-        .asFunction();
-
-    easy_cleanup = _dylib
-        .lookup<ffi.NativeFunction<_easy_cleanup_func>>('curl_easy_cleanup')
-        .asFunction();
-
-    easy_perform = _dylib
-        .lookup<ffi.NativeFunction<_easy_perform_func>>('curl_easy_perform')
-        .asFunction();
-
-    easy_setopt_string = _dylib
-        .lookup<ffi.NativeFunction<_easy_setopt_string_func>>(
-            'curl_easy_setopt')
-        .asFunction();
-
-    easy_setopt_int = _dylib
-        .lookup<ffi.NativeFunction<_easy_setopt_int_func>>('curl_easy_setopt')
-        .asFunction();
-
-    easy_setopt_ptr = _dylib
-        .lookup<ffi.NativeFunction<_easy_setopt_ptr_func>>('curl_easy_setopt')
-        .asFunction();
-
-    easy_getinfo = _dylib
-        .lookup<ffi.NativeFunction<_easy_getinfo_func>>('curl_easy_getinfo')
-        .asFunction();
-
-    slist_append = _dylib
-        .lookup<ffi.NativeFunction<_slist_append_func>>('curl_slist_append')
-        .asFunction();
-
-    slist_free_all = _dylib
-        .lookup<ffi.NativeFunction<_slist_free_all_func>>('curl_slist_free_all')
-        .asFunction();
-
-    easy_strerror = _dylib
-        .lookup<ffi.NativeFunction<_curl_easy_strerror_func>>(
-            'curl_easy_strerror')
-        .asFunction();
-
-    mime_init = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_init_func>>('curl_mime_init')
-        .asFunction();
-    mime_addpart = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_addpart_func>>(
-            'curl_mime_addpart')
-        .asFunction();
-    mime_filename = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_filename_func>>(
-            'curl_mime_filename')
-        .asFunction();
-    mime_filedata = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_filedata_func>>(
-            'curl_mime_filedata')
-        .asFunction();
-    mime_data = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_data_func>>('curl_mime_data')
-        .asFunction();
-    mime_name = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_name_func>>('curl_mime_name')
-        .asFunction();
-    mime_free = _dylib
-        .lookup<ffi.NativeFunction<_curl_mime_free_func>>('curl_mime_free')
-        .asFunction();
+// AUTO GENERATED FILE, DO NOT EDIT.
+//
+// Generated by `package:ffigen`.
+import 'dart:ffi' as ffi;
+
+class LibCURL {
+  /// Holds the symbol lookup function.
+  final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
+      _lookup;
+
+  /// The symbols are looked up in [dynamicLibrary].
+  LibCURL(ffi.DynamicLibrary dynamicLibrary) : _lookup = dynamicLibrary.lookup;
+
+  /// The symbols are looked up with [lookup].
+  LibCURL.fromLookup(
+      ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
+          lookup)
+      : _lookup = lookup;
+
+  int __darwin_check_fd_set_overflow(
+    int arg0,
+    ffi.Pointer<ffi.Void> arg1,
+    int arg2,
+  ) {
+    return ___darwin_check_fd_set_overflow(
+      arg0,
+      arg1,
+      arg2,
+    );
   }
+
+  late final ___darwin_check_fd_set_overflow_ptr =
+      _lookup<ffi.NativeFunction<_c___darwin_check_fd_set_overflow>>(
+          '__darwin_check_fd_set_overflow');
+  late final _dart___darwin_check_fd_set_overflow
+      ___darwin_check_fd_set_overflow = ___darwin_check_fd_set_overflow_ptr
+          .asFunction<_dart___darwin_check_fd_set_overflow>();
+
+  int fread(
+    ffi.Pointer<ffi.Void> arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int32> arg3,
+  ) {
+    return _fread(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _fread_ptr = _lookup<ffi.NativeFunction<_c_fread>>('fread');
+  late final _dart_fread _fread = _fread_ptr.asFunction<_dart_fread>();
+
+  int fwrite(
+    ffi.Pointer<ffi.Void> arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int32> arg3,
+  ) {
+    return _fwrite(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _fwrite_ptr = _lookup<ffi.NativeFunction<_c_fwrite>>('fwrite');
+  late final _dart_fwrite _fwrite = _fwrite_ptr.asFunction<_dart_fwrite>();
+
+  int strcasecmp(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _strcasecmp(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _strcasecmp_ptr =
+      _lookup<ffi.NativeFunction<_c_strcasecmp>>('strcasecmp');
+  late final _dart_strcasecmp _strcasecmp =
+      _strcasecmp_ptr.asFunction<_dart_strcasecmp>();
+
+  int strncasecmp(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+  ) {
+    return _strncasecmp(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _strncasecmp_ptr =
+      _lookup<ffi.NativeFunction<_c_strncasecmp>>('strncasecmp');
+  late final _dart_strncasecmp _strncasecmp =
+      _strncasecmp_ptr.asFunction<_dart_strncasecmp>();
+
+  ffi.Pointer<ffi.Int32> curl_easy_option_by_name(
+    ffi.Pointer<ffi.Int8> name,
+  ) {
+    return _curl_easy_option_by_name(
+      name,
+    );
+  }
+
+  late final _curl_easy_option_by_name_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_option_by_name>>(
+          'curl_easy_option_by_name');
+  late final _dart_curl_easy_option_by_name _curl_easy_option_by_name =
+      _curl_easy_option_by_name_ptr
+          .asFunction<_dart_curl_easy_option_by_name>();
+
+  ffi.Pointer<ffi.Int32> curl_easy_option_by_id(
+    int id,
+  ) {
+    return _curl_easy_option_by_id(
+      id,
+    );
+  }
+
+  late final _curl_easy_option_by_id_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_option_by_id>>(
+          'curl_easy_option_by_id');
+  late final _dart_curl_easy_option_by_id _curl_easy_option_by_id =
+      _curl_easy_option_by_id_ptr.asFunction<_dart_curl_easy_option_by_id>();
+
+  ffi.Pointer<ffi.Int32> curl_easy_option_next(
+    ffi.Pointer<curl_easyoption> prev,
+  ) {
+    return _curl_easy_option_next(
+      prev,
+    );
+  }
+
+  late final _curl_easy_option_next_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_option_next>>(
+          'curl_easy_option_next');
+  late final _dart_curl_easy_option_next _curl_easy_option_next =
+      _curl_easy_option_next_ptr.asFunction<_dart_curl_easy_option_next>();
+
+  int renameat(
+    int arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int8> arg3,
+  ) {
+    return _renameat(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _renameat_ptr =
+      _lookup<ffi.NativeFunction<_c_renameat>>('renameat');
+  late final _dart_renameat _renameat =
+      _renameat_ptr.asFunction<_dart_renameat>();
+
+  int renamex_np(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+  ) {
+    return _renamex_np(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _renamex_np_ptr =
+      _lookup<ffi.NativeFunction<_c_renamex_np>>('renamex_np');
+  late final _dart_renamex_np _renamex_np =
+      _renamex_np_ptr.asFunction<_dart_renamex_np>();
+
+  int renameatx_np(
+    int arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int8> arg3,
+    int arg4,
+  ) {
+    return _renameatx_np(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final _renameatx_np_ptr =
+      _lookup<ffi.NativeFunction<_c_renameatx_np>>('renameatx_np');
+  late final _dart_renameatx_np _renameatx_np =
+      _renameatx_np_ptr.asFunction<_dart_renameatx_np>();
+
+  late final ffi.Pointer<ffi.Pointer<FILE>> ___stdinp =
+      _lookup<ffi.Pointer<FILE>>('__stdinp');
+
+  ffi.Pointer<FILE> get __stdinp => ___stdinp.value;
+
+  set __stdinp(ffi.Pointer<FILE> value) => ___stdinp.value = value;
+
+  late final ffi.Pointer<ffi.Pointer<FILE>> ___stdoutp =
+      _lookup<ffi.Pointer<FILE>>('__stdoutp');
+
+  ffi.Pointer<FILE> get __stdoutp => ___stdoutp.value;
+
+  set __stdoutp(ffi.Pointer<FILE> value) => ___stdoutp.value = value;
+
+  late final ffi.Pointer<ffi.Pointer<FILE>> ___stderrp =
+      _lookup<ffi.Pointer<FILE>>('__stderrp');
+
+  ffi.Pointer<FILE> get __stderrp => ___stderrp.value;
+
+  set __stderrp(ffi.Pointer<FILE> value) => ___stderrp.value = value;
+
+  void clearerr(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _clearerr(
+      arg0,
+    );
+  }
+
+  late final _clearerr_ptr =
+      _lookup<ffi.NativeFunction<_c_clearerr>>('clearerr');
+  late final _dart_clearerr _clearerr =
+      _clearerr_ptr.asFunction<_dart_clearerr>();
+
+  int fclose(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _fclose(
+      arg0,
+    );
+  }
+
+  late final _fclose_ptr = _lookup<ffi.NativeFunction<_c_fclose>>('fclose');
+  late final _dart_fclose _fclose = _fclose_ptr.asFunction<_dart_fclose>();
+
+  int feof(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _feof(
+      arg0,
+    );
+  }
+
+  late final _feof_ptr = _lookup<ffi.NativeFunction<_c_feof>>('feof');
+  late final _dart_feof _feof = _feof_ptr.asFunction<_dart_feof>();
+
+  int ferror(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _ferror(
+      arg0,
+    );
+  }
+
+  late final _ferror_ptr = _lookup<ffi.NativeFunction<_c_ferror>>('ferror');
+  late final _dart_ferror _ferror = _ferror_ptr.asFunction<_dart_ferror>();
+
+  int fflush(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _fflush(
+      arg0,
+    );
+  }
+
+  late final _fflush_ptr = _lookup<ffi.NativeFunction<_c_fflush>>('fflush');
+  late final _dart_fflush _fflush = _fflush_ptr.asFunction<_dart_fflush>();
+
+  int fgetc(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _fgetc(
+      arg0,
+    );
+  }
+
+  late final _fgetc_ptr = _lookup<ffi.NativeFunction<_c_fgetc>>('fgetc');
+  late final _dart_fgetc _fgetc = _fgetc_ptr.asFunction<_dart_fgetc>();
+
+  int fgetpos(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int64> arg1,
+  ) {
+    return _fgetpos(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fgetpos_ptr = _lookup<ffi.NativeFunction<_c_fgetpos>>('fgetpos');
+  late final _dart_fgetpos _fgetpos = _fgetpos_ptr.asFunction<_dart_fgetpos>();
+
+  ffi.Pointer<ffi.Int8> fgets(
+    ffi.Pointer<ffi.Int8> arg0,
+    int arg1,
+    ffi.Pointer<FILE> arg2,
+  ) {
+    return _fgets(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _fgets_ptr = _lookup<ffi.NativeFunction<_c_fgets>>('fgets');
+  late final _dart_fgets _fgets = _fgets_ptr.asFunction<_dart_fgets>();
+
+  ffi.Pointer<FILE> fopen(
+    ffi.Pointer<ffi.Int8> __filename,
+    ffi.Pointer<ffi.Int8> __mode,
+  ) {
+    return _fopen(
+      __filename,
+      __mode,
+    );
+  }
+
+  late final _fopen_ptr = _lookup<ffi.NativeFunction<_c_fopen>>('fopen');
+  late final _dart_fopen _fopen = _fopen_ptr.asFunction<_dart_fopen>();
+
+  int fprintf(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _fprintf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fprintf_ptr = _lookup<ffi.NativeFunction<_c_fprintf>>('fprintf');
+  late final _dart_fprintf _fprintf = _fprintf_ptr.asFunction<_dart_fprintf>();
+
+  int fputc(
+    int arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return _fputc(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fputc_ptr = _lookup<ffi.NativeFunction<_c_fputc>>('fputc');
+  late final _dart_fputc _fputc = _fputc_ptr.asFunction<_dart_fputc>();
+
+  int fputs(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return _fputs(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fputs_ptr = _lookup<ffi.NativeFunction<_c_fputs>>('fputs');
+  late final _dart_fputs _fputs = _fputs_ptr.asFunction<_dart_fputs>();
+
+  ffi.Pointer<FILE> freopen(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<FILE> arg2,
+  ) {
+    return _freopen(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _freopen_ptr = _lookup<ffi.NativeFunction<_c_freopen>>('freopen');
+  late final _dart_freopen _freopen = _freopen_ptr.asFunction<_dart_freopen>();
+
+  int fscanf(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _fscanf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fscanf_ptr = _lookup<ffi.NativeFunction<_c_fscanf>>('fscanf');
+  late final _dart_fscanf _fscanf = _fscanf_ptr.asFunction<_dart_fscanf>();
+
+  int fseek(
+    ffi.Pointer<FILE> arg0,
+    int arg1,
+    int arg2,
+  ) {
+    return _fseek(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _fseek_ptr = _lookup<ffi.NativeFunction<_c_fseek>>('fseek');
+  late final _dart_fseek _fseek = _fseek_ptr.asFunction<_dart_fseek>();
+
+  int fsetpos(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int64> arg1,
+  ) {
+    return _fsetpos(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fsetpos_ptr = _lookup<ffi.NativeFunction<_c_fsetpos>>('fsetpos');
+  late final _dart_fsetpos _fsetpos = _fsetpos_ptr.asFunction<_dart_fsetpos>();
+
+  int ftell(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _ftell(
+      arg0,
+    );
+  }
+
+  late final _ftell_ptr = _lookup<ffi.NativeFunction<_c_ftell>>('ftell');
+  late final _dart_ftell _ftell = _ftell_ptr.asFunction<_dart_ftell>();
+
+  int getc(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _getc(
+      arg0,
+    );
+  }
+
+  late final _getc_ptr = _lookup<ffi.NativeFunction<_c_getc>>('getc');
+  late final _dart_getc _getc = _getc_ptr.asFunction<_dart_getc>();
+
+  int getchar() {
+    return _getchar();
+  }
+
+  late final _getchar_ptr = _lookup<ffi.NativeFunction<_c_getchar>>('getchar');
+  late final _dart_getchar _getchar = _getchar_ptr.asFunction<_dart_getchar>();
+
+  ffi.Pointer<ffi.Int8> gets(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _gets(
+      arg0,
+    );
+  }
+
+  late final _gets_ptr = _lookup<ffi.NativeFunction<_c_gets>>('gets');
+  late final _dart_gets _gets = _gets_ptr.asFunction<_dart_gets>();
+
+  void perror(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _perror(
+      arg0,
+    );
+  }
+
+  late final _perror_ptr = _lookup<ffi.NativeFunction<_c_perror>>('perror');
+  late final _dart_perror _perror = _perror_ptr.asFunction<_dart_perror>();
+
+  int printf(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _printf(
+      arg0,
+    );
+  }
+
+  late final _printf_ptr = _lookup<ffi.NativeFunction<_c_printf>>('printf');
+  late final _dart_printf _printf = _printf_ptr.asFunction<_dart_printf>();
+
+  int putc(
+    int arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return _putc(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _putc_ptr = _lookup<ffi.NativeFunction<_c_putc>>('putc');
+  late final _dart_putc _putc = _putc_ptr.asFunction<_dart_putc>();
+
+  int putchar(
+    int arg0,
+  ) {
+    return _putchar(
+      arg0,
+    );
+  }
+
+  late final _putchar_ptr = _lookup<ffi.NativeFunction<_c_putchar>>('putchar');
+  late final _dart_putchar _putchar = _putchar_ptr.asFunction<_dart_putchar>();
+
+  int puts(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _puts(
+      arg0,
+    );
+  }
+
+  late final _puts_ptr = _lookup<ffi.NativeFunction<_c_puts>>('puts');
+  late final _dart_puts _puts = _puts_ptr.asFunction<_dart_puts>();
+
+  int remove(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _remove(
+      arg0,
+    );
+  }
+
+  late final _remove_ptr = _lookup<ffi.NativeFunction<_c_remove>>('remove');
+  late final _dart_remove _remove = _remove_ptr.asFunction<_dart_remove>();
+
+  int rename(
+    ffi.Pointer<ffi.Int8> __old,
+    ffi.Pointer<ffi.Int8> __new,
+  ) {
+    return _rename(
+      __old,
+      __new,
+    );
+  }
+
+  late final _rename_ptr = _lookup<ffi.NativeFunction<_c_rename>>('rename');
+  late final _dart_rename _rename = _rename_ptr.asFunction<_dart_rename>();
+
+  void rewind(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _rewind(
+      arg0,
+    );
+  }
+
+  late final _rewind_ptr = _lookup<ffi.NativeFunction<_c_rewind>>('rewind');
+  late final _dart_rewind _rewind = _rewind_ptr.asFunction<_dart_rewind>();
+
+  int scanf(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _scanf(
+      arg0,
+    );
+  }
+
+  late final _scanf_ptr = _lookup<ffi.NativeFunction<_c_scanf>>('scanf');
+  late final _dart_scanf _scanf = _scanf_ptr.asFunction<_dart_scanf>();
+
+  void setbuf(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _setbuf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _setbuf_ptr = _lookup<ffi.NativeFunction<_c_setbuf>>('setbuf');
+  late final _dart_setbuf _setbuf = _setbuf_ptr.asFunction<_dart_setbuf>();
+
+  int setvbuf(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+    int arg3,
+  ) {
+    return _setvbuf(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _setvbuf_ptr = _lookup<ffi.NativeFunction<_c_setvbuf>>('setvbuf');
+  late final _dart_setvbuf _setvbuf = _setvbuf_ptr.asFunction<_dart_setvbuf>();
+
+  int sprintf(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _sprintf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _sprintf_ptr = _lookup<ffi.NativeFunction<_c_sprintf>>('sprintf');
+  late final _dart_sprintf _sprintf = _sprintf_ptr.asFunction<_dart_sprintf>();
+
+  int sscanf(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _sscanf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _sscanf_ptr = _lookup<ffi.NativeFunction<_c_sscanf>>('sscanf');
+  late final _dart_sscanf _sscanf = _sscanf_ptr.asFunction<_dart_sscanf>();
+
+  ffi.Pointer<FILE> tmpfile() {
+    return _tmpfile();
+  }
+
+  late final _tmpfile_ptr = _lookup<ffi.NativeFunction<_c_tmpfile>>('tmpfile');
+  late final _dart_tmpfile _tmpfile = _tmpfile_ptr.asFunction<_dart_tmpfile>();
+
+  ffi.Pointer<ffi.Int8> tmpnam(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _tmpnam(
+      arg0,
+    );
+  }
+
+  late final _tmpnam_ptr = _lookup<ffi.NativeFunction<_c_tmpnam>>('tmpnam');
+  late final _dart_tmpnam _tmpnam = _tmpnam_ptr.asFunction<_dart_tmpnam>();
+
+  int ungetc(
+    int arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return _ungetc(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _ungetc_ptr = _lookup<ffi.NativeFunction<_c_ungetc>>('ungetc');
+  late final _dart_ungetc _ungetc = _ungetc_ptr.asFunction<_dart_ungetc>();
+
+  int vfprintf(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return _vfprintf(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _vfprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_vfprintf>>('vfprintf');
+  late final _dart_vfprintf _vfprintf =
+      _vfprintf_ptr.asFunction<_dart_vfprintf>();
+
+  int vprintf(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<__va_list_tag> arg1,
+  ) {
+    return _vprintf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _vprintf_ptr = _lookup<ffi.NativeFunction<_c_vprintf>>('vprintf');
+  late final _dart_vprintf _vprintf = _vprintf_ptr.asFunction<_dart_vprintf>();
+
+  int vsprintf(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return _vsprintf(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _vsprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_vsprintf>>('vsprintf');
+  late final _dart_vsprintf _vsprintf =
+      _vsprintf_ptr.asFunction<_dart_vsprintf>();
+
+  ffi.Pointer<ffi.Int8> ctermid(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _ctermid(
+      arg0,
+    );
+  }
+
+  late final _ctermid_ptr = _lookup<ffi.NativeFunction<_c_ctermid>>('ctermid');
+  late final _dart_ctermid _ctermid = _ctermid_ptr.asFunction<_dart_ctermid>();
+
+  ffi.Pointer<FILE> fdopen(
+    int arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _fdopen(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fdopen_ptr = _lookup<ffi.NativeFunction<_c_fdopen>>('fdopen');
+  late final _dart_fdopen _fdopen = _fdopen_ptr.asFunction<_dart_fdopen>();
+
+  int fileno(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _fileno(
+      arg0,
+    );
+  }
+
+  late final _fileno_ptr = _lookup<ffi.NativeFunction<_c_fileno>>('fileno');
+  late final _dart_fileno _fileno = _fileno_ptr.asFunction<_dart_fileno>();
+
+  int pclose(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _pclose(
+      arg0,
+    );
+  }
+
+  late final _pclose_ptr = _lookup<ffi.NativeFunction<_c_pclose>>('pclose');
+  late final _dart_pclose _pclose = _pclose_ptr.asFunction<_dart_pclose>();
+
+  ffi.Pointer<FILE> popen(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _popen(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _popen_ptr = _lookup<ffi.NativeFunction<_c_popen>>('popen');
+  late final _dart_popen _popen = _popen_ptr.asFunction<_dart_popen>();
+
+  int __srget(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return ___srget(
+      arg0,
+    );
+  }
+
+  late final ___srget_ptr = _lookup<ffi.NativeFunction<_c___srget>>('__srget');
+  late final _dart___srget ___srget = ___srget_ptr.asFunction<_dart___srget>();
+
+  int __svfscanf(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return ___svfscanf(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final ___svfscanf_ptr =
+      _lookup<ffi.NativeFunction<_c___svfscanf>>('__svfscanf');
+  late final _dart___svfscanf ___svfscanf =
+      ___svfscanf_ptr.asFunction<_dart___svfscanf>();
+
+  int __swbuf(
+    int arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return ___swbuf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final ___swbuf_ptr = _lookup<ffi.NativeFunction<_c___swbuf>>('__swbuf');
+  late final _dart___swbuf ___swbuf = ___swbuf_ptr.asFunction<_dart___swbuf>();
+
+  void flockfile(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _flockfile(
+      arg0,
+    );
+  }
+
+  late final _flockfile_ptr =
+      _lookup<ffi.NativeFunction<_c_flockfile>>('flockfile');
+  late final _dart_flockfile _flockfile =
+      _flockfile_ptr.asFunction<_dart_flockfile>();
+
+  int ftrylockfile(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _ftrylockfile(
+      arg0,
+    );
+  }
+
+  late final _ftrylockfile_ptr =
+      _lookup<ffi.NativeFunction<_c_ftrylockfile>>('ftrylockfile');
+  late final _dart_ftrylockfile _ftrylockfile =
+      _ftrylockfile_ptr.asFunction<_dart_ftrylockfile>();
+
+  void funlockfile(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _funlockfile(
+      arg0,
+    );
+  }
+
+  late final _funlockfile_ptr =
+      _lookup<ffi.NativeFunction<_c_funlockfile>>('funlockfile');
+  late final _dart_funlockfile _funlockfile =
+      _funlockfile_ptr.asFunction<_dart_funlockfile>();
+
+  int getc_unlocked(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _getc_unlocked(
+      arg0,
+    );
+  }
+
+  late final _getc_unlocked_ptr =
+      _lookup<ffi.NativeFunction<_c_getc_unlocked>>('getc_unlocked');
+  late final _dart_getc_unlocked _getc_unlocked =
+      _getc_unlocked_ptr.asFunction<_dart_getc_unlocked>();
+
+  int getchar_unlocked() {
+    return _getchar_unlocked();
+  }
+
+  late final _getchar_unlocked_ptr =
+      _lookup<ffi.NativeFunction<_c_getchar_unlocked>>('getchar_unlocked');
+  late final _dart_getchar_unlocked _getchar_unlocked =
+      _getchar_unlocked_ptr.asFunction<_dart_getchar_unlocked>();
+
+  int putc_unlocked(
+    int arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return _putc_unlocked(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _putc_unlocked_ptr =
+      _lookup<ffi.NativeFunction<_c_putc_unlocked>>('putc_unlocked');
+  late final _dart_putc_unlocked _putc_unlocked =
+      _putc_unlocked_ptr.asFunction<_dart_putc_unlocked>();
+
+  int putchar_unlocked(
+    int arg0,
+  ) {
+    return _putchar_unlocked(
+      arg0,
+    );
+  }
+
+  late final _putchar_unlocked_ptr =
+      _lookup<ffi.NativeFunction<_c_putchar_unlocked>>('putchar_unlocked');
+  late final _dart_putchar_unlocked _putchar_unlocked =
+      _putchar_unlocked_ptr.asFunction<_dart_putchar_unlocked>();
+
+  int getw(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _getw(
+      arg0,
+    );
+  }
+
+  late final _getw_ptr = _lookup<ffi.NativeFunction<_c_getw>>('getw');
+  late final _dart_getw _getw = _getw_ptr.asFunction<_dart_getw>();
+
+  int putw(
+    int arg0,
+    ffi.Pointer<FILE> arg1,
+  ) {
+    return _putw(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _putw_ptr = _lookup<ffi.NativeFunction<_c_putw>>('putw');
+  late final _dart_putw _putw = _putw_ptr.asFunction<_dart_putw>();
+
+  ffi.Pointer<ffi.Int8> tempnam(
+    ffi.Pointer<ffi.Int8> __dir,
+    ffi.Pointer<ffi.Int8> __prefix,
+  ) {
+    return _tempnam(
+      __dir,
+      __prefix,
+    );
+  }
+
+  late final _tempnam_ptr = _lookup<ffi.NativeFunction<_c_tempnam>>('tempnam');
+  late final _dart_tempnam _tempnam = _tempnam_ptr.asFunction<_dart_tempnam>();
+
+  int fseeko(
+    ffi.Pointer<FILE> __stream,
+    int __offset,
+    int __whence,
+  ) {
+    return _fseeko(
+      __stream,
+      __offset,
+      __whence,
+    );
+  }
+
+  late final _fseeko_ptr = _lookup<ffi.NativeFunction<_c_fseeko>>('fseeko');
+  late final _dart_fseeko _fseeko = _fseeko_ptr.asFunction<_dart_fseeko>();
+
+  int ftello(
+    ffi.Pointer<FILE> __stream,
+  ) {
+    return _ftello(
+      __stream,
+    );
+  }
+
+  late final _ftello_ptr = _lookup<ffi.NativeFunction<_c_ftello>>('ftello');
+  late final _dart_ftello _ftello = _ftello_ptr.asFunction<_dart_ftello>();
+
+  int snprintf(
+    ffi.Pointer<ffi.Int8> __str,
+    int __size,
+    ffi.Pointer<ffi.Int8> __format,
+  ) {
+    return _snprintf(
+      __str,
+      __size,
+      __format,
+    );
+  }
+
+  late final _snprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_snprintf>>('snprintf');
+  late final _dart_snprintf _snprintf =
+      _snprintf_ptr.asFunction<_dart_snprintf>();
+
+  int vfscanf(
+    ffi.Pointer<FILE> __stream,
+    ffi.Pointer<ffi.Int8> __format,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return _vfscanf(
+      __stream,
+      __format,
+      arg2,
+    );
+  }
+
+  late final _vfscanf_ptr = _lookup<ffi.NativeFunction<_c_vfscanf>>('vfscanf');
+  late final _dart_vfscanf _vfscanf = _vfscanf_ptr.asFunction<_dart_vfscanf>();
+
+  int vscanf(
+    ffi.Pointer<ffi.Int8> __format,
+    ffi.Pointer<__va_list_tag> arg1,
+  ) {
+    return _vscanf(
+      __format,
+      arg1,
+    );
+  }
+
+  late final _vscanf_ptr = _lookup<ffi.NativeFunction<_c_vscanf>>('vscanf');
+  late final _dart_vscanf _vscanf = _vscanf_ptr.asFunction<_dart_vscanf>();
+
+  int vsnprintf(
+    ffi.Pointer<ffi.Int8> __str,
+    int __size,
+    ffi.Pointer<ffi.Int8> __format,
+    ffi.Pointer<__va_list_tag> arg3,
+  ) {
+    return _vsnprintf(
+      __str,
+      __size,
+      __format,
+      arg3,
+    );
+  }
+
+  late final _vsnprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_vsnprintf>>('vsnprintf');
+  late final _dart_vsnprintf _vsnprintf =
+      _vsnprintf_ptr.asFunction<_dart_vsnprintf>();
+
+  int vsscanf(
+    ffi.Pointer<ffi.Int8> __str,
+    ffi.Pointer<ffi.Int8> __format,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return _vsscanf(
+      __str,
+      __format,
+      arg2,
+    );
+  }
+
+  late final _vsscanf_ptr = _lookup<ffi.NativeFunction<_c_vsscanf>>('vsscanf');
+  late final _dart_vsscanf _vsscanf = _vsscanf_ptr.asFunction<_dart_vsscanf>();
+
+  int dprintf(
+    int arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _dprintf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _dprintf_ptr = _lookup<ffi.NativeFunction<_c_dprintf>>('dprintf');
+  late final _dart_dprintf _dprintf = _dprintf_ptr.asFunction<_dart_dprintf>();
+
+  int vdprintf(
+    int arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return _vdprintf(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _vdprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_vdprintf>>('vdprintf');
+  late final _dart_vdprintf _vdprintf =
+      _vdprintf_ptr.asFunction<_dart_vdprintf>();
+
+  int getdelim(
+    ffi.Pointer<ffi.Pointer<ffi.Int8>> __linep,
+    ffi.Pointer<ffi.Uint64> __linecapp,
+    int __delimiter,
+    ffi.Pointer<FILE> __stream,
+  ) {
+    return _getdelim(
+      __linep,
+      __linecapp,
+      __delimiter,
+      __stream,
+    );
+  }
+
+  late final _getdelim_ptr =
+      _lookup<ffi.NativeFunction<_c_getdelim>>('getdelim');
+  late final _dart_getdelim _getdelim =
+      _getdelim_ptr.asFunction<_dart_getdelim>();
+
+  int getline(
+    ffi.Pointer<ffi.Pointer<ffi.Int8>> __linep,
+    ffi.Pointer<ffi.Uint64> __linecapp,
+    ffi.Pointer<FILE> __stream,
+  ) {
+    return _getline(
+      __linep,
+      __linecapp,
+      __stream,
+    );
+  }
+
+  late final _getline_ptr = _lookup<ffi.NativeFunction<_c_getline>>('getline');
+  late final _dart_getline _getline = _getline_ptr.asFunction<_dart_getline>();
+
+  ffi.Pointer<FILE> fmemopen(
+    ffi.Pointer<ffi.Void> __buf,
+    int __size,
+    ffi.Pointer<ffi.Int8> __mode,
+  ) {
+    return _fmemopen(
+      __buf,
+      __size,
+      __mode,
+    );
+  }
+
+  late final _fmemopen_ptr =
+      _lookup<ffi.NativeFunction<_c_fmemopen>>('fmemopen');
+  late final _dart_fmemopen _fmemopen =
+      _fmemopen_ptr.asFunction<_dart_fmemopen>();
+
+  ffi.Pointer<FILE> open_memstream(
+    ffi.Pointer<ffi.Pointer<ffi.Int8>> __bufp,
+    ffi.Pointer<ffi.Uint64> __sizep,
+  ) {
+    return _open_memstream(
+      __bufp,
+      __sizep,
+    );
+  }
+
+  late final _open_memstream_ptr =
+      _lookup<ffi.NativeFunction<_c_open_memstream>>('open_memstream');
+  late final _dart_open_memstream _open_memstream =
+      _open_memstream_ptr.asFunction<_dart_open_memstream>();
+
+  late final ffi.Pointer<ffi.Int32> _sys_nerr = _lookup<ffi.Int32>('sys_nerr');
+
+  int get sys_nerr => _sys_nerr.value;
+
+  set sys_nerr(int value) => _sys_nerr.value = value;
+
+  late final ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Int8>>> _sys_errlist =
+      _lookup<ffi.Pointer<ffi.Pointer<ffi.Int8>>>('sys_errlist');
+
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> get sys_errlist => _sys_errlist.value;
+
+  set sys_errlist(ffi.Pointer<ffi.Pointer<ffi.Int8>> value) =>
+      _sys_errlist.value = value;
+
+  int asprintf(
+    ffi.Pointer<ffi.Pointer<ffi.Int8>> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _asprintf(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _asprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_asprintf>>('asprintf');
+  late final _dart_asprintf _asprintf =
+      _asprintf_ptr.asFunction<_dart_asprintf>();
+
+  ffi.Pointer<ffi.Int8> ctermid_r(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _ctermid_r(
+      arg0,
+    );
+  }
+
+  late final _ctermid_r_ptr =
+      _lookup<ffi.NativeFunction<_c_ctermid_r>>('ctermid_r');
+  late final _dart_ctermid_r _ctermid_r =
+      _ctermid_r_ptr.asFunction<_dart_ctermid_r>();
+
+  ffi.Pointer<ffi.Int8> fgetln(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Uint64> arg1,
+  ) {
+    return _fgetln(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fgetln_ptr = _lookup<ffi.NativeFunction<_c_fgetln>>('fgetln');
+  late final _dart_fgetln _fgetln = _fgetln_ptr.asFunction<_dart_fgetln>();
+
+  ffi.Pointer<ffi.Int8> fmtcheck(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _fmtcheck(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _fmtcheck_ptr =
+      _lookup<ffi.NativeFunction<_c_fmtcheck>>('fmtcheck');
+  late final _dart_fmtcheck _fmtcheck =
+      _fmtcheck_ptr.asFunction<_dart_fmtcheck>();
+
+  int fpurge(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _fpurge(
+      arg0,
+    );
+  }
+
+  late final _fpurge_ptr = _lookup<ffi.NativeFunction<_c_fpurge>>('fpurge');
+  late final _dart_fpurge _fpurge = _fpurge_ptr.asFunction<_dart_fpurge>();
+
+  void setbuffer(
+    ffi.Pointer<FILE> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+  ) {
+    return _setbuffer(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _setbuffer_ptr =
+      _lookup<ffi.NativeFunction<_c_setbuffer>>('setbuffer');
+  late final _dart_setbuffer _setbuffer =
+      _setbuffer_ptr.asFunction<_dart_setbuffer>();
+
+  int setlinebuf(
+    ffi.Pointer<FILE> arg0,
+  ) {
+    return _setlinebuf(
+      arg0,
+    );
+  }
+
+  late final _setlinebuf_ptr =
+      _lookup<ffi.NativeFunction<_c_setlinebuf>>('setlinebuf');
+  late final _dart_setlinebuf _setlinebuf =
+      _setlinebuf_ptr.asFunction<_dart_setlinebuf>();
+
+  int vasprintf(
+    ffi.Pointer<ffi.Pointer<ffi.Int8>> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<__va_list_tag> arg2,
+  ) {
+    return _vasprintf(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _vasprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_vasprintf>>('vasprintf');
+  late final _dart_vasprintf _vasprintf =
+      _vasprintf_ptr.asFunction<_dart_vasprintf>();
+
+  ffi.Pointer<FILE> zopen(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    int arg2,
+  ) {
+    return _zopen(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _zopen_ptr = _lookup<ffi.NativeFunction<_c_zopen>>('zopen');
+  late final _dart_zopen _zopen = _zopen_ptr.asFunction<_dart_zopen>();
+
+  ffi.Pointer<FILE> funopen(
+    ffi.Pointer<ffi.Void> arg0,
+    ffi.Pointer<ffi.NativeFunction<_typedefC_6>> arg1,
+    ffi.Pointer<ffi.NativeFunction<_typedefC_7>> arg2,
+    ffi.Pointer<ffi.NativeFunction<_typedefC_8>> arg3,
+    ffi.Pointer<ffi.NativeFunction<_typedefC_9>> arg4,
+  ) {
+    return _funopen(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final _funopen_ptr = _lookup<ffi.NativeFunction<_c_funopen>>('funopen');
+  late final _dart_funopen _funopen = _funopen_ptr.asFunction<_dart_funopen>();
+
+  int __sprintf_chk(
+    ffi.Pointer<ffi.Int8> arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int8> arg3,
+  ) {
+    return ___sprintf_chk(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final ___sprintf_chk_ptr =
+      _lookup<ffi.NativeFunction<_c___sprintf_chk>>('__sprintf_chk');
+  late final _dart___sprintf_chk ___sprintf_chk =
+      ___sprintf_chk_ptr.asFunction<_dart___sprintf_chk>();
+
+  int __snprintf_chk(
+    ffi.Pointer<ffi.Int8> arg0,
+    int arg1,
+    int arg2,
+    int arg3,
+    ffi.Pointer<ffi.Int8> arg4,
+  ) {
+    return ___snprintf_chk(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final ___snprintf_chk_ptr =
+      _lookup<ffi.NativeFunction<_c___snprintf_chk>>('__snprintf_chk');
+  late final _dart___snprintf_chk ___snprintf_chk =
+      ___snprintf_chk_ptr.asFunction<_dart___snprintf_chk>();
+
+  int __vsprintf_chk(
+    ffi.Pointer<ffi.Int8> arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int8> arg3,
+    ffi.Pointer<__va_list_tag> arg4,
+  ) {
+    return ___vsprintf_chk(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final ___vsprintf_chk_ptr =
+      _lookup<ffi.NativeFunction<_c___vsprintf_chk>>('__vsprintf_chk');
+  late final _dart___vsprintf_chk ___vsprintf_chk =
+      ___vsprintf_chk_ptr.asFunction<_dart___vsprintf_chk>();
+
+  int __vsnprintf_chk(
+    ffi.Pointer<ffi.Int8> arg0,
+    int arg1,
+    int arg2,
+    int arg3,
+    ffi.Pointer<ffi.Int8> arg4,
+    ffi.Pointer<__va_list_tag> arg5,
+  ) {
+    return ___vsnprintf_chk(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+    );
+  }
+
+  late final ___vsnprintf_chk_ptr =
+      _lookup<ffi.NativeFunction<_c___vsnprintf_chk>>('__vsnprintf_chk');
+  late final _dart___vsnprintf_chk ___vsnprintf_chk =
+      ___vsnprintf_chk_ptr.asFunction<_dart___vsnprintf_chk>();
+
+  int accept(
+    int arg0,
+    ffi.Pointer<sockaddr> arg1,
+    ffi.Pointer<ffi.Uint32> arg2,
+  ) {
+    return _accept(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _accept_ptr = _lookup<ffi.NativeFunction<_c_accept>>('accept');
+  late final _dart_accept _accept = _accept_ptr.asFunction<_dart_accept>();
+
+  int bind(
+    int arg0,
+    ffi.Pointer<sockaddr> arg1,
+    int arg2,
+  ) {
+    return _bind(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _bind_ptr = _lookup<ffi.NativeFunction<_c_bind>>('bind');
+  late final _dart_bind _bind = _bind_ptr.asFunction<_dart_bind>();
+
+  int connect(
+    int arg0,
+    ffi.Pointer<sockaddr> arg1,
+    int arg2,
+  ) {
+    return _connect(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _connect_ptr = _lookup<ffi.NativeFunction<_c_connect>>('connect');
+  late final _dart_connect _connect = _connect_ptr.asFunction<_dart_connect>();
+
+  int getpeername(
+    int arg0,
+    ffi.Pointer<sockaddr> arg1,
+    ffi.Pointer<ffi.Uint32> arg2,
+  ) {
+    return _getpeername(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _getpeername_ptr =
+      _lookup<ffi.NativeFunction<_c_getpeername>>('getpeername');
+  late final _dart_getpeername _getpeername =
+      _getpeername_ptr.asFunction<_dart_getpeername>();
+
+  int getsockname(
+    int arg0,
+    ffi.Pointer<sockaddr> arg1,
+    ffi.Pointer<ffi.Uint32> arg2,
+  ) {
+    return _getsockname(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _getsockname_ptr =
+      _lookup<ffi.NativeFunction<_c_getsockname>>('getsockname');
+  late final _dart_getsockname _getsockname =
+      _getsockname_ptr.asFunction<_dart_getsockname>();
+
+  int getsockopt(
+    int arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Void> arg3,
+    ffi.Pointer<ffi.Uint32> arg4,
+  ) {
+    return _getsockopt(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final _getsockopt_ptr =
+      _lookup<ffi.NativeFunction<_c_getsockopt>>('getsockopt');
+  late final _dart_getsockopt _getsockopt =
+      _getsockopt_ptr.asFunction<_dart_getsockopt>();
+
+  int listen(
+    int arg0,
+    int arg1,
+  ) {
+    return _listen(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _listen_ptr = _lookup<ffi.NativeFunction<_c_listen>>('listen');
+  late final _dart_listen _listen = _listen_ptr.asFunction<_dart_listen>();
+
+  int recv(
+    int arg0,
+    ffi.Pointer<ffi.Void> arg1,
+    int arg2,
+    int arg3,
+  ) {
+    return _recv(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _recv_ptr = _lookup<ffi.NativeFunction<_c_recv>>('recv');
+  late final _dart_recv _recv = _recv_ptr.asFunction<_dart_recv>();
+
+  int recvfrom(
+    int arg0,
+    ffi.Pointer<ffi.Void> arg1,
+    int arg2,
+    int arg3,
+    ffi.Pointer<sockaddr> arg4,
+    ffi.Pointer<ffi.Uint32> arg5,
+  ) {
+    return _recvfrom(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+    );
+  }
+
+  late final _recvfrom_ptr =
+      _lookup<ffi.NativeFunction<_c_recvfrom>>('recvfrom');
+  late final _dart_recvfrom _recvfrom =
+      _recvfrom_ptr.asFunction<_dart_recvfrom>();
+
+  int recvmsg(
+    int arg0,
+    ffi.Pointer<msghdr> arg1,
+    int arg2,
+  ) {
+    return _recvmsg(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _recvmsg_ptr = _lookup<ffi.NativeFunction<_c_recvmsg>>('recvmsg');
+  late final _dart_recvmsg _recvmsg = _recvmsg_ptr.asFunction<_dart_recvmsg>();
+
+  int send(
+    int arg0,
+    ffi.Pointer<ffi.Void> arg1,
+    int arg2,
+    int arg3,
+  ) {
+    return _send(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _send_ptr = _lookup<ffi.NativeFunction<_c_send>>('send');
+  late final _dart_send _send = _send_ptr.asFunction<_dart_send>();
+
+  int sendmsg(
+    int arg0,
+    ffi.Pointer<msghdr> arg1,
+    int arg2,
+  ) {
+    return _sendmsg(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _sendmsg_ptr = _lookup<ffi.NativeFunction<_c_sendmsg>>('sendmsg');
+  late final _dart_sendmsg _sendmsg = _sendmsg_ptr.asFunction<_dart_sendmsg>();
+
+  int sendto(
+    int arg0,
+    ffi.Pointer<ffi.Void> arg1,
+    int arg2,
+    int arg3,
+    ffi.Pointer<sockaddr> arg4,
+    int arg5,
+  ) {
+    return _sendto(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+    );
+  }
+
+  late final _sendto_ptr = _lookup<ffi.NativeFunction<_c_sendto>>('sendto');
+  late final _dart_sendto _sendto = _sendto_ptr.asFunction<_dart_sendto>();
+
+  int setsockopt(
+    int arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Void> arg3,
+    int arg4,
+  ) {
+    return _setsockopt(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final _setsockopt_ptr =
+      _lookup<ffi.NativeFunction<_c_setsockopt>>('setsockopt');
+  late final _dart_setsockopt _setsockopt =
+      _setsockopt_ptr.asFunction<_dart_setsockopt>();
+
+  int shutdown(
+    int arg0,
+    int arg1,
+  ) {
+    return _shutdown(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _shutdown_ptr =
+      _lookup<ffi.NativeFunction<_c_shutdown>>('shutdown');
+  late final _dart_shutdown _shutdown =
+      _shutdown_ptr.asFunction<_dart_shutdown>();
+
+  int sockatmark(
+    int arg0,
+  ) {
+    return _sockatmark(
+      arg0,
+    );
+  }
+
+  late final _sockatmark_ptr =
+      _lookup<ffi.NativeFunction<_c_sockatmark>>('sockatmark');
+  late final _dart_sockatmark _sockatmark =
+      _sockatmark_ptr.asFunction<_dart_sockatmark>();
+
+  int socket(
+    int arg0,
+    int arg1,
+    int arg2,
+  ) {
+    return _socket(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _socket_ptr = _lookup<ffi.NativeFunction<_c_socket>>('socket');
+  late final _dart_socket _socket = _socket_ptr.asFunction<_dart_socket>();
+
+  int socketpair(
+    int arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int32> arg3,
+  ) {
+    return _socketpair(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _socketpair_ptr =
+      _lookup<ffi.NativeFunction<_c_socketpair>>('socketpair');
+  late final _dart_socketpair _socketpair =
+      _socketpair_ptr.asFunction<_dart_socketpair>();
+
+  int sendfile(
+    int arg0,
+    int arg1,
+    int arg2,
+    ffi.Pointer<ffi.Int64> arg3,
+    ffi.Pointer<sf_hdtr> arg4,
+    int arg5,
+  ) {
+    return _sendfile(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+    );
+  }
+
+  late final _sendfile_ptr =
+      _lookup<ffi.NativeFunction<_c_sendfile>>('sendfile');
+  late final _dart_sendfile _sendfile =
+      _sendfile_ptr.asFunction<_dart_sendfile>();
+
+  void pfctlinput(
+    int arg0,
+    ffi.Pointer<sockaddr> arg1,
+  ) {
+    return _pfctlinput(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _pfctlinput_ptr =
+      _lookup<ffi.NativeFunction<_c_pfctlinput>>('pfctlinput');
+  late final _dart_pfctlinput _pfctlinput =
+      _pfctlinput_ptr.asFunction<_dart_pfctlinput>();
+
+  int connectx(
+    int arg0,
+    ffi.Pointer<sa_endpoints_t> arg1,
+    int arg2,
+    int arg3,
+    ffi.Pointer<iovec> arg4,
+    int arg5,
+    ffi.Pointer<ffi.Uint64> arg6,
+    ffi.Pointer<ffi.Uint32> arg7,
+  ) {
+    return _connectx(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+      arg5,
+      arg6,
+      arg7,
+    );
+  }
+
+  late final _connectx_ptr =
+      _lookup<ffi.NativeFunction<_c_connectx>>('connectx');
+  late final _dart_connectx _connectx =
+      _connectx_ptr.asFunction<_dart_connectx>();
+
+  int disconnectx(
+    int arg0,
+    int arg1,
+    int arg2,
+  ) {
+    return _disconnectx(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _disconnectx_ptr =
+      _lookup<ffi.NativeFunction<_c_disconnectx>>('disconnectx');
+  late final _dart_disconnectx _disconnectx =
+      _disconnectx_ptr.asFunction<_dart_disconnectx>();
+
+  late final ffi.Pointer<ffi.Pointer<ffi.Pointer<ffi.Int8>>> _tzname =
+      _lookup<ffi.Pointer<ffi.Pointer<ffi.Int8>>>('tzname');
+
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> get tzname => _tzname.value;
+
+  set tzname(ffi.Pointer<ffi.Pointer<ffi.Int8>> value) => _tzname.value = value;
+
+  late final ffi.Pointer<ffi.Int32> _getdate_err =
+      _lookup<ffi.Int32>('getdate_err');
+
+  int get getdate_err => _getdate_err.value;
+
+  set getdate_err(int value) => _getdate_err.value = value;
+
+  late final ffi.Pointer<ffi.Int64> _timezone = _lookup<ffi.Int64>('timezone');
+
+  int get timezone => _timezone.value;
+
+  set timezone(int value) => _timezone.value = value;
+
+  late final ffi.Pointer<ffi.Int32> _daylight = _lookup<ffi.Int32>('daylight');
+
+  int get daylight => _daylight.value;
+
+  set daylight(int value) => _daylight.value = value;
+
+  ffi.Pointer<ffi.Int8> asctime(
+    ffi.Pointer<tm> arg0,
+  ) {
+    return _asctime(
+      arg0,
+    );
+  }
+
+  late final _asctime_ptr = _lookup<ffi.NativeFunction<_c_asctime>>('asctime');
+  late final _dart_asctime _asctime = _asctime_ptr.asFunction<_dart_asctime>();
+
+  int clock() {
+    return _clock();
+  }
+
+  late final _clock_ptr = _lookup<ffi.NativeFunction<_c_clock>>('clock');
+  late final _dart_clock _clock = _clock_ptr.asFunction<_dart_clock>();
+
+  ffi.Pointer<ffi.Int8> ctime(
+    ffi.Pointer<ffi.Int64> arg0,
+  ) {
+    return _ctime(
+      arg0,
+    );
+  }
+
+  late final _ctime_ptr = _lookup<ffi.NativeFunction<_c_ctime>>('ctime');
+  late final _dart_ctime _ctime = _ctime_ptr.asFunction<_dart_ctime>();
+
+  double difftime(
+    int arg0,
+    int arg1,
+  ) {
+    return _difftime(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _difftime_ptr =
+      _lookup<ffi.NativeFunction<_c_difftime>>('difftime');
+  late final _dart_difftime _difftime =
+      _difftime_ptr.asFunction<_dart_difftime>();
+
+  ffi.Pointer<tm> getdate(
+    ffi.Pointer<ffi.Int8> arg0,
+  ) {
+    return _getdate(
+      arg0,
+    );
+  }
+
+  late final _getdate_ptr = _lookup<ffi.NativeFunction<_c_getdate>>('getdate');
+  late final _dart_getdate _getdate = _getdate_ptr.asFunction<_dart_getdate>();
+
+  ffi.Pointer<tm> gmtime(
+    ffi.Pointer<ffi.Int64> arg0,
+  ) {
+    return _gmtime(
+      arg0,
+    );
+  }
+
+  late final _gmtime_ptr = _lookup<ffi.NativeFunction<_c_gmtime>>('gmtime');
+  late final _dart_gmtime _gmtime = _gmtime_ptr.asFunction<_dart_gmtime>();
+
+  ffi.Pointer<tm> localtime(
+    ffi.Pointer<ffi.Int64> arg0,
+  ) {
+    return _localtime(
+      arg0,
+    );
+  }
+
+  late final _localtime_ptr =
+      _lookup<ffi.NativeFunction<_c_localtime>>('localtime');
+  late final _dart_localtime _localtime =
+      _localtime_ptr.asFunction<_dart_localtime>();
+
+  int mktime(
+    ffi.Pointer<tm> arg0,
+  ) {
+    return _mktime(
+      arg0,
+    );
+  }
+
+  late final _mktime_ptr = _lookup<ffi.NativeFunction<_c_mktime>>('mktime');
+  late final _dart_mktime _mktime = _mktime_ptr.asFunction<_dart_mktime>();
+
+  int strftime(
+    ffi.Pointer<ffi.Int8> arg0,
+    int arg1,
+    ffi.Pointer<ffi.Int8> arg2,
+    ffi.Pointer<tm> arg3,
+  ) {
+    return _strftime(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+    );
+  }
+
+  late final _strftime_ptr =
+      _lookup<ffi.NativeFunction<_c_strftime>>('strftime');
+  late final _dart_strftime _strftime =
+      _strftime_ptr.asFunction<_dart_strftime>();
+
+  ffi.Pointer<ffi.Int8> strptime(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+    ffi.Pointer<tm> arg2,
+  ) {
+    return _strptime(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _strptime_ptr =
+      _lookup<ffi.NativeFunction<_c_strptime>>('strptime');
+  late final _dart_strptime _strptime =
+      _strptime_ptr.asFunction<_dart_strptime>();
+
+  int time(
+    ffi.Pointer<ffi.Int64> arg0,
+  ) {
+    return _time(
+      arg0,
+    );
+  }
+
+  late final _time_ptr = _lookup<ffi.NativeFunction<_c_time>>('time');
+  late final _dart_time _time = _time_ptr.asFunction<_dart_time>();
+
+  void tzset() {
+    return _tzset();
+  }
+
+  late final _tzset_ptr = _lookup<ffi.NativeFunction<_c_tzset>>('tzset');
+  late final _dart_tzset _tzset = _tzset_ptr.asFunction<_dart_tzset>();
+
+  ffi.Pointer<ffi.Int8> asctime_r(
+    ffi.Pointer<tm> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _asctime_r(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _asctime_r_ptr =
+      _lookup<ffi.NativeFunction<_c_asctime_r>>('asctime_r');
+  late final _dart_asctime_r _asctime_r =
+      _asctime_r_ptr.asFunction<_dart_asctime_r>();
+
+  ffi.Pointer<ffi.Int8> ctime_r(
+    ffi.Pointer<ffi.Int64> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _ctime_r(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _ctime_r_ptr = _lookup<ffi.NativeFunction<_c_ctime_r>>('ctime_r');
+  late final _dart_ctime_r _ctime_r = _ctime_r_ptr.asFunction<_dart_ctime_r>();
+
+  ffi.Pointer<tm> gmtime_r(
+    ffi.Pointer<ffi.Int64> arg0,
+    ffi.Pointer<tm> arg1,
+  ) {
+    return _gmtime_r(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _gmtime_r_ptr =
+      _lookup<ffi.NativeFunction<_c_gmtime_r>>('gmtime_r');
+  late final _dart_gmtime_r _gmtime_r =
+      _gmtime_r_ptr.asFunction<_dart_gmtime_r>();
+
+  ffi.Pointer<tm> localtime_r(
+    ffi.Pointer<ffi.Int64> arg0,
+    ffi.Pointer<tm> arg1,
+  ) {
+    return _localtime_r(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _localtime_r_ptr =
+      _lookup<ffi.NativeFunction<_c_localtime_r>>('localtime_r');
+  late final _dart_localtime_r _localtime_r =
+      _localtime_r_ptr.asFunction<_dart_localtime_r>();
+
+  int posix2time(
+    int arg0,
+  ) {
+    return _posix2time(
+      arg0,
+    );
+  }
+
+  late final _posix2time_ptr =
+      _lookup<ffi.NativeFunction<_c_posix2time>>('posix2time');
+  late final _dart_posix2time _posix2time =
+      _posix2time_ptr.asFunction<_dart_posix2time>();
+
+  void tzsetwall() {
+    return _tzsetwall();
+  }
+
+  late final _tzsetwall_ptr =
+      _lookup<ffi.NativeFunction<_c_tzsetwall>>('tzsetwall');
+  late final _dart_tzsetwall _tzsetwall =
+      _tzsetwall_ptr.asFunction<_dart_tzsetwall>();
+
+  int time2posix(
+    int arg0,
+  ) {
+    return _time2posix(
+      arg0,
+    );
+  }
+
+  late final _time2posix_ptr =
+      _lookup<ffi.NativeFunction<_c_time2posix>>('time2posix');
+  late final _dart_time2posix _time2posix =
+      _time2posix_ptr.asFunction<_dart_time2posix>();
+
+  int timelocal(
+    ffi.Pointer<tm> arg0,
+  ) {
+    return _timelocal(
+      arg0,
+    );
+  }
+
+  late final _timelocal_ptr =
+      _lookup<ffi.NativeFunction<_c_timelocal>>('timelocal');
+  late final _dart_timelocal _timelocal =
+      _timelocal_ptr.asFunction<_dart_timelocal>();
+
+  int timegm(
+    ffi.Pointer<tm> arg0,
+  ) {
+    return _timegm(
+      arg0,
+    );
+  }
+
+  late final _timegm_ptr = _lookup<ffi.NativeFunction<_c_timegm>>('timegm');
+  late final _dart_timegm _timegm = _timegm_ptr.asFunction<_dart_timegm>();
+
+  int nanosleep(
+    ffi.Pointer<timespec> __rqtp,
+    ffi.Pointer<timespec> __rmtp,
+  ) {
+    return _nanosleep(
+      __rqtp,
+      __rmtp,
+    );
+  }
+
+  late final _nanosleep_ptr =
+      _lookup<ffi.NativeFunction<_c_nanosleep>>('nanosleep');
+  late final _dart_nanosleep _nanosleep =
+      _nanosleep_ptr.asFunction<_dart_nanosleep>();
+
+  int clock_getres(
+    int __clock_id,
+    ffi.Pointer<timespec> __res,
+  ) {
+    return _clock_getres(
+      __clock_id,
+      __res,
+    );
+  }
+
+  late final _clock_getres_ptr =
+      _lookup<ffi.NativeFunction<_c_clock_getres>>('clock_getres');
+  late final _dart_clock_getres _clock_getres =
+      _clock_getres_ptr.asFunction<_dart_clock_getres>();
+
+  int clock_gettime(
+    int __clock_id,
+    ffi.Pointer<timespec> __tp,
+  ) {
+    return _clock_gettime(
+      __clock_id,
+      __tp,
+    );
+  }
+
+  late final _clock_gettime_ptr =
+      _lookup<ffi.NativeFunction<_c_clock_gettime>>('clock_gettime');
+  late final _dart_clock_gettime _clock_gettime =
+      _clock_gettime_ptr.asFunction<_dart_clock_gettime>();
+
+  int clock_gettime_nsec_np(
+    int __clock_id,
+  ) {
+    return _clock_gettime_nsec_np(
+      __clock_id,
+    );
+  }
+
+  late final _clock_gettime_nsec_np_ptr =
+      _lookup<ffi.NativeFunction<_c_clock_gettime_nsec_np>>(
+          'clock_gettime_nsec_np');
+  late final _dart_clock_gettime_nsec_np _clock_gettime_nsec_np =
+      _clock_gettime_nsec_np_ptr.asFunction<_dart_clock_gettime_nsec_np>();
+
+  int clock_settime(
+    int __clock_id,
+    ffi.Pointer<timespec> __tp,
+  ) {
+    return _clock_settime(
+      __clock_id,
+      __tp,
+    );
+  }
+
+  late final _clock_settime_ptr =
+      _lookup<ffi.NativeFunction<_c_clock_settime>>('clock_settime');
+  late final _dart_clock_settime _clock_settime =
+      _clock_settime_ptr.asFunction<_dart_clock_settime>();
+
+  int timespec_get(
+    ffi.Pointer<timespec> ts,
+    int base,
+  ) {
+    return _timespec_get(
+      ts,
+      base,
+    );
+  }
+
+  late final _timespec_get_ptr =
+      _lookup<ffi.NativeFunction<_c_timespec_get>>('timespec_get');
+  late final _dart_timespec_get _timespec_get =
+      _timespec_get_ptr.asFunction<_dart_timespec_get>();
+
+  int adjtime(
+    ffi.Pointer<timeval> arg0,
+    ffi.Pointer<timeval> arg1,
+  ) {
+    return _adjtime(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _adjtime_ptr = _lookup<ffi.NativeFunction<_c_adjtime>>('adjtime');
+  late final _dart_adjtime _adjtime = _adjtime_ptr.asFunction<_dart_adjtime>();
+
+  int futimes(
+    int arg0,
+    ffi.Pointer<timeval> arg1,
+  ) {
+    return _futimes(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _futimes_ptr = _lookup<ffi.NativeFunction<_c_futimes>>('futimes');
+  late final _dart_futimes _futimes = _futimes_ptr.asFunction<_dart_futimes>();
+
+  int lutimes(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<timeval> arg1,
+  ) {
+    return _lutimes(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _lutimes_ptr = _lookup<ffi.NativeFunction<_c_lutimes>>('lutimes');
+  late final _dart_lutimes _lutimes = _lutimes_ptr.asFunction<_dart_lutimes>();
+
+  int settimeofday(
+    ffi.Pointer<timeval> arg0,
+    ffi.Pointer<timezone_1> arg1,
+  ) {
+    return _settimeofday(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _settimeofday_ptr =
+      _lookup<ffi.NativeFunction<_c_settimeofday>>('settimeofday');
+  late final _dart_settimeofday _settimeofday =
+      _settimeofday_ptr.asFunction<_dart_settimeofday>();
+
+  int getitimer(
+    int arg0,
+    ffi.Pointer<itimerval> arg1,
+  ) {
+    return _getitimer(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _getitimer_ptr =
+      _lookup<ffi.NativeFunction<_c_getitimer>>('getitimer');
+  late final _dart_getitimer _getitimer =
+      _getitimer_ptr.asFunction<_dart_getitimer>();
+
+  int gettimeofday(
+    ffi.Pointer<timeval> arg0,
+    ffi.Pointer<ffi.Void> arg1,
+  ) {
+    return _gettimeofday(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _gettimeofday_ptr =
+      _lookup<ffi.NativeFunction<_c_gettimeofday>>('gettimeofday');
+  late final _dart_gettimeofday _gettimeofday =
+      _gettimeofday_ptr.asFunction<_dart_gettimeofday>();
+
+  int select(
+    int arg0,
+    ffi.Pointer<fd_set> arg1,
+    ffi.Pointer<fd_set> arg2,
+    ffi.Pointer<fd_set> arg3,
+    ffi.Pointer<timeval> arg4,
+  ) {
+    return _select(
+      arg0,
+      arg1,
+      arg2,
+      arg3,
+      arg4,
+    );
+  }
+
+  late final _select_ptr = _lookup<ffi.NativeFunction<_c_select>>('select');
+  late final _dart_select _select = _select_ptr.asFunction<_dart_select>();
+
+  int setitimer(
+    int arg0,
+    ffi.Pointer<itimerval> arg1,
+    ffi.Pointer<itimerval> arg2,
+  ) {
+    return _setitimer(
+      arg0,
+      arg1,
+      arg2,
+    );
+  }
+
+  late final _setitimer_ptr =
+      _lookup<ffi.NativeFunction<_c_setitimer>>('setitimer');
+  late final _dart_setitimer _setitimer =
+      _setitimer_ptr.asFunction<_dart_setitimer>();
+
+  int utimes(
+    ffi.Pointer<ffi.Int8> arg0,
+    ffi.Pointer<timeval> arg1,
+  ) {
+    return _utimes(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _utimes_ptr = _lookup<ffi.NativeFunction<_c_utimes>>('utimes');
+  late final _dart_utimes _utimes = _utimes_ptr.asFunction<_dart_utimes>();
+
+  int curl_strequal(
+    ffi.Pointer<ffi.Int8> s1,
+    ffi.Pointer<ffi.Int8> s2,
+  ) {
+    return _curl_strequal(
+      s1,
+      s2,
+    );
+  }
+
+  late final _curl_strequal_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_strequal>>('curl_strequal');
+  late final _dart_curl_strequal _curl_strequal =
+      _curl_strequal_ptr.asFunction<_dart_curl_strequal>();
+
+  int curl_strnequal(
+    ffi.Pointer<ffi.Int8> s1,
+    ffi.Pointer<ffi.Int8> s2,
+    int n,
+  ) {
+    return _curl_strnequal(
+      s1,
+      s2,
+      n,
+    );
+  }
+
+  late final _curl_strnequal_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_strnequal>>('curl_strnequal');
+  late final _dart_curl_strnequal _curl_strnequal =
+      _curl_strnequal_ptr.asFunction<_dart_curl_strnequal>();
+
+  ffi.Pointer<curl_mime> curl_mime_init(
+    ffi.Pointer<ffi.Void> easy,
+  ) {
+    return _curl_mime_init(
+      easy,
+    );
+  }
+
+  late final _curl_mime_init_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_init>>('curl_mime_init');
+  late final _dart_curl_mime_init _curl_mime_init =
+      _curl_mime_init_ptr.asFunction<_dart_curl_mime_init>();
+
+  void curl_mime_free(
+    ffi.Pointer<curl_mime> mime,
+  ) {
+    return _curl_mime_free(
+      mime,
+    );
+  }
+
+  late final _curl_mime_free_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_free>>('curl_mime_free');
+  late final _dart_curl_mime_free _curl_mime_free =
+      _curl_mime_free_ptr.asFunction<_dart_curl_mime_free>();
+
+  ffi.Pointer<curl_mimepart> curl_mime_addpart(
+    ffi.Pointer<curl_mime> mime,
+  ) {
+    return _curl_mime_addpart(
+      mime,
+    );
+  }
+
+  late final _curl_mime_addpart_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_addpart>>('curl_mime_addpart');
+  late final _dart_curl_mime_addpart _curl_mime_addpart =
+      _curl_mime_addpart_ptr.asFunction<_dart_curl_mime_addpart>();
+
+  int curl_mime_name(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<ffi.Int8> name,
+  ) {
+    return _curl_mime_name(
+      part_1,
+      name,
+    );
+  }
+
+  late final _curl_mime_name_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_name>>('curl_mime_name');
+  late final _dart_curl_mime_name _curl_mime_name =
+      _curl_mime_name_ptr.asFunction<_dart_curl_mime_name>();
+
+  int curl_mime_filename(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<ffi.Int8> filename,
+  ) {
+    return _curl_mime_filename(
+      part_1,
+      filename,
+    );
+  }
+
+  late final _curl_mime_filename_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_filename>>('curl_mime_filename');
+  late final _dart_curl_mime_filename _curl_mime_filename =
+      _curl_mime_filename_ptr.asFunction<_dart_curl_mime_filename>();
+
+  int curl_mime_type(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<ffi.Int8> mimetype,
+  ) {
+    return _curl_mime_type(
+      part_1,
+      mimetype,
+    );
+  }
+
+  late final _curl_mime_type_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_type>>('curl_mime_type');
+  late final _dart_curl_mime_type _curl_mime_type =
+      _curl_mime_type_ptr.asFunction<_dart_curl_mime_type>();
+
+  int curl_mime_encoder(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<ffi.Int8> encoding,
+  ) {
+    return _curl_mime_encoder(
+      part_1,
+      encoding,
+    );
+  }
+
+  late final _curl_mime_encoder_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_encoder>>('curl_mime_encoder');
+  late final _dart_curl_mime_encoder _curl_mime_encoder =
+      _curl_mime_encoder_ptr.asFunction<_dart_curl_mime_encoder>();
+
+  int curl_mime_data(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<ffi.Int8> data,
+    int datasize,
+  ) {
+    return _curl_mime_data(
+      part_1,
+      data,
+      datasize,
+    );
+  }
+
+  late final _curl_mime_data_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_data>>('curl_mime_data');
+  late final _dart_curl_mime_data _curl_mime_data =
+      _curl_mime_data_ptr.asFunction<_dart_curl_mime_data>();
+
+  int curl_mime_filedata(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<ffi.Int8> filename,
+  ) {
+    return _curl_mime_filedata(
+      part_1,
+      filename,
+    );
+  }
+
+  late final _curl_mime_filedata_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_filedata>>('curl_mime_filedata');
+  late final _dart_curl_mime_filedata _curl_mime_filedata =
+      _curl_mime_filedata_ptr.asFunction<_dart_curl_mime_filedata>();
+
+  int curl_mime_data_cb(
+    ffi.Pointer<curl_mimepart> part_1,
+    int datasize,
+    ffi.Pointer<ffi.NativeFunction<curl_read_callback>> readfunc,
+    ffi.Pointer<ffi.NativeFunction<curl_seek_callback>> seekfunc,
+    ffi.Pointer<ffi.NativeFunction<curl_free_callback>> freefunc,
+    ffi.Pointer<ffi.Void> arg,
+  ) {
+    return _curl_mime_data_cb(
+      part_1,
+      datasize,
+      readfunc,
+      seekfunc,
+      freefunc,
+      arg,
+    );
+  }
+
+  late final _curl_mime_data_cb_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_data_cb>>('curl_mime_data_cb');
+  late final _dart_curl_mime_data_cb _curl_mime_data_cb =
+      _curl_mime_data_cb_ptr.asFunction<_dart_curl_mime_data_cb>();
+
+  int curl_mime_subparts(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<curl_mime> subparts,
+  ) {
+    return _curl_mime_subparts(
+      part_1,
+      subparts,
+    );
+  }
+
+  late final _curl_mime_subparts_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_subparts>>('curl_mime_subparts');
+  late final _dart_curl_mime_subparts _curl_mime_subparts =
+      _curl_mime_subparts_ptr.asFunction<_dart_curl_mime_subparts>();
+
+  int curl_mime_headers(
+    ffi.Pointer<curl_mimepart> part_1,
+    ffi.Pointer<curl_slist> headers,
+    int take_ownership,
+  ) {
+    return _curl_mime_headers(
+      part_1,
+      headers,
+      take_ownership,
+    );
+  }
+
+  late final _curl_mime_headers_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mime_headers>>('curl_mime_headers');
+  late final _dart_curl_mime_headers _curl_mime_headers =
+      _curl_mime_headers_ptr.asFunction<_dart_curl_mime_headers>();
+
+  int curl_formadd(
+    ffi.Pointer<ffi.Pointer<curl_httppost>> httppost,
+    ffi.Pointer<ffi.Pointer<curl_httppost>> last_post,
+  ) {
+    return _curl_formadd(
+      httppost,
+      last_post,
+    );
+  }
+
+  late final _curl_formadd_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_formadd>>('curl_formadd');
+  late final _dart_curl_formadd _curl_formadd =
+      _curl_formadd_ptr.asFunction<_dart_curl_formadd>();
+
+  int curl_formget(
+    ffi.Pointer<curl_httppost> form,
+    ffi.Pointer<ffi.Void> arg,
+    ffi.Pointer<ffi.NativeFunction<curl_formget_callback>> append,
+  ) {
+    return _curl_formget(
+      form,
+      arg,
+      append,
+    );
+  }
+
+  late final _curl_formget_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_formget>>('curl_formget');
+  late final _dart_curl_formget _curl_formget =
+      _curl_formget_ptr.asFunction<_dart_curl_formget>();
+
+  void curl_formfree(
+    ffi.Pointer<curl_httppost> form,
+  ) {
+    return _curl_formfree(
+      form,
+    );
+  }
+
+  late final _curl_formfree_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_formfree>>('curl_formfree');
+  late final _dart_curl_formfree _curl_formfree =
+      _curl_formfree_ptr.asFunction<_dart_curl_formfree>();
+
+  ffi.Pointer<ffi.Int8> curl_getenv(
+    ffi.Pointer<ffi.Int8> variable,
+  ) {
+    return _curl_getenv(
+      variable,
+    );
+  }
+
+  late final _curl_getenv_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_getenv>>('curl_getenv');
+  late final _dart_curl_getenv _curl_getenv =
+      _curl_getenv_ptr.asFunction<_dart_curl_getenv>();
+
+  ffi.Pointer<ffi.Int8> curl_version() {
+    return _curl_version();
+  }
+
+  late final _curl_version_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_version>>('curl_version');
+  late final _dart_curl_version _curl_version =
+      _curl_version_ptr.asFunction<_dart_curl_version>();
+
+  ffi.Pointer<ffi.Int8> curl_easy_escape(
+    ffi.Pointer<ffi.Void> handle,
+    ffi.Pointer<ffi.Int8> string,
+    int length,
+  ) {
+    return _curl_easy_escape(
+      handle,
+      string,
+      length,
+    );
+  }
+
+  late final _curl_easy_escape_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_escape>>('curl_easy_escape');
+  late final _dart_curl_easy_escape _curl_easy_escape =
+      _curl_easy_escape_ptr.asFunction<_dart_curl_easy_escape>();
+
+  ffi.Pointer<ffi.Int8> curl_escape(
+    ffi.Pointer<ffi.Int8> string,
+    int length,
+  ) {
+    return _curl_escape(
+      string,
+      length,
+    );
+  }
+
+  late final _curl_escape_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_escape>>('curl_escape');
+  late final _dart_curl_escape _curl_escape =
+      _curl_escape_ptr.asFunction<_dart_curl_escape>();
+
+  ffi.Pointer<ffi.Int8> curl_easy_unescape(
+    ffi.Pointer<ffi.Void> handle,
+    ffi.Pointer<ffi.Int8> string,
+    int length,
+    ffi.Pointer<ffi.Int32> outlength,
+  ) {
+    return _curl_easy_unescape(
+      handle,
+      string,
+      length,
+      outlength,
+    );
+  }
+
+  late final _curl_easy_unescape_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_unescape>>('curl_easy_unescape');
+  late final _dart_curl_easy_unescape _curl_easy_unescape =
+      _curl_easy_unescape_ptr.asFunction<_dart_curl_easy_unescape>();
+
+  ffi.Pointer<ffi.Int8> curl_unescape(
+    ffi.Pointer<ffi.Int8> string,
+    int length,
+  ) {
+    return _curl_unescape(
+      string,
+      length,
+    );
+  }
+
+  late final _curl_unescape_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_unescape>>('curl_unescape');
+  late final _dart_curl_unescape _curl_unescape =
+      _curl_unescape_ptr.asFunction<_dart_curl_unescape>();
+
+  void curl_free(
+    ffi.Pointer<ffi.Void> p,
+  ) {
+    return _curl_free(
+      p,
+    );
+  }
+
+  late final _curl_free_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_free>>('curl_free');
+  late final _dart_curl_free _curl_free =
+      _curl_free_ptr.asFunction<_dart_curl_free>();
+
+  int curl_global_init(
+    int flags,
+  ) {
+    return _curl_global_init(
+      flags,
+    );
+  }
+
+  late final _curl_global_init_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_global_init>>('curl_global_init');
+  late final _dart_curl_global_init _curl_global_init =
+      _curl_global_init_ptr.asFunction<_dart_curl_global_init>();
+
+  int curl_global_init_mem(
+    int flags,
+    ffi.Pointer<ffi.NativeFunction<curl_malloc_callback>> m,
+    ffi.Pointer<ffi.NativeFunction<curl_free_callback>> f,
+    ffi.Pointer<ffi.NativeFunction<curl_realloc_callback>> r,
+    ffi.Pointer<ffi.NativeFunction<curl_strdup_callback>> s,
+    ffi.Pointer<ffi.NativeFunction<curl_calloc_callback>> c,
+  ) {
+    return _curl_global_init_mem(
+      flags,
+      m,
+      f,
+      r,
+      s,
+      c,
+    );
+  }
+
+  late final _curl_global_init_mem_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_global_init_mem>>(
+          'curl_global_init_mem');
+  late final _dart_curl_global_init_mem _curl_global_init_mem =
+      _curl_global_init_mem_ptr.asFunction<_dart_curl_global_init_mem>();
+
+  void curl_global_cleanup() {
+    return _curl_global_cleanup();
+  }
+
+  late final _curl_global_cleanup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_global_cleanup>>(
+          'curl_global_cleanup');
+  late final _dart_curl_global_cleanup _curl_global_cleanup =
+      _curl_global_cleanup_ptr.asFunction<_dart_curl_global_cleanup>();
+
+  int curl_global_sslset(
+    int id,
+    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Pointer<ffi.Pointer<curl_ssl_backend>>> avail,
+  ) {
+    return _curl_global_sslset(
+      id,
+      name,
+      avail,
+    );
+  }
+
+  late final _curl_global_sslset_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_global_sslset>>('curl_global_sslset');
+  late final _dart_curl_global_sslset _curl_global_sslset =
+      _curl_global_sslset_ptr.asFunction<_dart_curl_global_sslset>();
+
+  ffi.Pointer<curl_slist> curl_slist_append(
+    ffi.Pointer<curl_slist> arg0,
+    ffi.Pointer<ffi.Int8> arg1,
+  ) {
+    return _curl_slist_append(
+      arg0,
+      arg1,
+    );
+  }
+
+  late final _curl_slist_append_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_slist_append>>('curl_slist_append');
+  late final _dart_curl_slist_append _curl_slist_append =
+      _curl_slist_append_ptr.asFunction<_dart_curl_slist_append>();
+
+  void curl_slist_free_all(
+    ffi.Pointer<curl_slist> arg0,
+  ) {
+    return _curl_slist_free_all(
+      arg0,
+    );
+  }
+
+  late final _curl_slist_free_all_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_slist_free_all>>(
+          'curl_slist_free_all');
+  late final _dart_curl_slist_free_all _curl_slist_free_all =
+      _curl_slist_free_all_ptr.asFunction<_dart_curl_slist_free_all>();
+
+  int curl_getdate(
+    ffi.Pointer<ffi.Int8> p,
+    ffi.Pointer<ffi.Int64> unused,
+  ) {
+    return _curl_getdate(
+      p,
+      unused,
+    );
+  }
+
+  late final _curl_getdate_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_getdate>>('curl_getdate');
+  late final _dart_curl_getdate _curl_getdate =
+      _curl_getdate_ptr.asFunction<_dart_curl_getdate>();
+
+  ffi.Pointer<ffi.Void> curl_share_init() {
+    return _curl_share_init();
+  }
+
+  late final _curl_share_init_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_share_init>>('curl_share_init');
+  late final _dart_curl_share_init _curl_share_init =
+      _curl_share_init_ptr.asFunction<_dart_curl_share_init>();
+
+  int curl_share_setopt(
+    ffi.Pointer<ffi.Void> arg0,
+    int option,
+  ) {
+    return _curl_share_setopt(
+      arg0,
+      option,
+    );
+  }
+
+  late final _curl_share_setopt_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_share_setopt>>('curl_share_setopt');
+  late final _dart_curl_share_setopt _curl_share_setopt =
+      _curl_share_setopt_ptr.asFunction<_dart_curl_share_setopt>();
+
+  int curl_share_cleanup(
+    ffi.Pointer<ffi.Void> arg0,
+  ) {
+    return _curl_share_cleanup(
+      arg0,
+    );
+  }
+
+  late final _curl_share_cleanup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_share_cleanup>>('curl_share_cleanup');
+  late final _dart_curl_share_cleanup _curl_share_cleanup =
+      _curl_share_cleanup_ptr.asFunction<_dart_curl_share_cleanup>();
+
+  ffi.Pointer<curl_version_info_data> curl_version_info(
+    int arg0,
+  ) {
+    return _curl_version_info(
+      arg0,
+    );
+  }
+
+  late final _curl_version_info_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_version_info>>('curl_version_info');
+  late final _dart_curl_version_info _curl_version_info =
+      _curl_version_info_ptr.asFunction<_dart_curl_version_info>();
+
+  ffi.Pointer<ffi.Int8> curl_easy_strerror(
+    int arg0,
+  ) {
+    return _curl_easy_strerror(
+      arg0,
+    );
+  }
+
+  late final _curl_easy_strerror_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_strerror>>('curl_easy_strerror');
+  late final _dart_curl_easy_strerror _curl_easy_strerror =
+      _curl_easy_strerror_ptr.asFunction<_dart_curl_easy_strerror>();
+
+  ffi.Pointer<ffi.Int8> curl_share_strerror(
+    int arg0,
+  ) {
+    return _curl_share_strerror(
+      arg0,
+    );
+  }
+
+  late final _curl_share_strerror_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_share_strerror>>(
+          'curl_share_strerror');
+  late final _dart_curl_share_strerror _curl_share_strerror =
+      _curl_share_strerror_ptr.asFunction<_dart_curl_share_strerror>();
+
+  int curl_easy_pause(
+    ffi.Pointer<ffi.Void> handle,
+    int bitmask,
+  ) {
+    return _curl_easy_pause(
+      handle,
+      bitmask,
+    );
+  }
+
+  late final _curl_easy_pause_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_pause>>('curl_easy_pause');
+  late final _dart_curl_easy_pause _curl_easy_pause =
+      _curl_easy_pause_ptr.asFunction<_dart_curl_easy_pause>();
+
+  ffi.Pointer<ffi.Void> curl_easy_init() {
+    return _curl_easy_init();
+  }
+
+  late final _curl_easy_init_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_init>>('curl_easy_init');
+  late final _dart_curl_easy_init _curl_easy_init =
+      _curl_easy_init_ptr.asFunction<_dart_curl_easy_init>();
+
+  int curl_easy_setopt(
+    ffi.Pointer<ffi.Void> curl,
+    int option,
+  ) {
+    return _curl_easy_setopt(
+      curl,
+      option,
+    );
+  }
+
+  late final _curl_easy_setopt_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_setopt>>('curl_easy_setopt');
+  late final _dart_curl_easy_setopt _curl_easy_setopt =
+      _curl_easy_setopt_ptr.asFunction<_dart_curl_easy_setopt>();
+
+  int curl_easy_perform(
+    ffi.Pointer<ffi.Void> curl,
+  ) {
+    return _curl_easy_perform(
+      curl,
+    );
+  }
+
+  late final _curl_easy_perform_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_perform>>('curl_easy_perform');
+  late final _dart_curl_easy_perform _curl_easy_perform =
+      _curl_easy_perform_ptr.asFunction<_dart_curl_easy_perform>();
+
+  void curl_easy_cleanup(
+    ffi.Pointer<ffi.Void> curl,
+  ) {
+    return _curl_easy_cleanup(
+      curl,
+    );
+  }
+
+  late final _curl_easy_cleanup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_cleanup>>('curl_easy_cleanup');
+  late final _dart_curl_easy_cleanup _curl_easy_cleanup =
+      _curl_easy_cleanup_ptr.asFunction<_dart_curl_easy_cleanup>();
+
+  int curl_easy_getinfo(
+    ffi.Pointer<ffi.Void> curl,
+    int info,
+  ) {
+    return _curl_easy_getinfo(
+      curl,
+      info,
+    );
+  }
+
+  late final _curl_easy_getinfo_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_getinfo>>('curl_easy_getinfo');
+  late final _dart_curl_easy_getinfo _curl_easy_getinfo =
+      _curl_easy_getinfo_ptr.asFunction<_dart_curl_easy_getinfo>();
+
+  ffi.Pointer<ffi.Void> curl_easy_duphandle(
+    ffi.Pointer<ffi.Void> curl,
+  ) {
+    return _curl_easy_duphandle(
+      curl,
+    );
+  }
+
+  late final _curl_easy_duphandle_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_duphandle>>(
+          'curl_easy_duphandle');
+  late final _dart_curl_easy_duphandle _curl_easy_duphandle =
+      _curl_easy_duphandle_ptr.asFunction<_dart_curl_easy_duphandle>();
+
+  void curl_easy_reset(
+    ffi.Pointer<ffi.Void> curl,
+  ) {
+    return _curl_easy_reset(
+      curl,
+    );
+  }
+
+  late final _curl_easy_reset_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_reset>>('curl_easy_reset');
+  late final _dart_curl_easy_reset _curl_easy_reset =
+      _curl_easy_reset_ptr.asFunction<_dart_curl_easy_reset>();
+
+  int curl_easy_recv(
+    ffi.Pointer<ffi.Void> curl,
+    ffi.Pointer<ffi.Void> buffer,
+    int buflen,
+    ffi.Pointer<ffi.Uint64> n,
+  ) {
+    return _curl_easy_recv(
+      curl,
+      buffer,
+      buflen,
+      n,
+    );
+  }
+
+  late final _curl_easy_recv_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_recv>>('curl_easy_recv');
+  late final _dart_curl_easy_recv _curl_easy_recv =
+      _curl_easy_recv_ptr.asFunction<_dart_curl_easy_recv>();
+
+  int curl_easy_send(
+    ffi.Pointer<ffi.Void> curl,
+    ffi.Pointer<ffi.Void> buffer,
+    int buflen,
+    ffi.Pointer<ffi.Uint64> n,
+  ) {
+    return _curl_easy_send(
+      curl,
+      buffer,
+      buflen,
+      n,
+    );
+  }
+
+  late final _curl_easy_send_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_send>>('curl_easy_send');
+  late final _dart_curl_easy_send _curl_easy_send =
+      _curl_easy_send_ptr.asFunction<_dart_curl_easy_send>();
+
+  int curl_easy_upkeep(
+    ffi.Pointer<ffi.Void> curl,
+  ) {
+    return _curl_easy_upkeep(
+      curl,
+    );
+  }
+
+  late final _curl_easy_upkeep_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_easy_upkeep>>('curl_easy_upkeep');
+  late final _dart_curl_easy_upkeep _curl_easy_upkeep =
+      _curl_easy_upkeep_ptr.asFunction<_dart_curl_easy_upkeep>();
+
+  ffi.Pointer<ffi.Void> curl_multi_init() {
+    return _curl_multi_init();
+  }
+
+  late final _curl_multi_init_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_init>>('curl_multi_init');
+  late final _dart_curl_multi_init _curl_multi_init =
+      _curl_multi_init_ptr.asFunction<_dart_curl_multi_init>();
+
+  int curl_multi_add_handle(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<ffi.Void> curl_handle,
+  ) {
+    return _curl_multi_add_handle(
+      multi_handle,
+      curl_handle,
+    );
+  }
+
+  late final _curl_multi_add_handle_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_add_handle>>(
+          'curl_multi_add_handle');
+  late final _dart_curl_multi_add_handle _curl_multi_add_handle =
+      _curl_multi_add_handle_ptr.asFunction<_dart_curl_multi_add_handle>();
+
+  int curl_multi_remove_handle(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<ffi.Void> curl_handle,
+  ) {
+    return _curl_multi_remove_handle(
+      multi_handle,
+      curl_handle,
+    );
+  }
+
+  late final _curl_multi_remove_handle_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_remove_handle>>(
+          'curl_multi_remove_handle');
+  late final _dart_curl_multi_remove_handle _curl_multi_remove_handle =
+      _curl_multi_remove_handle_ptr
+          .asFunction<_dart_curl_multi_remove_handle>();
+
+  int curl_multi_fdset(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<fd_set> read_fd_set,
+    ffi.Pointer<fd_set> write_fd_set,
+    ffi.Pointer<fd_set> exc_fd_set,
+    ffi.Pointer<ffi.Int32> max_fd,
+  ) {
+    return _curl_multi_fdset(
+      multi_handle,
+      read_fd_set,
+      write_fd_set,
+      exc_fd_set,
+      max_fd,
+    );
+  }
+
+  late final _curl_multi_fdset_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_fdset>>('curl_multi_fdset');
+  late final _dart_curl_multi_fdset _curl_multi_fdset =
+      _curl_multi_fdset_ptr.asFunction<_dart_curl_multi_fdset>();
+
+  int curl_multi_wait(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<curl_waitfd> extra_fds,
+    int extra_nfds,
+    int timeout_ms,
+    ffi.Pointer<ffi.Int32> ret,
+  ) {
+    return _curl_multi_wait(
+      multi_handle,
+      extra_fds,
+      extra_nfds,
+      timeout_ms,
+      ret,
+    );
+  }
+
+  late final _curl_multi_wait_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_wait>>('curl_multi_wait');
+  late final _dart_curl_multi_wait _curl_multi_wait =
+      _curl_multi_wait_ptr.asFunction<_dart_curl_multi_wait>();
+
+  int curl_multi_poll(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<curl_waitfd> extra_fds,
+    int extra_nfds,
+    int timeout_ms,
+    ffi.Pointer<ffi.Int32> ret,
+  ) {
+    return _curl_multi_poll(
+      multi_handle,
+      extra_fds,
+      extra_nfds,
+      timeout_ms,
+      ret,
+    );
+  }
+
+  late final _curl_multi_poll_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_poll>>('curl_multi_poll');
+  late final _dart_curl_multi_poll _curl_multi_poll =
+      _curl_multi_poll_ptr.asFunction<_dart_curl_multi_poll>();
+
+  int curl_multi_wakeup(
+    ffi.Pointer<ffi.Void> multi_handle,
+  ) {
+    return _curl_multi_wakeup(
+      multi_handle,
+    );
+  }
+
+  late final _curl_multi_wakeup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_wakeup>>('curl_multi_wakeup');
+  late final _dart_curl_multi_wakeup _curl_multi_wakeup =
+      _curl_multi_wakeup_ptr.asFunction<_dart_curl_multi_wakeup>();
+
+  int curl_multi_perform(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<ffi.Int32> running_handles,
+  ) {
+    return _curl_multi_perform(
+      multi_handle,
+      running_handles,
+    );
+  }
+
+  late final _curl_multi_perform_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_perform>>('curl_multi_perform');
+  late final _dart_curl_multi_perform _curl_multi_perform =
+      _curl_multi_perform_ptr.asFunction<_dart_curl_multi_perform>();
+
+  int curl_multi_cleanup(
+    ffi.Pointer<ffi.Void> multi_handle,
+  ) {
+    return _curl_multi_cleanup(
+      multi_handle,
+    );
+  }
+
+  late final _curl_multi_cleanup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_cleanup>>('curl_multi_cleanup');
+  late final _dart_curl_multi_cleanup _curl_multi_cleanup =
+      _curl_multi_cleanup_ptr.asFunction<_dart_curl_multi_cleanup>();
+
+  ffi.Pointer<CURLMsg> curl_multi_info_read(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<ffi.Int32> msgs_in_queue,
+  ) {
+    return _curl_multi_info_read(
+      multi_handle,
+      msgs_in_queue,
+    );
+  }
+
+  late final _curl_multi_info_read_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_info_read>>(
+          'curl_multi_info_read');
+  late final _dart_curl_multi_info_read _curl_multi_info_read =
+      _curl_multi_info_read_ptr.asFunction<_dart_curl_multi_info_read>();
+
+  ffi.Pointer<ffi.Int8> curl_multi_strerror(
+    int arg0,
+  ) {
+    return _curl_multi_strerror(
+      arg0,
+    );
+  }
+
+  late final _curl_multi_strerror_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_strerror>>(
+          'curl_multi_strerror');
+  late final _dart_curl_multi_strerror _curl_multi_strerror =
+      _curl_multi_strerror_ptr.asFunction<_dart_curl_multi_strerror>();
+
+  int curl_multi_socket(
+    ffi.Pointer<ffi.Void> multi_handle,
+    int s,
+    ffi.Pointer<ffi.Int32> running_handles,
+  ) {
+    return _curl_multi_socket(
+      multi_handle,
+      s,
+      running_handles,
+    );
+  }
+
+  late final _curl_multi_socket_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_socket>>('curl_multi_socket');
+  late final _dart_curl_multi_socket _curl_multi_socket =
+      _curl_multi_socket_ptr.asFunction<_dart_curl_multi_socket>();
+
+  int curl_multi_socket_action(
+    ffi.Pointer<ffi.Void> multi_handle,
+    int s,
+    int ev_bitmask,
+    ffi.Pointer<ffi.Int32> running_handles,
+  ) {
+    return _curl_multi_socket_action(
+      multi_handle,
+      s,
+      ev_bitmask,
+      running_handles,
+    );
+  }
+
+  late final _curl_multi_socket_action_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_socket_action>>(
+          'curl_multi_socket_action');
+  late final _dart_curl_multi_socket_action _curl_multi_socket_action =
+      _curl_multi_socket_action_ptr
+          .asFunction<_dart_curl_multi_socket_action>();
+
+  int curl_multi_socket_all(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<ffi.Int32> running_handles,
+  ) {
+    return _curl_multi_socket_all(
+      multi_handle,
+      running_handles,
+    );
+  }
+
+  late final _curl_multi_socket_all_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_socket_all>>(
+          'curl_multi_socket_all');
+  late final _dart_curl_multi_socket_all _curl_multi_socket_all =
+      _curl_multi_socket_all_ptr.asFunction<_dart_curl_multi_socket_all>();
+
+  int curl_multi_timeout(
+    ffi.Pointer<ffi.Void> multi_handle,
+    ffi.Pointer<ffi.Int64> milliseconds,
+  ) {
+    return _curl_multi_timeout(
+      multi_handle,
+      milliseconds,
+    );
+  }
+
+  late final _curl_multi_timeout_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_timeout>>('curl_multi_timeout');
+  late final _dart_curl_multi_timeout _curl_multi_timeout =
+      _curl_multi_timeout_ptr.asFunction<_dart_curl_multi_timeout>();
+
+  int curl_multi_setopt(
+    ffi.Pointer<ffi.Void> multi_handle,
+    int option,
+  ) {
+    return _curl_multi_setopt(
+      multi_handle,
+      option,
+    );
+  }
+
+  late final _curl_multi_setopt_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_setopt>>('curl_multi_setopt');
+  late final _dart_curl_multi_setopt _curl_multi_setopt =
+      _curl_multi_setopt_ptr.asFunction<_dart_curl_multi_setopt>();
+
+  int curl_multi_assign(
+    ffi.Pointer<ffi.Void> multi_handle,
+    int sockfd,
+    ffi.Pointer<ffi.Void> sockp,
+  ) {
+    return _curl_multi_assign(
+      multi_handle,
+      sockfd,
+      sockp,
+    );
+  }
+
+  late final _curl_multi_assign_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_multi_assign>>('curl_multi_assign');
+  late final _dart_curl_multi_assign _curl_multi_assign =
+      _curl_multi_assign_ptr.asFunction<_dart_curl_multi_assign>();
+
+  ffi.Pointer<ffi.Int8> curl_pushheader_bynum(
+    ffi.Pointer<curl_pushheaders> h,
+    int num,
+  ) {
+    return _curl_pushheader_bynum(
+      h,
+      num,
+    );
+  }
+
+  late final _curl_pushheader_bynum_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_pushheader_bynum>>(
+          'curl_pushheader_bynum');
+  late final _dart_curl_pushheader_bynum _curl_pushheader_bynum =
+      _curl_pushheader_bynum_ptr.asFunction<_dart_curl_pushheader_bynum>();
+
+  ffi.Pointer<ffi.Int8> curl_pushheader_byname(
+    ffi.Pointer<curl_pushheaders> h,
+    ffi.Pointer<ffi.Int8> name,
+  ) {
+    return _curl_pushheader_byname(
+      h,
+      name,
+    );
+  }
+
+  late final _curl_pushheader_byname_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_pushheader_byname>>(
+          'curl_pushheader_byname');
+  late final _dart_curl_pushheader_byname _curl_pushheader_byname =
+      _curl_pushheader_byname_ptr.asFunction<_dart_curl_pushheader_byname>();
+
+  ffi.Pointer<Curl_URL> curl_url() {
+    return _curl_url();
+  }
+
+  late final _curl_url_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_url>>('curl_url');
+  late final _dart_curl_url _curl_url =
+      _curl_url_ptr.asFunction<_dart_curl_url>();
+
+  void curl_url_cleanup(
+    ffi.Pointer<Curl_URL> handle,
+  ) {
+    return _curl_url_cleanup(
+      handle,
+    );
+  }
+
+  late final _curl_url_cleanup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_url_cleanup>>('curl_url_cleanup');
+  late final _dart_curl_url_cleanup _curl_url_cleanup =
+      _curl_url_cleanup_ptr.asFunction<_dart_curl_url_cleanup>();
+
+  ffi.Pointer<Curl_URL> curl_url_dup(
+    ffi.Pointer<Curl_URL> in_1,
+  ) {
+    return _curl_url_dup(
+      in_1,
+    );
+  }
+
+  late final _curl_url_dup_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_url_dup>>('curl_url_dup');
+  late final _dart_curl_url_dup _curl_url_dup =
+      _curl_url_dup_ptr.asFunction<_dart_curl_url_dup>();
+
+  int curl_url_get(
+    ffi.Pointer<Curl_URL> handle,
+    int what,
+    ffi.Pointer<ffi.Pointer<ffi.Int8>> part_1,
+    int flags,
+  ) {
+    return _curl_url_get(
+      handle,
+      what,
+      part_1,
+      flags,
+    );
+  }
+
+  late final _curl_url_get_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_url_get>>('curl_url_get');
+  late final _dart_curl_url_get _curl_url_get =
+      _curl_url_get_ptr.asFunction<_dart_curl_url_get>();
+
+  int curl_url_set(
+    ffi.Pointer<Curl_URL> handle,
+    int what,
+    ffi.Pointer<ffi.Int8> part_1,
+    int flags,
+  ) {
+    return _curl_url_set(
+      handle,
+      what,
+      part_1,
+      flags,
+    );
+  }
+
+  late final _curl_url_set_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_url_set>>('curl_url_set');
+  late final _dart_curl_url_set _curl_url_set =
+      _curl_url_set_ptr.asFunction<_dart_curl_url_set>();
+
+  int curl_mprintf(
+    ffi.Pointer<ffi.Int8> format,
+  ) {
+    return _curl_mprintf(
+      format,
+    );
+  }
+
+  late final _curl_mprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mprintf>>('curl_mprintf');
+  late final _dart_curl_mprintf _curl_mprintf =
+      _curl_mprintf_ptr.asFunction<_dart_curl_mprintf>();
+
+  int curl_mfprintf(
+    ffi.Pointer<FILE> fd,
+    ffi.Pointer<ffi.Int8> format,
+  ) {
+    return _curl_mfprintf(
+      fd,
+      format,
+    );
+  }
+
+  late final _curl_mfprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mfprintf>>('curl_mfprintf');
+  late final _dart_curl_mfprintf _curl_mfprintf =
+      _curl_mfprintf_ptr.asFunction<_dart_curl_mfprintf>();
+
+  int curl_msprintf(
+    ffi.Pointer<ffi.Int8> buffer,
+    ffi.Pointer<ffi.Int8> format,
+  ) {
+    return _curl_msprintf(
+      buffer,
+      format,
+    );
+  }
+
+  late final _curl_msprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_msprintf>>('curl_msprintf');
+  late final _dart_curl_msprintf _curl_msprintf =
+      _curl_msprintf_ptr.asFunction<_dart_curl_msprintf>();
+
+  int curl_msnprintf(
+    ffi.Pointer<ffi.Int8> buffer,
+    int maxlength,
+    ffi.Pointer<ffi.Int8> format,
+  ) {
+    return _curl_msnprintf(
+      buffer,
+      maxlength,
+      format,
+    );
+  }
+
+  late final _curl_msnprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_msnprintf>>('curl_msnprintf');
+  late final _dart_curl_msnprintf _curl_msnprintf =
+      _curl_msnprintf_ptr.asFunction<_dart_curl_msnprintf>();
+
+  int curl_mvprintf(
+    ffi.Pointer<ffi.Int8> format,
+    ffi.Pointer<__va_list_tag> args,
+  ) {
+    return _curl_mvprintf(
+      format,
+      args,
+    );
+  }
+
+  late final _curl_mvprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mvprintf>>('curl_mvprintf');
+  late final _dart_curl_mvprintf _curl_mvprintf =
+      _curl_mvprintf_ptr.asFunction<_dart_curl_mvprintf>();
+
+  int curl_mvfprintf(
+    ffi.Pointer<FILE> fd,
+    ffi.Pointer<ffi.Int8> format,
+    ffi.Pointer<__va_list_tag> args,
+  ) {
+    return _curl_mvfprintf(
+      fd,
+      format,
+      args,
+    );
+  }
+
+  late final _curl_mvfprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mvfprintf>>('curl_mvfprintf');
+  late final _dart_curl_mvfprintf _curl_mvfprintf =
+      _curl_mvfprintf_ptr.asFunction<_dart_curl_mvfprintf>();
+
+  int curl_mvsprintf(
+    ffi.Pointer<ffi.Int8> buffer,
+    ffi.Pointer<ffi.Int8> format,
+    ffi.Pointer<__va_list_tag> args,
+  ) {
+    return _curl_mvsprintf(
+      buffer,
+      format,
+      args,
+    );
+  }
+
+  late final _curl_mvsprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mvsprintf>>('curl_mvsprintf');
+  late final _dart_curl_mvsprintf _curl_mvsprintf =
+      _curl_mvsprintf_ptr.asFunction<_dart_curl_mvsprintf>();
+
+  int curl_mvsnprintf(
+    ffi.Pointer<ffi.Int8> buffer,
+    int maxlength,
+    ffi.Pointer<ffi.Int8> format,
+    ffi.Pointer<__va_list_tag> args,
+  ) {
+    return _curl_mvsnprintf(
+      buffer,
+      maxlength,
+      format,
+      args,
+    );
+  }
+
+  late final _curl_mvsnprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mvsnprintf>>('curl_mvsnprintf');
+  late final _dart_curl_mvsnprintf _curl_mvsnprintf =
+      _curl_mvsnprintf_ptr.asFunction<_dart_curl_mvsnprintf>();
+
+  ffi.Pointer<ffi.Int8> curl_maprintf(
+    ffi.Pointer<ffi.Int8> format,
+  ) {
+    return _curl_maprintf(
+      format,
+    );
+  }
+
+  late final _curl_maprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_maprintf>>('curl_maprintf');
+  late final _dart_curl_maprintf _curl_maprintf =
+      _curl_maprintf_ptr.asFunction<_dart_curl_maprintf>();
+
+  ffi.Pointer<ffi.Int8> curl_mvaprintf(
+    ffi.Pointer<ffi.Int8> format,
+    ffi.Pointer<__va_list_tag> args,
+  ) {
+    return _curl_mvaprintf(
+      format,
+      args,
+    );
+  }
+
+  late final _curl_mvaprintf_ptr =
+      _lookup<ffi.NativeFunction<_c_curl_mvaprintf>>('curl_mvaprintf');
+  late final _dart_curl_mvaprintf _curl_mvaprintf =
+      _curl_mvaprintf_ptr.asFunction<_dart_curl_mvaprintf>();
+
+  late final ffi.Pointer<ffi.Int32> _CURL = _lookup<ffi.Int32>('CURL');
+
+  int get CURL => _CURL.value;
+
+  set CURL(int value) => _CURL.value = value;
+
+  late final ffi.Pointer<ffi.Int32> _CURLcode_1 =
+      _lookup<ffi.Int32>('CURLcode');
+
+  int get CURLcode_1 => _CURLcode_1.value;
+
+  set CURLcode_1(int value) => _CURLcode_1.value = value;
+
+  void _curl_easy_setopt_err_long() {
+    return __curl_easy_setopt_err_long();
+  }
+
+  late final __curl_easy_setopt_err_long_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_long>>(
+          '_curl_easy_setopt_err_long');
+  late final _dart__curl_easy_setopt_err_long __curl_easy_setopt_err_long =
+      __curl_easy_setopt_err_long_ptr
+          .asFunction<_dart__curl_easy_setopt_err_long>();
+
+  void _curl_easy_setopt_err_curl_off_t() {
+    return __curl_easy_setopt_err_curl_off_t();
+  }
+
+  late final __curl_easy_setopt_err_curl_off_t_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_curl_off_t>>(
+          '_curl_easy_setopt_err_curl_off_t');
+  late final _dart__curl_easy_setopt_err_curl_off_t
+      __curl_easy_setopt_err_curl_off_t = __curl_easy_setopt_err_curl_off_t_ptr
+          .asFunction<_dart__curl_easy_setopt_err_curl_off_t>();
+
+  void _curl_easy_setopt_err_string() {
+    return __curl_easy_setopt_err_string();
+  }
+
+  late final __curl_easy_setopt_err_string_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_string>>(
+          '_curl_easy_setopt_err_string');
+  late final _dart__curl_easy_setopt_err_string __curl_easy_setopt_err_string =
+      __curl_easy_setopt_err_string_ptr
+          .asFunction<_dart__curl_easy_setopt_err_string>();
+
+  void _curl_easy_setopt_err_write_callback() {
+    return __curl_easy_setopt_err_write_callback();
+  }
+
+  late final __curl_easy_setopt_err_write_callback_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_write_callback>>(
+          '_curl_easy_setopt_err_write_callback');
+  late final _dart__curl_easy_setopt_err_write_callback
+      __curl_easy_setopt_err_write_callback =
+      __curl_easy_setopt_err_write_callback_ptr
+          .asFunction<_dart__curl_easy_setopt_err_write_callback>();
+
+  void _curl_easy_setopt_err_resolver_start_callback() {
+    return __curl_easy_setopt_err_resolver_start_callback();
+  }
+
+  late final __curl_easy_setopt_err_resolver_start_callback_ptr = _lookup<
+          ffi.NativeFunction<_c__curl_easy_setopt_err_resolver_start_callback>>(
+      '_curl_easy_setopt_err_resolver_start_callback');
+  late final _dart__curl_easy_setopt_err_resolver_start_callback
+      __curl_easy_setopt_err_resolver_start_callback =
+      __curl_easy_setopt_err_resolver_start_callback_ptr
+          .asFunction<_dart__curl_easy_setopt_err_resolver_start_callback>();
+
+  void _curl_easy_setopt_err_read_cb() {
+    return __curl_easy_setopt_err_read_cb();
+  }
+
+  late final __curl_easy_setopt_err_read_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_read_cb>>(
+          '_curl_easy_setopt_err_read_cb');
+  late final _dart__curl_easy_setopt_err_read_cb
+      __curl_easy_setopt_err_read_cb = __curl_easy_setopt_err_read_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_read_cb>();
+
+  void _curl_easy_setopt_err_ioctl_cb() {
+    return __curl_easy_setopt_err_ioctl_cb();
+  }
+
+  late final __curl_easy_setopt_err_ioctl_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_ioctl_cb>>(
+          '_curl_easy_setopt_err_ioctl_cb');
+  late final _dart__curl_easy_setopt_err_ioctl_cb
+      __curl_easy_setopt_err_ioctl_cb = __curl_easy_setopt_err_ioctl_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_ioctl_cb>();
+
+  void _curl_easy_setopt_err_sockopt_cb() {
+    return __curl_easy_setopt_err_sockopt_cb();
+  }
+
+  late final __curl_easy_setopt_err_sockopt_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_sockopt_cb>>(
+          '_curl_easy_setopt_err_sockopt_cb');
+  late final _dart__curl_easy_setopt_err_sockopt_cb
+      __curl_easy_setopt_err_sockopt_cb = __curl_easy_setopt_err_sockopt_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_sockopt_cb>();
+
+  void _curl_easy_setopt_err_opensocket_cb() {
+    return __curl_easy_setopt_err_opensocket_cb();
+  }
+
+  late final __curl_easy_setopt_err_opensocket_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_opensocket_cb>>(
+          '_curl_easy_setopt_err_opensocket_cb');
+  late final _dart__curl_easy_setopt_err_opensocket_cb
+      __curl_easy_setopt_err_opensocket_cb =
+      __curl_easy_setopt_err_opensocket_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_opensocket_cb>();
+
+  void _curl_easy_setopt_err_progress_cb() {
+    return __curl_easy_setopt_err_progress_cb();
+  }
+
+  late final __curl_easy_setopt_err_progress_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_progress_cb>>(
+          '_curl_easy_setopt_err_progress_cb');
+  late final _dart__curl_easy_setopt_err_progress_cb
+      __curl_easy_setopt_err_progress_cb =
+      __curl_easy_setopt_err_progress_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_progress_cb>();
+
+  void _curl_easy_setopt_err_debug_cb() {
+    return __curl_easy_setopt_err_debug_cb();
+  }
+
+  late final __curl_easy_setopt_err_debug_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_debug_cb>>(
+          '_curl_easy_setopt_err_debug_cb');
+  late final _dart__curl_easy_setopt_err_debug_cb
+      __curl_easy_setopt_err_debug_cb = __curl_easy_setopt_err_debug_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_debug_cb>();
+
+  void _curl_easy_setopt_err_ssl_ctx_cb() {
+    return __curl_easy_setopt_err_ssl_ctx_cb();
+  }
+
+  late final __curl_easy_setopt_err_ssl_ctx_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_ssl_ctx_cb>>(
+          '_curl_easy_setopt_err_ssl_ctx_cb');
+  late final _dart__curl_easy_setopt_err_ssl_ctx_cb
+      __curl_easy_setopt_err_ssl_ctx_cb = __curl_easy_setopt_err_ssl_ctx_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_ssl_ctx_cb>();
+
+  void _curl_easy_setopt_err_conv_cb() {
+    return __curl_easy_setopt_err_conv_cb();
+  }
+
+  late final __curl_easy_setopt_err_conv_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_conv_cb>>(
+          '_curl_easy_setopt_err_conv_cb');
+  late final _dart__curl_easy_setopt_err_conv_cb
+      __curl_easy_setopt_err_conv_cb = __curl_easy_setopt_err_conv_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_conv_cb>();
+
+  void _curl_easy_setopt_err_seek_cb() {
+    return __curl_easy_setopt_err_seek_cb();
+  }
+
+  late final __curl_easy_setopt_err_seek_cb_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_seek_cb>>(
+          '_curl_easy_setopt_err_seek_cb');
+  late final _dart__curl_easy_setopt_err_seek_cb
+      __curl_easy_setopt_err_seek_cb = __curl_easy_setopt_err_seek_cb_ptr
+          .asFunction<_dart__curl_easy_setopt_err_seek_cb>();
+
+  void _curl_easy_setopt_err_cb_data() {
+    return __curl_easy_setopt_err_cb_data();
+  }
+
+  late final __curl_easy_setopt_err_cb_data_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_cb_data>>(
+          '_curl_easy_setopt_err_cb_data');
+  late final _dart__curl_easy_setopt_err_cb_data
+      __curl_easy_setopt_err_cb_data = __curl_easy_setopt_err_cb_data_ptr
+          .asFunction<_dart__curl_easy_setopt_err_cb_data>();
+
+  void _curl_easy_setopt_err_error_buffer() {
+    return __curl_easy_setopt_err_error_buffer();
+  }
+
+  late final __curl_easy_setopt_err_error_buffer_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_error_buffer>>(
+          '_curl_easy_setopt_err_error_buffer');
+  late final _dart__curl_easy_setopt_err_error_buffer
+      __curl_easy_setopt_err_error_buffer =
+      __curl_easy_setopt_err_error_buffer_ptr
+          .asFunction<_dart__curl_easy_setopt_err_error_buffer>();
+
+  void _curl_easy_setopt_err_FILE() {
+    return __curl_easy_setopt_err_FILE();
+  }
+
+  late final __curl_easy_setopt_err_FILE_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_FILE>>(
+          '_curl_easy_setopt_err_FILE');
+  late final _dart__curl_easy_setopt_err_FILE __curl_easy_setopt_err_FILE =
+      __curl_easy_setopt_err_FILE_ptr
+          .asFunction<_dart__curl_easy_setopt_err_FILE>();
+
+  void _curl_easy_setopt_err_postfields() {
+    return __curl_easy_setopt_err_postfields();
+  }
+
+  late final __curl_easy_setopt_err_postfields_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_postfields>>(
+          '_curl_easy_setopt_err_postfields');
+  late final _dart__curl_easy_setopt_err_postfields
+      __curl_easy_setopt_err_postfields = __curl_easy_setopt_err_postfields_ptr
+          .asFunction<_dart__curl_easy_setopt_err_postfields>();
+
+  void _curl_easy_setopt_err_curl_httpost() {
+    return __curl_easy_setopt_err_curl_httpost();
+  }
+
+  late final __curl_easy_setopt_err_curl_httpost_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_curl_httpost>>(
+          '_curl_easy_setopt_err_curl_httpost');
+  late final _dart__curl_easy_setopt_err_curl_httpost
+      __curl_easy_setopt_err_curl_httpost =
+      __curl_easy_setopt_err_curl_httpost_ptr
+          .asFunction<_dart__curl_easy_setopt_err_curl_httpost>();
+
+  void _curl_easy_setopt_err_curl_mimepost() {
+    return __curl_easy_setopt_err_curl_mimepost();
+  }
+
+  late final __curl_easy_setopt_err_curl_mimepost_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_curl_mimepost>>(
+          '_curl_easy_setopt_err_curl_mimepost');
+  late final _dart__curl_easy_setopt_err_curl_mimepost
+      __curl_easy_setopt_err_curl_mimepost =
+      __curl_easy_setopt_err_curl_mimepost_ptr
+          .asFunction<_dart__curl_easy_setopt_err_curl_mimepost>();
+
+  void _curl_easy_setopt_err_curl_slist() {
+    return __curl_easy_setopt_err_curl_slist();
+  }
+
+  late final __curl_easy_setopt_err_curl_slist_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_curl_slist>>(
+          '_curl_easy_setopt_err_curl_slist');
+  late final _dart__curl_easy_setopt_err_curl_slist
+      __curl_easy_setopt_err_curl_slist = __curl_easy_setopt_err_curl_slist_ptr
+          .asFunction<_dart__curl_easy_setopt_err_curl_slist>();
+
+  void _curl_easy_setopt_err_CURLSH() {
+    return __curl_easy_setopt_err_CURLSH();
+  }
+
+  late final __curl_easy_setopt_err_CURLSH_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_setopt_err_CURLSH>>(
+          '_curl_easy_setopt_err_CURLSH');
+  late final _dart__curl_easy_setopt_err_CURLSH __curl_easy_setopt_err_CURLSH =
+      __curl_easy_setopt_err_CURLSH_ptr
+          .asFunction<_dart__curl_easy_setopt_err_CURLSH>();
+
+  void _curl_easy_getinfo_err_string() {
+    return __curl_easy_getinfo_err_string();
+  }
+
+  late final __curl_easy_getinfo_err_string_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_string>>(
+          '_curl_easy_getinfo_err_string');
+  late final _dart__curl_easy_getinfo_err_string
+      __curl_easy_getinfo_err_string = __curl_easy_getinfo_err_string_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_string>();
+
+  void _curl_easy_getinfo_err_long() {
+    return __curl_easy_getinfo_err_long();
+  }
+
+  late final __curl_easy_getinfo_err_long_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_long>>(
+          '_curl_easy_getinfo_err_long');
+  late final _dart__curl_easy_getinfo_err_long __curl_easy_getinfo_err_long =
+      __curl_easy_getinfo_err_long_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_long>();
+
+  void _curl_easy_getinfo_err_double() {
+    return __curl_easy_getinfo_err_double();
+  }
+
+  late final __curl_easy_getinfo_err_double_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_double>>(
+          '_curl_easy_getinfo_err_double');
+  late final _dart__curl_easy_getinfo_err_double
+      __curl_easy_getinfo_err_double = __curl_easy_getinfo_err_double_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_double>();
+
+  void _curl_easy_getinfo_err_curl_slist() {
+    return __curl_easy_getinfo_err_curl_slist();
+  }
+
+  late final __curl_easy_getinfo_err_curl_slist_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_curl_slist>>(
+          '_curl_easy_getinfo_err_curl_slist');
+  late final _dart__curl_easy_getinfo_err_curl_slist
+      __curl_easy_getinfo_err_curl_slist =
+      __curl_easy_getinfo_err_curl_slist_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_curl_slist>();
+
+  void _curl_easy_getinfo_err_curl_tlssesssioninfo() {
+    return __curl_easy_getinfo_err_curl_tlssesssioninfo();
+  }
+
+  late final __curl_easy_getinfo_err_curl_tlssesssioninfo_ptr = _lookup<
+          ffi.NativeFunction<_c__curl_easy_getinfo_err_curl_tlssesssioninfo>>(
+      '_curl_easy_getinfo_err_curl_tlssesssioninfo');
+  late final _dart__curl_easy_getinfo_err_curl_tlssesssioninfo
+      __curl_easy_getinfo_err_curl_tlssesssioninfo =
+      __curl_easy_getinfo_err_curl_tlssesssioninfo_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_curl_tlssesssioninfo>();
+
+  void _curl_easy_getinfo_err_curl_certinfo() {
+    return __curl_easy_getinfo_err_curl_certinfo();
+  }
+
+  late final __curl_easy_getinfo_err_curl_certinfo_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_curl_certinfo>>(
+          '_curl_easy_getinfo_err_curl_certinfo');
+  late final _dart__curl_easy_getinfo_err_curl_certinfo
+      __curl_easy_getinfo_err_curl_certinfo =
+      __curl_easy_getinfo_err_curl_certinfo_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_curl_certinfo>();
+
+  void _curl_easy_getinfo_err_curl_socket() {
+    return __curl_easy_getinfo_err_curl_socket();
+  }
+
+  late final __curl_easy_getinfo_err_curl_socket_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_curl_socket>>(
+          '_curl_easy_getinfo_err_curl_socket');
+  late final _dart__curl_easy_getinfo_err_curl_socket
+      __curl_easy_getinfo_err_curl_socket =
+      __curl_easy_getinfo_err_curl_socket_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_curl_socket>();
+
+  void _curl_easy_getinfo_err_curl_off_t() {
+    return __curl_easy_getinfo_err_curl_off_t();
+  }
+
+  late final __curl_easy_getinfo_err_curl_off_t_ptr =
+      _lookup<ffi.NativeFunction<_c__curl_easy_getinfo_err_curl_off_t>>(
+          '_curl_easy_getinfo_err_curl_off_t');
+  late final _dart__curl_easy_getinfo_err_curl_off_t
+      __curl_easy_getinfo_err_curl_off_t =
+      __curl_easy_getinfo_err_curl_off_t_ptr
+          .asFunction<_dart__curl_easy_getinfo_err_curl_off_t>();
 }
+
+class __darwin_pthread_handler_rec extends ffi.Struct {
+  external ffi.Pointer<ffi.NativeFunction<_typedefC_1>> __routine;
+
+  external ffi.Pointer<ffi.Void> __arg;
+
+  external ffi.Pointer<__darwin_pthread_handler_rec> __next;
+}
+
+class _opaque_pthread_attr_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([56])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_cond_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([40])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_condattr_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([8])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_mutex_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([56])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_mutexattr_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([8])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_once_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([8])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_rwlock_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([192])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_rwlockattr_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  @ffi.Array.multi([16])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class _opaque_pthread_t extends ffi.Struct {
+  @ffi.Int64()
+  external int __sig;
+
+  external ffi.Pointer<__darwin_pthread_handler_rec> __cleanup_stack;
+
+  @ffi.Array.multi([8176])
+  external ffi.Array<ffi.Int8> __opaque;
+}
+
+class fd_set extends ffi.Struct {
+  @ffi.Array.multi([32])
+  external ffi.Array<ffi.Int32> fds_bits;
+}
+
+abstract class curl_easytype {
+  static const int CURLOT_LONG = 0;
+  static const int CURLOT_VALUES = 1;
+  static const int CURLOT_OFF_T = 2;
+  static const int CURLOT_OBJECT = 3;
+  static const int CURLOT_STRING = 4;
+  static const int CURLOT_SLIST = 5;
+  static const int CURLOT_CBPTR = 6;
+  static const int CURLOT_BLOB = 7;
+  static const int CURLOT_FUNCTION = 8;
+}
+
+class curl_easyoption extends ffi.Struct {
+  external ffi.Pointer<ffi.Int8> name;
+
+  @ffi.Int32()
+  external int id;
+
+  @ffi.Int32()
+  external int type;
+
+  @ffi.Uint32()
+  external int flags;
+}
+
+class __sbuf extends ffi.Struct {
+  external ffi.Pointer<ffi.Uint8> _base;
+
+  @ffi.Int32()
+  external int _size;
+}
+
+class __sFILEX extends ffi.Opaque {}
+
+class FILE extends ffi.Struct {
+  external ffi.Pointer<ffi.Uint8> _p;
+
+  @ffi.Int32()
+  external int _r;
+
+  @ffi.Int32()
+  external int _w;
+
+  @ffi.Int16()
+  external int _flags;
+
+  @ffi.Int16()
+  external int _file;
+
+  external __sbuf _bf;
+
+  @ffi.Int32()
+  external int _lbfsize;
+
+  external ffi.Pointer<ffi.Void> _cookie;
+
+  external ffi.Pointer<ffi.NativeFunction<_typedefC_2>> _close;
+
+  external ffi.Pointer<ffi.NativeFunction<_typedefC_3>> _read;
+
+  external ffi.Pointer<ffi.NativeFunction<_typedefC_4>> _seek;
+
+  external ffi.Pointer<ffi.NativeFunction<_typedefC_5>> _write;
+
+  external __sbuf _ub;
+
+  external ffi.Pointer<__sFILEX> _extra;
+
+  @ffi.Int32()
+  external int _ur;
+
+  @ffi.Array.multi([3])
+  external ffi.Array<ffi.Uint8> _ubuf;
+
+  @ffi.Array.multi([1])
+  external ffi.Array<ffi.Uint8> _nbuf;
+
+  external __sbuf _lb;
+
+  @ffi.Int32()
+  external int _blksize;
+
+  @ffi.Int64()
+  external int _offset;
+}
+
+class __va_list_tag extends ffi.Struct {
+  @ffi.Uint32()
+  external int gp_offset;
+
+  @ffi.Uint32()
+  external int fp_offset;
+
+  external ffi.Pointer<ffi.Void> overflow_arg_area;
+
+  external ffi.Pointer<ffi.Void> reg_save_area;
+}
+
+class iovec extends ffi.Struct {
+  external ffi.Pointer<ffi.Void> iov_base;
+
+  @ffi.Uint64()
+  external int iov_len;
+}
+
+class sockaddr extends ffi.Struct {
+  @ffi.Uint8()
+  external int sa_len;
+
+  @ffi.Uint8()
+  external int sa_family;
+
+  @ffi.Array.multi([14])
+  external ffi.Array<ffi.Int8> sa_data;
+}
+
+class sa_endpoints_t extends ffi.Struct {
+  @ffi.Uint32()
+  external int sae_srcif;
+
+  external ffi.Pointer<sockaddr> sae_srcaddr;
+
+  @ffi.Uint32()
+  external int sae_srcaddrlen;
+
+  external ffi.Pointer<sockaddr> sae_dstaddr;
+
+  @ffi.Uint32()
+  external int sae_dstaddrlen;
+}
+
+class linger extends ffi.Struct {
+  @ffi.Int32()
+  external int l_onoff;
+
+  @ffi.Int32()
+  external int l_linger;
+}
+
+class so_np_extensions extends ffi.Struct {
+  @ffi.Uint32()
+  external int npx_flags;
+
+  @ffi.Uint32()
+  external int npx_mask;
+}
+
+class sockproto extends ffi.Struct {
+  @ffi.Uint16()
+  external int sp_family;
+
+  @ffi.Uint16()
+  external int sp_protocol;
+}
+
+class sockaddr_storage extends ffi.Struct {
+  @ffi.Uint8()
+  external int ss_len;
+
+  @ffi.Uint8()
+  external int ss_family;
+
+  @ffi.Array.multi([6])
+  external ffi.Array<ffi.Int8> __ss_pad1;
+
+  @ffi.Int64()
+  external int __ss_align;
+
+  @ffi.Array.multi([112])
+  external ffi.Array<ffi.Int8> __ss_pad2;
+}
+
+class msghdr extends ffi.Struct {
+  external ffi.Pointer<ffi.Void> msg_name;
+
+  @ffi.Uint32()
+  external int msg_namelen;
+
+  external ffi.Pointer<iovec> msg_iov;
+
+  @ffi.Int32()
+  external int msg_iovlen;
+
+  external ffi.Pointer<ffi.Void> msg_control;
+
+  @ffi.Uint32()
+  external int msg_controllen;
+
+  @ffi.Int32()
+  external int msg_flags;
+}
+
+class cmsghdr extends ffi.Struct {
+  @ffi.Uint32()
+  external int cmsg_len;
+
+  @ffi.Int32()
+  external int cmsg_level;
+
+  @ffi.Int32()
+  external int cmsg_type;
+}
+
+class sf_hdtr extends ffi.Struct {
+  external ffi.Pointer<iovec> headers;
+
+  @ffi.Int32()
+  external int hdr_cnt;
+
+  external ffi.Pointer<iovec> trailers;
+
+  @ffi.Int32()
+  external int trl_cnt;
+}
+
+class timespec extends ffi.Struct {
+  @ffi.Int64()
+  external int tv_sec;
+
+  @ffi.Int64()
+  external int tv_nsec;
+}
+
+class tm extends ffi.Struct {
+  @ffi.Int32()
+  external int tm_sec;
+
+  @ffi.Int32()
+  external int tm_min;
+
+  @ffi.Int32()
+  external int tm_hour;
+
+  @ffi.Int32()
+  external int tm_mday;
+
+  @ffi.Int32()
+  external int tm_mon;
+
+  @ffi.Int32()
+  external int tm_year;
+
+  @ffi.Int32()
+  external int tm_wday;
+
+  @ffi.Int32()
+  external int tm_yday;
+
+  @ffi.Int32()
+  external int tm_isdst;
+
+  @ffi.Int64()
+  external int tm_gmtoff;
+
+  external ffi.Pointer<ffi.Int8> tm_zone;
+}
+
+abstract class clockid_t {
+  static const int _CLOCK_REALTIME = 0;
+  static const int _CLOCK_MONOTONIC = 6;
+  static const int _CLOCK_MONOTONIC_RAW = 4;
+  static const int _CLOCK_MONOTONIC_RAW_APPROX = 5;
+  static const int _CLOCK_UPTIME_RAW = 8;
+  static const int _CLOCK_UPTIME_RAW_APPROX = 9;
+  static const int _CLOCK_PROCESS_CPUTIME_ID = 12;
+  static const int _CLOCK_THREAD_CPUTIME_ID = 16;
+}
+
+class timeval extends ffi.Struct {
+  @ffi.Int64()
+  external int tv_sec;
+
+  @ffi.Int32()
+  external int tv_usec;
+}
+
+class timeval64 extends ffi.Struct {
+  @ffi.Int64()
+  external int tv_sec;
+
+  @ffi.Int64()
+  external int tv_usec;
+}
+
+class itimerval extends ffi.Struct {
+  external timeval it_interval;
+
+  external timeval it_value;
+}
+
+class timezone_1 extends ffi.Struct {
+  @ffi.Int32()
+  external int tz_minuteswest;
+
+  @ffi.Int32()
+  external int tz_dsttime;
+}
+
+class clockinfo extends ffi.Struct {
+  @ffi.Int32()
+  external int hz;
+
+  @ffi.Int32()
+  external int tick;
+
+  @ffi.Int32()
+  external int tickadj;
+
+  @ffi.Int32()
+  external int stathz;
+
+  @ffi.Int32()
+  external int profhz;
+}
+
+abstract class curl_sslbackend {
+  static const int CURLSSLBACKEND_NONE = 0;
+  static const int CURLSSLBACKEND_OPENSSL = 1;
+  static const int CURLSSLBACKEND_GNUTLS = 2;
+  static const int CURLSSLBACKEND_NSS = 3;
+  static const int CURLSSLBACKEND_OBSOLETE4 = 4;
+  static const int CURLSSLBACKEND_GSKIT = 5;
+  static const int CURLSSLBACKEND_POLARSSL = 6;
+  static const int CURLSSLBACKEND_WOLFSSL = 7;
+  static const int CURLSSLBACKEND_SCHANNEL = 8;
+  static const int CURLSSLBACKEND_SECURETRANSPORT = 9;
+  static const int CURLSSLBACKEND_AXTLS = 10;
+  static const int CURLSSLBACKEND_MBEDTLS = 11;
+  static const int CURLSSLBACKEND_MESALINK = 12;
+  static const int CURLSSLBACKEND_BEARSSL = 13;
+  static const int CURLSSLBACKEND_RUSTLS = 14;
+}
+
+class curl_slist extends ffi.Struct {
+  external ffi.Pointer<ffi.Int8> data;
+
+  external ffi.Pointer<curl_slist> next;
+}
+
+class curl_httppost extends ffi.Struct {
+  external ffi.Pointer<curl_httppost> next;
+
+  external ffi.Pointer<ffi.Int8> name;
+
+  @ffi.Int64()
+  external int namelength;
+
+  external ffi.Pointer<ffi.Int8> contents;
+
+  @ffi.Int64()
+  external int contentslength;
+
+  external ffi.Pointer<ffi.Int8> buffer;
+
+  @ffi.Int64()
+  external int bufferlength;
+
+  external ffi.Pointer<ffi.Int8> contenttype;
+
+  external ffi.Pointer<curl_slist> contentheader;
+
+  external ffi.Pointer<curl_httppost> more;
+
+  @ffi.Int64()
+  external int flags;
+
+  external ffi.Pointer<ffi.Int8> showfilename;
+
+  external ffi.Pointer<ffi.Void> userp;
+
+  @ffi.Int64()
+  external int contentlen;
+}
+
+abstract class curlfiletype {
+  static const int CURLFILETYPE_FILE = 0;
+  static const int CURLFILETYPE_DIRECTORY = 1;
+  static const int CURLFILETYPE_SYMLINK = 2;
+  static const int CURLFILETYPE_DEVICE_BLOCK = 3;
+  static const int CURLFILETYPE_DEVICE_CHAR = 4;
+  static const int CURLFILETYPE_NAMEDPIPE = 5;
+  static const int CURLFILETYPE_SOCKET = 6;
+  static const int CURLFILETYPE_DOOR = 7;
+  static const int CURLFILETYPE_UNKNOWN = 8;
+}
+
+class unnamedStruct_1 extends ffi.Struct {
+  external ffi.Pointer<ffi.Int8> time;
+
+  external ffi.Pointer<ffi.Int8> perm;
+
+  external ffi.Pointer<ffi.Int8> user;
+
+  external ffi.Pointer<ffi.Int8> group;
+
+  external ffi.Pointer<ffi.Int8> target;
+}
+
+class curl_fileinfo extends ffi.Struct {
+  external ffi.Pointer<ffi.Int8> filename;
+
+  @ffi.Int32()
+  external int filetype;
+
+  @ffi.Int64()
+  external int time;
+
+  @ffi.Uint32()
+  external int perm;
+
+  @ffi.Int32()
+  external int uid;
+
+  @ffi.Int32()
+  external int gid;
+
+  @ffi.Int64()
+  external int size;
+
+  @ffi.Int64()
+  external int hardlinks;
+
+  external unnamedStruct_1 strings;
+
+  @ffi.Uint32()
+  external int flags;
+
+  external ffi.Pointer<ffi.Int8> b_data;
+
+  @ffi.Uint64()
+  external int b_size;
+
+  @ffi.Uint64()
+  external int b_used;
+}
+
+abstract class curlsocktype {
+  static const int CURLSOCKTYPE_IPCXN = 0;
+  static const int CURLSOCKTYPE_ACCEPT = 1;
+  static const int CURLSOCKTYPE_LAST = 2;
+}
+
+class curl_sockaddr extends ffi.Struct {
+  @ffi.Int32()
+  external int family;
+
+  @ffi.Int32()
+  external int socktype;
+
+  @ffi.Int32()
+  external int protocol;
+
+  @ffi.Uint32()
+  external int addrlen;
+
+  external sockaddr addr;
+}
+
+abstract class curlioerr {
+  static const int CURLIOE_OK = 0;
+  static const int CURLIOE_UNKNOWNCMD = 1;
+  static const int CURLIOE_FAILRESTART = 2;
+  static const int CURLIOE_LAST = 3;
+}
+
+abstract class curliocmd {
+  static const int CURLIOCMD_NOP = 0;
+  static const int CURLIOCMD_RESTARTREAD = 1;
+  static const int CURLIOCMD_LAST = 2;
+}
+
+abstract class curl_infotype {
+  static const int CURLINFO_TEXT = 0;
+  static const int CURLINFO_HEADER_IN = 1;
+  static const int CURLINFO_HEADER_OUT = 2;
+  static const int CURLINFO_DATA_IN = 3;
+  static const int CURLINFO_DATA_OUT = 4;
+  static const int CURLINFO_SSL_DATA_IN = 5;
+  static const int CURLINFO_SSL_DATA_OUT = 6;
+  static const int CURLINFO_END = 7;
+}
+
+abstract class CURLcode {
+  static const int CURLE_OK = 0;
+  static const int CURLE_UNSUPPORTED_PROTOCOL = 1;
+  static const int CURLE_FAILED_INIT = 2;
+  static const int CURLE_URL_MALFORMAT = 3;
+  static const int CURLE_NOT_BUILT_IN = 4;
+  static const int CURLE_COULDNT_RESOLVE_PROXY = 5;
+  static const int CURLE_COULDNT_RESOLVE_HOST = 6;
+  static const int CURLE_COULDNT_CONNECT = 7;
+  static const int CURLE_WEIRD_SERVER_REPLY = 8;
+  static const int CURLE_REMOTE_ACCESS_DENIED = 9;
+  static const int CURLE_FTP_ACCEPT_FAILED = 10;
+  static const int CURLE_FTP_WEIRD_PASS_REPLY = 11;
+  static const int CURLE_FTP_ACCEPT_TIMEOUT = 12;
+  static const int CURLE_FTP_WEIRD_PASV_REPLY = 13;
+  static const int CURLE_FTP_WEIRD_227_FORMAT = 14;
+  static const int CURLE_FTP_CANT_GET_HOST = 15;
+  static const int CURLE_HTTP2 = 16;
+  static const int CURLE_FTP_COULDNT_SET_TYPE = 17;
+  static const int CURLE_PARTIAL_FILE = 18;
+  static const int CURLE_FTP_COULDNT_RETR_FILE = 19;
+  static const int CURLE_OBSOLETE20 = 20;
+  static const int CURLE_QUOTE_ERROR = 21;
+  static const int CURLE_HTTP_RETURNED_ERROR = 22;
+  static const int CURLE_WRITE_ERROR = 23;
+  static const int CURLE_OBSOLETE24 = 24;
+  static const int CURLE_UPLOAD_FAILED = 25;
+  static const int CURLE_READ_ERROR = 26;
+  static const int CURLE_OUT_OF_MEMORY = 27;
+  static const int CURLE_OPERATION_TIMEDOUT = 28;
+  static const int CURLE_OBSOLETE29 = 29;
+  static const int CURLE_FTP_PORT_FAILED = 30;
+  static const int CURLE_FTP_COULDNT_USE_REST = 31;
+  static const int CURLE_OBSOLETE32 = 32;
+  static const int CURLE_RANGE_ERROR = 33;
+  static const int CURLE_HTTP_POST_ERROR = 34;
+  static const int CURLE_SSL_CONNECT_ERROR = 35;
+  static const int CURLE_BAD_DOWNLOAD_RESUME = 36;
+  static const int CURLE_FILE_COULDNT_READ_FILE = 37;
+  static const int CURLE_LDAP_CANNOT_BIND = 38;
+  static const int CURLE_LDAP_SEARCH_FAILED = 39;
+  static const int CURLE_OBSOLETE40 = 40;
+  static const int CURLE_FUNCTION_NOT_FOUND = 41;
+  static const int CURLE_ABORTED_BY_CALLBACK = 42;
+  static const int CURLE_BAD_FUNCTION_ARGUMENT = 43;
+  static const int CURLE_OBSOLETE44 = 44;
+  static const int CURLE_INTERFACE_FAILED = 45;
+  static const int CURLE_OBSOLETE46 = 46;
+  static const int CURLE_TOO_MANY_REDIRECTS = 47;
+  static const int CURLE_UNKNOWN_OPTION = 48;
+  static const int CURLE_TELNET_OPTION_SYNTAX = 49;
+  static const int CURLE_OBSOLETE50 = 50;
+  static const int CURLE_OBSOLETE51 = 51;
+  static const int CURLE_GOT_NOTHING = 52;
+  static const int CURLE_SSL_ENGINE_NOTFOUND = 53;
+  static const int CURLE_SSL_ENGINE_SETFAILED = 54;
+  static const int CURLE_SEND_ERROR = 55;
+  static const int CURLE_RECV_ERROR = 56;
+  static const int CURLE_OBSOLETE57 = 57;
+  static const int CURLE_SSL_CERTPROBLEM = 58;
+  static const int CURLE_SSL_CIPHER = 59;
+  static const int CURLE_PEER_FAILED_VERIFICATION = 60;
+  static const int CURLE_BAD_CONTENT_ENCODING = 61;
+  static const int CURLE_LDAP_INVALID_URL = 62;
+  static const int CURLE_FILESIZE_EXCEEDED = 63;
+  static const int CURLE_USE_SSL_FAILED = 64;
+  static const int CURLE_SEND_FAIL_REWIND = 65;
+  static const int CURLE_SSL_ENGINE_INITFAILED = 66;
+  static const int CURLE_LOGIN_DENIED = 67;
+  static const int CURLE_TFTP_NOTFOUND = 68;
+  static const int CURLE_TFTP_PERM = 69;
+  static const int CURLE_REMOTE_DISK_FULL = 70;
+  static const int CURLE_TFTP_ILLEGAL = 71;
+  static const int CURLE_TFTP_UNKNOWNID = 72;
+  static const int CURLE_REMOTE_FILE_EXISTS = 73;
+  static const int CURLE_TFTP_NOSUCHUSER = 74;
+  static const int CURLE_CONV_FAILED = 75;
+  static const int CURLE_CONV_REQD = 76;
+  static const int CURLE_SSL_CACERT_BADFILE = 77;
+  static const int CURLE_REMOTE_FILE_NOT_FOUND = 78;
+  static const int CURLE_SSH = 79;
+  static const int CURLE_SSL_SHUTDOWN_FAILED = 80;
+  static const int CURLE_AGAIN = 81;
+  static const int CURLE_SSL_CRL_BADFILE = 82;
+  static const int CURLE_SSL_ISSUER_ERROR = 83;
+  static const int CURLE_FTP_PRET_FAILED = 84;
+  static const int CURLE_RTSP_CSEQ_ERROR = 85;
+  static const int CURLE_RTSP_SESSION_ERROR = 86;
+  static const int CURLE_FTP_BAD_FILE_LIST = 87;
+  static const int CURLE_CHUNK_FAILED = 88;
+  static const int CURLE_NO_CONNECTION_AVAILABLE = 89;
+  static const int CURLE_SSL_PINNEDPUBKEYNOTMATCH = 90;
+  static const int CURLE_SSL_INVALIDCERTSTATUS = 91;
+  static const int CURLE_HTTP2_STREAM = 92;
+  static const int CURLE_RECURSIVE_API_CALL = 93;
+  static const int CURLE_AUTH_ERROR = 94;
+  static const int CURLE_HTTP3 = 95;
+  static const int CURLE_QUIC_CONNECT_ERROR = 96;
+  static const int CURLE_PROXY = 97;
+  static const int CURL_LAST = 98;
+}
+
+/// !CURL_NO_OLDIES
+abstract class CURLproxycode {
+  static const int CURLPX_OK = 0;
+  static const int CURLPX_BAD_ADDRESS_TYPE = 1;
+  static const int CURLPX_BAD_VERSION = 2;
+  static const int CURLPX_CLOSED = 3;
+  static const int CURLPX_GSSAPI = 4;
+  static const int CURLPX_GSSAPI_PERMSG = 5;
+  static const int CURLPX_GSSAPI_PROTECTION = 6;
+  static const int CURLPX_IDENTD = 7;
+  static const int CURLPX_IDENTD_DIFFER = 8;
+  static const int CURLPX_LONG_HOSTNAME = 9;
+  static const int CURLPX_LONG_PASSWD = 10;
+  static const int CURLPX_LONG_USER = 11;
+  static const int CURLPX_NO_AUTH = 12;
+  static const int CURLPX_RECV_ADDRESS = 13;
+  static const int CURLPX_RECV_AUTH = 14;
+  static const int CURLPX_RECV_CONNECT = 15;
+  static const int CURLPX_RECV_REQACK = 16;
+  static const int CURLPX_REPLY_ADDRESS_TYPE_NOT_SUPPORTED = 17;
+  static const int CURLPX_REPLY_COMMAND_NOT_SUPPORTED = 18;
+  static const int CURLPX_REPLY_CONNECTION_REFUSED = 19;
+  static const int CURLPX_REPLY_GENERAL_SERVER_FAILURE = 20;
+  static const int CURLPX_REPLY_HOST_UNREACHABLE = 21;
+  static const int CURLPX_REPLY_NETWORK_UNREACHABLE = 22;
+  static const int CURLPX_REPLY_NOT_ALLOWED = 23;
+  static const int CURLPX_REPLY_TTL_EXPIRED = 24;
+  static const int CURLPX_REPLY_UNASSIGNED = 25;
+  static const int CURLPX_REQUEST_FAILED = 26;
+  static const int CURLPX_RESOLVE_HOST = 27;
+  static const int CURLPX_SEND_AUTH = 28;
+  static const int CURLPX_SEND_CONNECT = 29;
+  static const int CURLPX_SEND_REQUEST = 30;
+  static const int CURLPX_UNKNOWN_FAIL = 31;
+  static const int CURLPX_UNKNOWN_MODE = 32;
+  static const int CURLPX_USER_REJECTED = 33;
+  static const int CURLPX_LAST = 34;
+}
+
+abstract class curl_proxytype {
+  static const int CURLPROXY_HTTP = 0;
+  static const int CURLPROXY_HTTP_1_0 = 1;
+  static const int CURLPROXY_HTTPS = 2;
+  static const int CURLPROXY_SOCKS4 = 4;
+  static const int CURLPROXY_SOCKS5 = 5;
+  static const int CURLPROXY_SOCKS4A = 6;
+  static const int CURLPROXY_SOCKS5_HOSTNAME = 7;
+}
+
+abstract class curl_khtype {
+  static const int CURLKHTYPE_UNKNOWN = 0;
+  static const int CURLKHTYPE_RSA1 = 1;
+  static const int CURLKHTYPE_RSA = 2;
+  static const int CURLKHTYPE_DSS = 3;
+  static const int CURLKHTYPE_ECDSA = 4;
+  static const int CURLKHTYPE_ED25519 = 5;
+}
+
+class curl_khkey extends ffi.Struct {
+  external ffi.Pointer<ffi.Int8> key;
+
+  @ffi.Uint64()
+  external int len;
+
+  @ffi.Int32()
+  external int keytype;
+}
+
+abstract class curl_khstat {
+  static const int CURLKHSTAT_FINE_ADD_TO_FILE = 0;
+  static const int CURLKHSTAT_FINE = 1;
+  static const int CURLKHSTAT_REJECT = 2;
+  static const int CURLKHSTAT_DEFER = 3;
+  static const int CURLKHSTAT_FINE_REPLACE = 4;
+  static const int CURLKHSTAT_LAST = 5;
+}
+
+abstract class curl_khmatch {
+  static const int CURLKHMATCH_OK = 0;
+  static const int CURLKHMATCH_MISMATCH = 1;
+  static const int CURLKHMATCH_MISSING = 2;
+  static const int CURLKHMATCH_LAST = 3;
+}
+
+abstract class curl_usessl {
+  static const int CURLUSESSL_NONE = 0;
+  static const int CURLUSESSL_TRY = 1;
+  static const int CURLUSESSL_CONTROL = 2;
+  static const int CURLUSESSL_ALL = 3;
+  static const int CURLUSESSL_LAST = 4;
+}
+
+/// !CURL_NO_OLDIES
+abstract class curl_ftpccc {
+  static const int CURLFTPSSL_CCC_NONE = 0;
+  static const int CURLFTPSSL_CCC_PASSIVE = 1;
+  static const int CURLFTPSSL_CCC_ACTIVE = 2;
+  static const int CURLFTPSSL_CCC_LAST = 3;
+}
+
+abstract class curl_ftpauth {
+  static const int CURLFTPAUTH_DEFAULT = 0;
+  static const int CURLFTPAUTH_SSL = 1;
+  static const int CURLFTPAUTH_TLS = 2;
+  static const int CURLFTPAUTH_LAST = 3;
+}
+
+abstract class curl_ftpcreatedir {
+  static const int CURLFTP_CREATE_DIR_NONE = 0;
+  static const int CURLFTP_CREATE_DIR = 1;
+  static const int CURLFTP_CREATE_DIR_RETRY = 2;
+  static const int CURLFTP_CREATE_DIR_LAST = 3;
+}
+
+abstract class curl_ftpmethod {
+  static const int CURLFTPMETHOD_DEFAULT = 0;
+  static const int CURLFTPMETHOD_MULTICWD = 1;
+  static const int CURLFTPMETHOD_NOCWD = 2;
+  static const int CURLFTPMETHOD_SINGLECWD = 3;
+  static const int CURLFTPMETHOD_LAST = 4;
+}
+
+class curl_hstsentry extends ffi.Opaque {}
+
+class curl_index extends ffi.Struct {
+  @ffi.Uint64()
+  external int index;
+
+  @ffi.Uint64()
+  external int total;
+}
+
+abstract class CURLSTScode {
+  static const int CURLSTS_OK = 0;
+  static const int CURLSTS_DONE = 1;
+  static const int CURLSTS_FAIL = 2;
+}
+
+abstract class CURLoption {
+  static const int CURLOPT_WRITEDATA = 10001;
+  static const int CURLOPT_URL = 10002;
+  static const int CURLOPT_PORT = 3;
+  static const int CURLOPT_PROXY = 10004;
+  static const int CURLOPT_USERPWD = 10005;
+  static const int CURLOPT_PROXYUSERPWD = 10006;
+  static const int CURLOPT_RANGE = 10007;
+  static const int CURLOPT_READDATA = 10009;
+  static const int CURLOPT_ERRORBUFFER = 10010;
+  static const int CURLOPT_WRITEFUNCTION = 20011;
+  static const int CURLOPT_READFUNCTION = 20012;
+  static const int CURLOPT_TIMEOUT = 13;
+  static const int CURLOPT_INFILESIZE = 14;
+  static const int CURLOPT_POSTFIELDS = 10015;
+  static const int CURLOPT_REFERER = 10016;
+  static const int CURLOPT_FTPPORT = 10017;
+  static const int CURLOPT_USERAGENT = 10018;
+  static const int CURLOPT_LOW_SPEED_LIMIT = 19;
+  static const int CURLOPT_LOW_SPEED_TIME = 20;
+  static const int CURLOPT_RESUME_FROM = 21;
+  static const int CURLOPT_COOKIE = 10022;
+  static const int CURLOPT_HTTPHEADER = 10023;
+  static const int CURLOPT_HTTPPOST = 10024;
+  static const int CURLOPT_SSLCERT = 10025;
+  static const int CURLOPT_KEYPASSWD = 10026;
+  static const int CURLOPT_CRLF = 27;
+  static const int CURLOPT_QUOTE = 10028;
+  static const int CURLOPT_HEADERDATA = 10029;
+  static const int CURLOPT_COOKIEFILE = 10031;
+  static const int CURLOPT_SSLVERSION = 32;
+  static const int CURLOPT_TIMECONDITION = 33;
+  static const int CURLOPT_TIMEVALUE = 34;
+  static const int CURLOPT_CUSTOMREQUEST = 10036;
+  static const int CURLOPT_STDERR = 10037;
+  static const int CURLOPT_POSTQUOTE = 10039;
+  static const int CURLOPT_OBSOLETE40 = 10040;
+  static const int CURLOPT_VERBOSE = 41;
+  static const int CURLOPT_HEADER = 42;
+  static const int CURLOPT_NOPROGRESS = 43;
+  static const int CURLOPT_NOBODY = 44;
+  static const int CURLOPT_FAILONERROR = 45;
+  static const int CURLOPT_UPLOAD = 46;
+  static const int CURLOPT_POST = 47;
+  static const int CURLOPT_DIRLISTONLY = 48;
+  static const int CURLOPT_APPEND = 50;
+  static const int CURLOPT_NETRC = 51;
+  static const int CURLOPT_FOLLOWLOCATION = 52;
+  static const int CURLOPT_TRANSFERTEXT = 53;
+  static const int CURLOPT_PUT = 54;
+  static const int CURLOPT_PROGRESSFUNCTION = 20056;
+  static const int CURLOPT_XFERINFODATA = 10057;
+  static const int CURLOPT_AUTOREFERER = 58;
+  static const int CURLOPT_PROXYPORT = 59;
+  static const int CURLOPT_POSTFIELDSIZE = 60;
+  static const int CURLOPT_HTTPPROXYTUNNEL = 61;
+  static const int CURLOPT_INTERFACE = 10062;
+  static const int CURLOPT_KRBLEVEL = 10063;
+  static const int CURLOPT_SSL_VERIFYPEER = 64;
+  static const int CURLOPT_CAINFO = 10065;
+  static const int CURLOPT_MAXREDIRS = 68;
+  static const int CURLOPT_FILETIME = 69;
+  static const int CURLOPT_TELNETOPTIONS = 10070;
+  static const int CURLOPT_MAXCONNECTS = 71;
+  static const int CURLOPT_OBSOLETE72 = 72;
+  static const int CURLOPT_FRESH_CONNECT = 74;
+  static const int CURLOPT_FORBID_REUSE = 75;
+  static const int CURLOPT_RANDOM_FILE = 10076;
+  static const int CURLOPT_EGDSOCKET = 10077;
+  static const int CURLOPT_CONNECTTIMEOUT = 78;
+  static const int CURLOPT_HEADERFUNCTION = 20079;
+  static const int CURLOPT_HTTPGET = 80;
+  static const int CURLOPT_SSL_VERIFYHOST = 81;
+  static const int CURLOPT_COOKIEJAR = 10082;
+  static const int CURLOPT_SSL_CIPHER_LIST = 10083;
+  static const int CURLOPT_HTTP_VERSION = 84;
+  static const int CURLOPT_FTP_USE_EPSV = 85;
+  static const int CURLOPT_SSLCERTTYPE = 10086;
+  static const int CURLOPT_SSLKEY = 10087;
+  static const int CURLOPT_SSLKEYTYPE = 10088;
+  static const int CURLOPT_SSLENGINE = 10089;
+  static const int CURLOPT_SSLENGINE_DEFAULT = 90;
+  static const int CURLOPT_DNS_USE_GLOBAL_CACHE = 91;
+  static const int CURLOPT_DNS_CACHE_TIMEOUT = 92;
+  static const int CURLOPT_PREQUOTE = 10093;
+  static const int CURLOPT_DEBUGFUNCTION = 20094;
+  static const int CURLOPT_DEBUGDATA = 10095;
+  static const int CURLOPT_COOKIESESSION = 96;
+  static const int CURLOPT_CAPATH = 10097;
+  static const int CURLOPT_BUFFERSIZE = 98;
+  static const int CURLOPT_NOSIGNAL = 99;
+  static const int CURLOPT_SHARE = 10100;
+  static const int CURLOPT_PROXYTYPE = 101;
+  static const int CURLOPT_ACCEPT_ENCODING = 10102;
+  static const int CURLOPT_PRIVATE = 10103;
+  static const int CURLOPT_HTTP200ALIASES = 10104;
+  static const int CURLOPT_UNRESTRICTED_AUTH = 105;
+  static const int CURLOPT_FTP_USE_EPRT = 106;
+  static const int CURLOPT_HTTPAUTH = 107;
+  static const int CURLOPT_SSL_CTX_FUNCTION = 20108;
+  static const int CURLOPT_SSL_CTX_DATA = 10109;
+  static const int CURLOPT_FTP_CREATE_MISSING_DIRS = 110;
+  static const int CURLOPT_PROXYAUTH = 111;
+  static const int CURLOPT_FTP_RESPONSE_TIMEOUT = 112;
+  static const int CURLOPT_IPRESOLVE = 113;
+  static const int CURLOPT_MAXFILESIZE = 114;
+  static const int CURLOPT_INFILESIZE_LARGE = 30115;
+  static const int CURLOPT_RESUME_FROM_LARGE = 30116;
+  static const int CURLOPT_MAXFILESIZE_LARGE = 30117;
+  static const int CURLOPT_NETRC_FILE = 10118;
+  static const int CURLOPT_USE_SSL = 119;
+  static const int CURLOPT_POSTFIELDSIZE_LARGE = 30120;
+  static const int CURLOPT_TCP_NODELAY = 121;
+  static const int CURLOPT_FTPSSLAUTH = 129;
+  static const int CURLOPT_IOCTLFUNCTION = 20130;
+  static const int CURLOPT_IOCTLDATA = 10131;
+  static const int CURLOPT_FTP_ACCOUNT = 10134;
+  static const int CURLOPT_COOKIELIST = 10135;
+  static const int CURLOPT_IGNORE_CONTENT_LENGTH = 136;
+  static const int CURLOPT_FTP_SKIP_PASV_IP = 137;
+  static const int CURLOPT_FTP_FILEMETHOD = 138;
+  static const int CURLOPT_LOCALPORT = 139;
+  static const int CURLOPT_LOCALPORTRANGE = 140;
+  static const int CURLOPT_CONNECT_ONLY = 141;
+  static const int CURLOPT_CONV_FROM_NETWORK_FUNCTION = 20142;
+  static const int CURLOPT_CONV_TO_NETWORK_FUNCTION = 20143;
+  static const int CURLOPT_CONV_FROM_UTF8_FUNCTION = 20144;
+  static const int CURLOPT_MAX_SEND_SPEED_LARGE = 30145;
+  static const int CURLOPT_MAX_RECV_SPEED_LARGE = 30146;
+  static const int CURLOPT_FTP_ALTERNATIVE_TO_USER = 10147;
+  static const int CURLOPT_SOCKOPTFUNCTION = 20148;
+  static const int CURLOPT_SOCKOPTDATA = 10149;
+  static const int CURLOPT_SSL_SESSIONID_CACHE = 150;
+  static const int CURLOPT_SSH_AUTH_TYPES = 151;
+  static const int CURLOPT_SSH_PUBLIC_KEYFILE = 10152;
+  static const int CURLOPT_SSH_PRIVATE_KEYFILE = 10153;
+  static const int CURLOPT_FTP_SSL_CCC = 154;
+  static const int CURLOPT_TIMEOUT_MS = 155;
+  static const int CURLOPT_CONNECTTIMEOUT_MS = 156;
+  static const int CURLOPT_HTTP_TRANSFER_DECODING = 157;
+  static const int CURLOPT_HTTP_CONTENT_DECODING = 158;
+  static const int CURLOPT_NEW_FILE_PERMS = 159;
+  static const int CURLOPT_NEW_DIRECTORY_PERMS = 160;
+  static const int CURLOPT_POSTREDIR = 161;
+  static const int CURLOPT_SSH_HOST_PUBLIC_KEY_MD5 = 10162;
+  static const int CURLOPT_OPENSOCKETFUNCTION = 20163;
+  static const int CURLOPT_OPENSOCKETDATA = 10164;
+  static const int CURLOPT_COPYPOSTFIELDS = 10165;
+  static const int CURLOPT_PROXY_TRANSFER_MODE = 166;
+  static const int CURLOPT_SEEKFUNCTION = 20167;
+  static const int CURLOPT_SEEKDATA = 10168;
+  static const int CURLOPT_CRLFILE = 10169;
+  static const int CURLOPT_ISSUERCERT = 10170;
+  static const int CURLOPT_ADDRESS_SCOPE = 171;
+  static const int CURLOPT_CERTINFO = 172;
+  static const int CURLOPT_USERNAME = 10173;
+  static const int CURLOPT_PASSWORD = 10174;
+  static const int CURLOPT_PROXYUSERNAME = 10175;
+  static const int CURLOPT_PROXYPASSWORD = 10176;
+  static const int CURLOPT_NOPROXY = 10177;
+  static const int CURLOPT_TFTP_BLKSIZE = 178;
+  static const int CURLOPT_SOCKS5_GSSAPI_SERVICE = 10179;
+  static const int CURLOPT_SOCKS5_GSSAPI_NEC = 180;
+  static const int CURLOPT_PROTOCOLS = 181;
+  static const int CURLOPT_REDIR_PROTOCOLS = 182;
+  static const int CURLOPT_SSH_KNOWNHOSTS = 10183;
+  static const int CURLOPT_SSH_KEYFUNCTION = 20184;
+  static const int CURLOPT_SSH_KEYDATA = 10185;
+  static const int CURLOPT_MAIL_FROM = 10186;
+  static const int CURLOPT_MAIL_RCPT = 10187;
+  static const int CURLOPT_FTP_USE_PRET = 188;
+  static const int CURLOPT_RTSP_REQUEST = 189;
+  static const int CURLOPT_RTSP_SESSION_ID = 10190;
+  static const int CURLOPT_RTSP_STREAM_URI = 10191;
+  static const int CURLOPT_RTSP_TRANSPORT = 10192;
+  static const int CURLOPT_RTSP_CLIENT_CSEQ = 193;
+  static const int CURLOPT_RTSP_SERVER_CSEQ = 194;
+  static const int CURLOPT_INTERLEAVEDATA = 10195;
+  static const int CURLOPT_INTERLEAVEFUNCTION = 20196;
+  static const int CURLOPT_WILDCARDMATCH = 197;
+  static const int CURLOPT_CHUNK_BGN_FUNCTION = 20198;
+  static const int CURLOPT_CHUNK_END_FUNCTION = 20199;
+  static const int CURLOPT_FNMATCH_FUNCTION = 20200;
+  static const int CURLOPT_CHUNK_DATA = 10201;
+  static const int CURLOPT_FNMATCH_DATA = 10202;
+  static const int CURLOPT_RESOLVE = 10203;
+  static const int CURLOPT_TLSAUTH_USERNAME = 10204;
+  static const int CURLOPT_TLSAUTH_PASSWORD = 10205;
+  static const int CURLOPT_TLSAUTH_TYPE = 10206;
+  static const int CURLOPT_TRANSFER_ENCODING = 207;
+  static const int CURLOPT_CLOSESOCKETFUNCTION = 20208;
+  static const int CURLOPT_CLOSESOCKETDATA = 10209;
+  static const int CURLOPT_GSSAPI_DELEGATION = 210;
+  static const int CURLOPT_DNS_SERVERS = 10211;
+  static const int CURLOPT_ACCEPTTIMEOUT_MS = 212;
+  static const int CURLOPT_TCP_KEEPALIVE = 213;
+  static const int CURLOPT_TCP_KEEPIDLE = 214;
+  static const int CURLOPT_TCP_KEEPINTVL = 215;
+  static const int CURLOPT_SSL_OPTIONS = 216;
+  static const int CURLOPT_MAIL_AUTH = 10217;
+  static const int CURLOPT_SASL_IR = 218;
+  static const int CURLOPT_XFERINFOFUNCTION = 20219;
+  static const int CURLOPT_XOAUTH2_BEARER = 10220;
+  static const int CURLOPT_DNS_INTERFACE = 10221;
+  static const int CURLOPT_DNS_LOCAL_IP4 = 10222;
+  static const int CURLOPT_DNS_LOCAL_IP6 = 10223;
+  static const int CURLOPT_LOGIN_OPTIONS = 10224;
+  static const int CURLOPT_SSL_ENABLE_NPN = 225;
+  static const int CURLOPT_SSL_ENABLE_ALPN = 226;
+  static const int CURLOPT_EXPECT_100_TIMEOUT_MS = 227;
+  static const int CURLOPT_PROXYHEADER = 10228;
+  static const int CURLOPT_HEADEROPT = 229;
+  static const int CURLOPT_PINNEDPUBLICKEY = 10230;
+  static const int CURLOPT_UNIX_SOCKET_PATH = 10231;
+  static const int CURLOPT_SSL_VERIFYSTATUS = 232;
+  static const int CURLOPT_SSL_FALSESTART = 233;
+  static const int CURLOPT_PATH_AS_IS = 234;
+  static const int CURLOPT_PROXY_SERVICE_NAME = 10235;
+  static const int CURLOPT_SERVICE_NAME = 10236;
+  static const int CURLOPT_PIPEWAIT = 237;
+  static const int CURLOPT_DEFAULT_PROTOCOL = 10238;
+  static const int CURLOPT_STREAM_WEIGHT = 239;
+  static const int CURLOPT_STREAM_DEPENDS = 10240;
+  static const int CURLOPT_STREAM_DEPENDS_E = 10241;
+  static const int CURLOPT_TFTP_NO_OPTIONS = 242;
+  static const int CURLOPT_CONNECT_TO = 10243;
+  static const int CURLOPT_TCP_FASTOPEN = 244;
+  static const int CURLOPT_KEEP_SENDING_ON_ERROR = 245;
+  static const int CURLOPT_PROXY_CAINFO = 10246;
+  static const int CURLOPT_PROXY_CAPATH = 10247;
+  static const int CURLOPT_PROXY_SSL_VERIFYPEER = 248;
+  static const int CURLOPT_PROXY_SSL_VERIFYHOST = 249;
+  static const int CURLOPT_PROXY_SSLVERSION = 250;
+  static const int CURLOPT_PROXY_TLSAUTH_USERNAME = 10251;
+  static const int CURLOPT_PROXY_TLSAUTH_PASSWORD = 10252;
+  static const int CURLOPT_PROXY_TLSAUTH_TYPE = 10253;
+  static const int CURLOPT_PROXY_SSLCERT = 10254;
+  static const int CURLOPT_PROXY_SSLCERTTYPE = 10255;
+  static const int CURLOPT_PROXY_SSLKEY = 10256;
+  static const int CURLOPT_PROXY_SSLKEYTYPE = 10257;
+  static const int CURLOPT_PROXY_KEYPASSWD = 10258;
+  static const int CURLOPT_PROXY_SSL_CIPHER_LIST = 10259;
+  static const int CURLOPT_PROXY_CRLFILE = 10260;
+  static const int CURLOPT_PROXY_SSL_OPTIONS = 261;
+  static const int CURLOPT_PRE_PROXY = 10262;
+  static const int CURLOPT_PROXY_PINNEDPUBLICKEY = 10263;
+  static const int CURLOPT_ABSTRACT_UNIX_SOCKET = 10264;
+  static const int CURLOPT_SUPPRESS_CONNECT_HEADERS = 265;
+  static const int CURLOPT_REQUEST_TARGET = 10266;
+  static const int CURLOPT_SOCKS5_AUTH = 267;
+  static const int CURLOPT_SSH_COMPRESSION = 268;
+  static const int CURLOPT_MIMEPOST = 10269;
+  static const int CURLOPT_TIMEVALUE_LARGE = 30270;
+  static const int CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS = 271;
+  static const int CURLOPT_RESOLVER_START_FUNCTION = 20272;
+  static const int CURLOPT_RESOLVER_START_DATA = 10273;
+  static const int CURLOPT_HAPROXYPROTOCOL = 274;
+  static const int CURLOPT_DNS_SHUFFLE_ADDRESSES = 275;
+  static const int CURLOPT_TLS13_CIPHERS = 10276;
+  static const int CURLOPT_PROXY_TLS13_CIPHERS = 10277;
+  static const int CURLOPT_DISALLOW_USERNAME_IN_URL = 278;
+  static const int CURLOPT_DOH_URL = 10279;
+  static const int CURLOPT_UPLOAD_BUFFERSIZE = 280;
+  static const int CURLOPT_UPKEEP_INTERVAL_MS = 281;
+  static const int CURLOPT_CURLU = 10282;
+  static const int CURLOPT_TRAILERFUNCTION = 20283;
+  static const int CURLOPT_TRAILERDATA = 10284;
+  static const int CURLOPT_HTTP09_ALLOWED = 285;
+  static const int CURLOPT_ALTSVC_CTRL = 286;
+  static const int CURLOPT_ALTSVC = 10287;
+  static const int CURLOPT_MAXAGE_CONN = 288;
+  static const int CURLOPT_SASL_AUTHZID = 10289;
+  static const int CURLOPT_MAIL_RCPT_ALLLOWFAILS = 290;
+  static const int CURLOPT_SSLCERT_BLOB = 40291;
+  static const int CURLOPT_SSLKEY_BLOB = 40292;
+  static const int CURLOPT_PROXY_SSLCERT_BLOB = 40293;
+  static const int CURLOPT_PROXY_SSLKEY_BLOB = 40294;
+  static const int CURLOPT_ISSUERCERT_BLOB = 40295;
+  static const int CURLOPT_PROXY_ISSUERCERT = 10296;
+  static const int CURLOPT_PROXY_ISSUERCERT_BLOB = 40297;
+  static const int CURLOPT_SSL_EC_CURVES = 10298;
+  static const int CURLOPT_HSTS_CTRL = 299;
+  static const int CURLOPT_HSTS = 10300;
+  static const int CURLOPT_HSTSREADFUNCTION = 20301;
+  static const int CURLOPT_HSTSREADDATA = 10302;
+  static const int CURLOPT_HSTSWRITEFUNCTION = 20303;
+  static const int CURLOPT_HSTSWRITEDATA = 10304;
+  static const int CURLOPT_AWS_SIGV4 = 10305;
+  static const int CURLOPT_DOH_SSL_VERIFYPEER = 306;
+  static const int CURLOPT_DOH_SSL_VERIFYHOST = 307;
+  static const int CURLOPT_DOH_SSL_VERIFYSTATUS = 308;
+  static const int CURLOPT_LASTENTRY = 309;
+}
+
+abstract class CURL_NETRC_OPTION {
+  static const int CURL_NETRC_IGNORED = 0;
+  static const int CURL_NETRC_OPTIONAL = 1;
+  static const int CURL_NETRC_REQUIRED = 2;
+  static const int CURL_NETRC_LAST = 3;
+}
+
+abstract class CURL_TLSAUTH {
+  static const int CURL_TLSAUTH_NONE = 0;
+  static const int CURL_TLSAUTH_SRP = 1;
+  static const int CURL_TLSAUTH_LAST = 2;
+}
+
+abstract class curl_TimeCond {
+  static const int CURL_TIMECOND_NONE = 0;
+  static const int CURL_TIMECOND_IFMODSINCE = 1;
+  static const int CURL_TIMECOND_IFUNMODSINCE = 2;
+  static const int CURL_TIMECOND_LASTMOD = 3;
+  static const int CURL_TIMECOND_LAST = 4;
+}
+
+class curl_mime extends ffi.Opaque {}
+
+class curl_mimepart extends ffi.Opaque {}
+
+abstract class CURLformoption {
+  static const int CURLFORM_NOTHING = 0;
+
+  /// the first one is unused
+  static const int CURLFORM_COPYNAME = 1;
+  static const int CURLFORM_PTRNAME = 2;
+  static const int CURLFORM_NAMELENGTH = 3;
+  static const int CURLFORM_COPYCONTENTS = 4;
+  static const int CURLFORM_PTRCONTENTS = 5;
+  static const int CURLFORM_CONTENTSLENGTH = 6;
+  static const int CURLFORM_FILECONTENT = 7;
+  static const int CURLFORM_ARRAY = 8;
+  static const int CURLFORM_OBSOLETE = 9;
+  static const int CURLFORM_FILE = 10;
+  static const int CURLFORM_BUFFER = 11;
+  static const int CURLFORM_BUFFERPTR = 12;
+  static const int CURLFORM_BUFFERLENGTH = 13;
+  static const int CURLFORM_CONTENTTYPE = 14;
+  static const int CURLFORM_CONTENTHEADER = 15;
+  static const int CURLFORM_FILENAME = 16;
+  static const int CURLFORM_END = 17;
+  static const int CURLFORM_OBSOLETE2 = 18;
+  static const int CURLFORM_STREAM = 19;
+  static const int CURLFORM_CONTENTLEN = 20;
+  static const int CURLFORM_LASTENTRY = 21;
+}
+
+class curl_forms extends ffi.Struct {
+  @ffi.Int32()
+  external int option;
+
+  external ffi.Pointer<ffi.Int8> value;
+}
+
+abstract class CURLFORMcode {
+  static const int CURL_FORMADD_OK = 0;
+  static const int CURL_FORMADD_MEMORY = 1;
+  static const int CURL_FORMADD_OPTION_TWICE = 2;
+  static const int CURL_FORMADD_NULL = 3;
+  static const int CURL_FORMADD_UNKNOWN_OPTION = 4;
+  static const int CURL_FORMADD_INCOMPLETE = 5;
+  static const int CURL_FORMADD_ILLEGAL_ARRAY = 6;
+  static const int CURL_FORMADD_DISABLED = 7;
+  static const int CURL_FORMADD_LAST = 8;
+}
+
+class curl_ssl_backend extends ffi.Struct {
+  @ffi.Int32()
+  external int id;
+
+  external ffi.Pointer<ffi.Int8> name;
+}
+
+abstract class CURLsslset {
+  static const int CURLSSLSET_OK = 0;
+  static const int CURLSSLSET_UNKNOWN_BACKEND = 1;
+  static const int CURLSSLSET_TOO_LATE = 2;
+  static const int CURLSSLSET_NO_BACKENDS = 3;
+}
+
+class curl_certinfo extends ffi.Struct {
+  @ffi.Int32()
+  external int num_of_certs;
+
+  external ffi.Pointer<ffi.Pointer<curl_slist>> certinfo;
+}
+
+class curl_tlssessioninfo extends ffi.Struct {
+  @ffi.Int32()
+  external int backend;
+
+  external ffi.Pointer<ffi.Void> internals;
+}
+
+abstract class CURLINFO {
+  static const int CURLINFO_NONE = 0;
+  static const int CURLINFO_EFFECTIVE_URL = 1048577;
+  static const int CURLINFO_RESPONSE_CODE = 2097154;
+  static const int CURLINFO_TOTAL_TIME = 3145731;
+  static const int CURLINFO_NAMELOOKUP_TIME = 3145732;
+  static const int CURLINFO_CONNECT_TIME = 3145733;
+  static const int CURLINFO_PRETRANSFER_TIME = 3145734;
+  static const int CURLINFO_SIZE_UPLOAD = 3145735;
+  static const int CURLINFO_SIZE_UPLOAD_T = 6291463;
+  static const int CURLINFO_SIZE_DOWNLOAD = 3145736;
+  static const int CURLINFO_SIZE_DOWNLOAD_T = 6291464;
+  static const int CURLINFO_SPEED_DOWNLOAD = 3145737;
+  static const int CURLINFO_SPEED_DOWNLOAD_T = 6291465;
+  static const int CURLINFO_SPEED_UPLOAD = 3145738;
+  static const int CURLINFO_SPEED_UPLOAD_T = 6291466;
+  static const int CURLINFO_HEADER_SIZE = 2097163;
+  static const int CURLINFO_REQUEST_SIZE = 2097164;
+  static const int CURLINFO_SSL_VERIFYRESULT = 2097165;
+  static const int CURLINFO_FILETIME = 2097166;
+  static const int CURLINFO_FILETIME_T = 6291470;
+  static const int CURLINFO_CONTENT_LENGTH_DOWNLOAD = 3145743;
+  static const int CURLINFO_CONTENT_LENGTH_DOWNLOAD_T = 6291471;
+  static const int CURLINFO_CONTENT_LENGTH_UPLOAD = 3145744;
+  static const int CURLINFO_CONTENT_LENGTH_UPLOAD_T = 6291472;
+  static const int CURLINFO_STARTTRANSFER_TIME = 3145745;
+  static const int CURLINFO_CONTENT_TYPE = 1048594;
+  static const int CURLINFO_REDIRECT_TIME = 3145747;
+  static const int CURLINFO_REDIRECT_COUNT = 2097172;
+  static const int CURLINFO_PRIVATE = 1048597;
+  static const int CURLINFO_HTTP_CONNECTCODE = 2097174;
+  static const int CURLINFO_HTTPAUTH_AVAIL = 2097175;
+  static const int CURLINFO_PROXYAUTH_AVAIL = 2097176;
+  static const int CURLINFO_OS_ERRNO = 2097177;
+  static const int CURLINFO_NUM_CONNECTS = 2097178;
+  static const int CURLINFO_SSL_ENGINES = 4194331;
+  static const int CURLINFO_COOKIELIST = 4194332;
+  static const int CURLINFO_LASTSOCKET = 2097181;
+  static const int CURLINFO_FTP_ENTRY_PATH = 1048606;
+  static const int CURLINFO_REDIRECT_URL = 1048607;
+  static const int CURLINFO_PRIMARY_IP = 1048608;
+  static const int CURLINFO_APPCONNECT_TIME = 3145761;
+  static const int CURLINFO_CERTINFO = 4194338;
+  static const int CURLINFO_CONDITION_UNMET = 2097187;
+  static const int CURLINFO_RTSP_SESSION_ID = 1048612;
+  static const int CURLINFO_RTSP_CLIENT_CSEQ = 2097189;
+  static const int CURLINFO_RTSP_SERVER_CSEQ = 2097190;
+  static const int CURLINFO_RTSP_CSEQ_RECV = 2097191;
+  static const int CURLINFO_PRIMARY_PORT = 2097192;
+  static const int CURLINFO_LOCAL_IP = 1048617;
+  static const int CURLINFO_LOCAL_PORT = 2097194;
+  static const int CURLINFO_TLS_SESSION = 4194347;
+  static const int CURLINFO_ACTIVESOCKET = 5242924;
+  static const int CURLINFO_TLS_SSL_PTR = 4194349;
+  static const int CURLINFO_HTTP_VERSION = 2097198;
+  static const int CURLINFO_PROXY_SSL_VERIFYRESULT = 2097199;
+  static const int CURLINFO_PROTOCOL = 2097200;
+  static const int CURLINFO_SCHEME = 1048625;
+  static const int CURLINFO_TOTAL_TIME_T = 6291506;
+  static const int CURLINFO_NAMELOOKUP_TIME_T = 6291507;
+  static const int CURLINFO_CONNECT_TIME_T = 6291508;
+  static const int CURLINFO_PRETRANSFER_TIME_T = 6291509;
+  static const int CURLINFO_STARTTRANSFER_TIME_T = 6291510;
+  static const int CURLINFO_REDIRECT_TIME_T = 6291511;
+  static const int CURLINFO_APPCONNECT_TIME_T = 6291512;
+  static const int CURLINFO_RETRY_AFTER = 6291513;
+  static const int CURLINFO_EFFECTIVE_METHOD = 1048634;
+  static const int CURLINFO_PROXY_ERROR = 2097211;
+  static const int CURLINFO_REFERER = 1048636;
+  static const int CURLINFO_LASTONE = 60;
+}
+
+abstract class curl_closepolicy {
+  static const int CURLCLOSEPOLICY_NONE = 0;
+  static const int CURLCLOSEPOLICY_OLDEST = 1;
+  static const int CURLCLOSEPOLICY_LEAST_RECENTLY_USED = 2;
+  static const int CURLCLOSEPOLICY_LEAST_TRAFFIC = 3;
+  static const int CURLCLOSEPOLICY_SLOWEST = 4;
+  static const int CURLCLOSEPOLICY_CALLBACK = 5;
+  static const int CURLCLOSEPOLICY_LAST = 6;
+}
+
+/// Setup defines, protos etc for the sharing stuff.
+abstract class curl_lock_data {
+  static const int CURL_LOCK_DATA_NONE = 0;
+  static const int CURL_LOCK_DATA_SHARE = 1;
+  static const int CURL_LOCK_DATA_COOKIE = 2;
+  static const int CURL_LOCK_DATA_DNS = 3;
+  static const int CURL_LOCK_DATA_SSL_SESSION = 4;
+  static const int CURL_LOCK_DATA_CONNECT = 5;
+  static const int CURL_LOCK_DATA_PSL = 6;
+  static const int CURL_LOCK_DATA_LAST = 7;
+}
+
+abstract class curl_lock_access {
+  static const int CURL_LOCK_ACCESS_NONE = 0;
+  static const int CURL_LOCK_ACCESS_SHARED = 1;
+  static const int CURL_LOCK_ACCESS_SINGLE = 2;
+  static const int CURL_LOCK_ACCESS_LAST = 3;
+}
+
+abstract class CURLSHcode {
+  static const int CURLSHE_OK = 0;
+  static const int CURLSHE_BAD_OPTION = 1;
+  static const int CURLSHE_IN_USE = 2;
+  static const int CURLSHE_INVALID = 3;
+  static const int CURLSHE_NOMEM = 4;
+  static const int CURLSHE_NOT_BUILT_IN = 5;
+  static const int CURLSHE_LAST = 6;
+}
+
+abstract class CURLSHoption {
+  static const int CURLSHOPT_NONE = 0;
+  static const int CURLSHOPT_SHARE = 1;
+  static const int CURLSHOPT_UNSHARE = 2;
+  static const int CURLSHOPT_LOCKFUNC = 3;
+  static const int CURLSHOPT_UNLOCKFUNC = 4;
+  static const int CURLSHOPT_USERDATA = 5;
+  static const int CURLSHOPT_LAST = 6;
+}
+
+/// Structures for querying information about the curl library at runtime.
+abstract class CURLversion {
+  static const int CURLVERSION_FIRST = 0;
+  static const int CURLVERSION_SECOND = 1;
+  static const int CURLVERSION_THIRD = 2;
+  static const int CURLVERSION_FOURTH = 3;
+  static const int CURLVERSION_FIFTH = 4;
+  static const int CURLVERSION_SIXTH = 5;
+  static const int CURLVERSION_SEVENTH = 6;
+  static const int CURLVERSION_EIGHTH = 7;
+  static const int CURLVERSION_NINTH = 8;
+  static const int CURLVERSION_LAST = 9;
+}
+
+class curl_version_info_data extends ffi.Struct {
+  @ffi.Int32()
+  external int age;
+
+  external ffi.Pointer<ffi.Int8> version;
+
+  @ffi.Uint32()
+  external int version_num;
+
+  external ffi.Pointer<ffi.Int8> host;
+
+  @ffi.Int32()
+  external int features;
+
+  external ffi.Pointer<ffi.Int8> ssl_version;
+
+  @ffi.Int64()
+  external int ssl_version_num;
+
+  external ffi.Pointer<ffi.Int8> libz_version;
+
+  external ffi.Pointer<ffi.Pointer<ffi.Int8>> protocols;
+
+  external ffi.Pointer<ffi.Int8> ares;
+
+  @ffi.Int32()
+  external int ares_num;
+
+  external ffi.Pointer<ffi.Int8> libidn;
+
+  @ffi.Int32()
+  external int iconv_ver_num;
+
+  external ffi.Pointer<ffi.Int8> libssh_version;
+
+  @ffi.Uint32()
+  external int brotli_ver_num;
+
+  external ffi.Pointer<ffi.Int8> brotli_version;
+
+  @ffi.Uint32()
+  external int nghttp2_ver_num;
+
+  external ffi.Pointer<ffi.Int8> nghttp2_version;
+
+  external ffi.Pointer<ffi.Int8> quic_version;
+
+  external ffi.Pointer<ffi.Int8> cainfo;
+
+  external ffi.Pointer<ffi.Int8> capath;
+
+  @ffi.Uint32()
+  external int zstd_ver_num;
+
+  external ffi.Pointer<ffi.Int8> zstd_version;
+
+  external ffi.Pointer<ffi.Int8> hyper_version;
+}
+
+class curl_blob extends ffi.Struct {
+  external ffi.Pointer<ffi.Void> data;
+
+  @ffi.Uint64()
+  external int len;
+
+  @ffi.Uint32()
+  external int flags;
+}
+
+abstract class CURLMcode {
+  static const int CURLM_CALL_MULTI_PERFORM = -1;
+  static const int CURLM_OK = 0;
+  static const int CURLM_BAD_HANDLE = 1;
+  static const int CURLM_BAD_EASY_HANDLE = 2;
+  static const int CURLM_OUT_OF_MEMORY = 3;
+  static const int CURLM_INTERNAL_ERROR = 4;
+  static const int CURLM_BAD_SOCKET = 5;
+  static const int CURLM_UNKNOWN_OPTION = 6;
+  static const int CURLM_ADDED_ALREADY = 7;
+  static const int CURLM_RECURSIVE_API_CALL = 8;
+  static const int CURLM_WAKEUP_FAILURE = 9;
+  static const int CURLM_BAD_FUNCTION_ARGUMENT = 10;
+  static const int CURLM_LAST = 11;
+}
+
+abstract class CURLMSG {
+  static const int CURLMSG_NONE = 0;
+  static const int CURLMSG_DONE = 1;
+  static const int CURLMSG_LAST = 2;
+}
+
+class CURLMsg extends ffi.Opaque {}
+
+class curl_waitfd extends ffi.Struct {
+  @ffi.Int32()
+  external int fd;
+
+  @ffi.Int16()
+  external int events;
+
+  @ffi.Int16()
+  external int revents;
+}
+
+abstract class CURLMoption {
+  static const int CURLMOPT_SOCKETFUNCTION = 20001;
+  static const int CURLMOPT_SOCKETDATA = 10002;
+  static const int CURLMOPT_PIPELINING = 3;
+  static const int CURLMOPT_TIMERFUNCTION = 20004;
+  static const int CURLMOPT_TIMERDATA = 10005;
+  static const int CURLMOPT_MAXCONNECTS = 6;
+  static const int CURLMOPT_MAX_HOST_CONNECTIONS = 7;
+  static const int CURLMOPT_MAX_PIPELINE_LENGTH = 8;
+  static const int CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE = 30009;
+  static const int CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE = 30010;
+  static const int CURLMOPT_PIPELINING_SITE_BL = 10011;
+  static const int CURLMOPT_PIPELINING_SERVER_BL = 10012;
+  static const int CURLMOPT_MAX_TOTAL_CONNECTIONS = 13;
+  static const int CURLMOPT_PUSHFUNCTION = 20014;
+  static const int CURLMOPT_PUSHDATA = 10015;
+  static const int CURLMOPT_MAX_CONCURRENT_STREAMS = 16;
+  static const int CURLMOPT_LASTENTRY = 17;
+}
+
+class curl_pushheaders extends ffi.Opaque {}
+
+abstract class CURLUcode {
+  static const int CURLUE_OK = 0;
+  static const int CURLUE_BAD_HANDLE = 1;
+  static const int CURLUE_BAD_PARTPOINTER = 2;
+  static const int CURLUE_MALFORMED_INPUT = 3;
+  static const int CURLUE_BAD_PORT_NUMBER = 4;
+  static const int CURLUE_UNSUPPORTED_SCHEME = 5;
+  static const int CURLUE_URLDECODE = 6;
+  static const int CURLUE_OUT_OF_MEMORY = 7;
+  static const int CURLUE_USER_NOT_ALLOWED = 8;
+  static const int CURLUE_UNKNOWN_PART = 9;
+  static const int CURLUE_NO_SCHEME = 10;
+  static const int CURLUE_NO_USER = 11;
+  static const int CURLUE_NO_PASSWORD = 12;
+  static const int CURLUE_NO_OPTIONS = 13;
+  static const int CURLUE_NO_HOST = 14;
+  static const int CURLUE_NO_PORT = 15;
+  static const int CURLUE_NO_QUERY = 16;
+  static const int CURLUE_NO_FRAGMENT = 17;
+}
+
+abstract class CURLUPart {
+  static const int CURLUPART_URL = 0;
+  static const int CURLUPART_SCHEME = 1;
+  static const int CURLUPART_USER = 2;
+  static const int CURLUPART_PASSWORD = 3;
+  static const int CURLUPART_OPTIONS = 4;
+  static const int CURLUPART_HOST = 5;
+  static const int CURLUPART_PORT = 6;
+  static const int CURLUPART_PATH = 7;
+  static const int CURLUPART_QUERY = 8;
+  static const int CURLUPART_FRAGMENT = 9;
+  static const int CURLUPART_ZONEID = 10;
+}
+
+class Curl_URL extends ffi.Opaque {}
+
+const int CURL_HTTP_VERSION_NONE = 0;
+
+const int CURL_HTTP_VERSION_1_0 = 1;
+
+const int CURL_HTTP_VERSION_1_1 = 2;
+
+const int CURL_HTTP_VERSION_2_0 = 3;
+
+const int CURL_HTTP_VERSION_2TLS = 4;
+
+const int CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE = 5;
+
+const int CURL_HTTP_VERSION_3 = 30;
+
+const int CURL_HTTP_VERSION_LAST = 31;
+
+const int CURL_RTSPREQ_NONE = 0;
+
+const int CURL_RTSPREQ_OPTIONS = 1;
+
+const int CURL_RTSPREQ_DESCRIBE = 2;
+
+const int CURL_RTSPREQ_ANNOUNCE = 3;
+
+const int CURL_RTSPREQ_SETUP = 4;
+
+const int CURL_RTSPREQ_PLAY = 5;
+
+const int CURL_RTSPREQ_PAUSE = 6;
+
+const int CURL_RTSPREQ_TEARDOWN = 7;
+
+const int CURL_RTSPREQ_GET_PARAMETER = 8;
+
+const int CURL_RTSPREQ_SET_PARAMETER = 9;
+
+const int CURL_RTSPREQ_RECORD = 10;
+
+const int CURL_RTSPREQ_RECEIVE = 11;
+
+const int CURL_RTSPREQ_LAST = 12;
+
+const int CURL_SSLVERSION_DEFAULT = 0;
+
+const int CURL_SSLVERSION_TLSv1 = 1;
+
+const int CURL_SSLVERSION_SSLv2 = 2;
+
+const int CURL_SSLVERSION_SSLv3 = 3;
+
+const int CURL_SSLVERSION_TLSv1_0 = 4;
+
+const int CURL_SSLVERSION_TLSv1_1 = 5;
+
+const int CURL_SSLVERSION_TLSv1_2 = 6;
+
+const int CURL_SSLVERSION_TLSv1_3 = 7;
+
+const int CURL_SSLVERSION_LAST = 8;
+
+const int CURL_SSLVERSION_MAX_NONE = 0;
+
+const int CURL_SSLVERSION_MAX_DEFAULT = 65536;
+
+const int CURL_SSLVERSION_MAX_TLSv1_0 = 262144;
+
+const int CURL_SSLVERSION_MAX_TLSv1_1 = 327680;
+
+const int CURL_SSLVERSION_MAX_TLSv1_2 = 393216;
+
+const int CURL_SSLVERSION_MAX_TLSv1_3 = 458752;
+
+const int CURL_SSLVERSION_MAX_LAST = 524288;
+
+const int __DARWIN_ONLY_64_BIT_INO_T = 0;
+
+const int __DARWIN_ONLY_UNIX_CONFORMANCE = 1;
+
+const int __DARWIN_ONLY_VERS_1050 = 0;
+
+const int __DARWIN_UNIX03 = 1;
+
+const int __DARWIN_64_BIT_INO_T = 1;
+
+const int __DARWIN_VERS_1050 = 1;
+
+const int __DARWIN_NON_CANCELABLE = 0;
+
+const String __DARWIN_SUF_64_BIT_INO_T = '\$INODE64';
+
+const String __DARWIN_SUF_1050 = '\$1050';
+
+const String __DARWIN_SUF_EXTSN = '\$DARWIN_EXTSN';
+
+const int __DARWIN_C_ANSI = 4096;
+
+const int __DARWIN_C_FULL = 900000;
+
+const int __DARWIN_C_LEVEL = 900000;
+
+const int __STDC_WANT_LIB_EXT1__ = 1;
+
+const int __DARWIN_NO_LONG_LONG = 0;
+
+const int _DARWIN_FEATURE_64_BIT_INODE = 1;
+
+const int _DARWIN_FEATURE_ONLY_UNIX_CONFORMANCE = 1;
+
+const int _DARWIN_FEATURE_UNIX_CONFORMANCE = 3;
+
+const int USER_ADDR_NULL = 0;
+
+const int __DARWIN_NULL = 0;
+
+const int __PTHREAD_SIZE__ = 8176;
+
+const int __PTHREAD_ATTR_SIZE__ = 56;
+
+const int __PTHREAD_MUTEXATTR_SIZE__ = 8;
+
+const int __PTHREAD_MUTEX_SIZE__ = 56;
+
+const int __PTHREAD_CONDATTR_SIZE__ = 8;
+
+const int __PTHREAD_COND_SIZE__ = 40;
+
+const int __PTHREAD_ONCE_SIZE__ = 8;
+
+const int __PTHREAD_RWLOCK_SIZE__ = 192;
+
+const int __PTHREAD_RWLOCKATTR_SIZE__ = 16;
+
+const int _QUAD_HIGHWORD = 1;
+
+const int _QUAD_LOWWORD = 0;
+
+const int __DARWIN_LITTLE_ENDIAN = 1234;
+
+const int __DARWIN_BIG_ENDIAN = 4321;
+
+const int __DARWIN_PDP_ENDIAN = 3412;
+
+const int __DARWIN_BYTE_ORDER = 1234;
+
+const int LITTLE_ENDIAN = 1234;
+
+const int BIG_ENDIAN = 4321;
+
+const int PDP_ENDIAN = 3412;
+
+const int BYTE_ORDER = 1234;
+
+const int __API_TO_BE_DEPRECATED = 100000;
+
+const int __MAC_10_0 = 1000;
+
+const int __MAC_10_1 = 1010;
+
+const int __MAC_10_2 = 1020;
+
+const int __MAC_10_3 = 1030;
+
+const int __MAC_10_4 = 1040;
+
+const int __MAC_10_5 = 1050;
+
+const int __MAC_10_6 = 1060;
+
+const int __MAC_10_7 = 1070;
+
+const int __MAC_10_8 = 1080;
+
+const int __MAC_10_9 = 1090;
+
+const int __MAC_10_10 = 101000;
+
+const int __MAC_10_10_2 = 101002;
+
+const int __MAC_10_10_3 = 101003;
+
+const int __MAC_10_11 = 101100;
+
+const int __MAC_10_11_2 = 101102;
+
+const int __MAC_10_11_3 = 101103;
+
+const int __MAC_10_11_4 = 101104;
+
+const int __MAC_10_12 = 101200;
+
+const int __MAC_10_12_1 = 101201;
+
+const int __MAC_10_12_2 = 101202;
+
+const int __MAC_10_12_4 = 101204;
+
+const int __MAC_10_13 = 101300;
+
+const int __MAC_10_13_1 = 101301;
+
+const int __MAC_10_13_2 = 101302;
+
+const int __MAC_10_13_4 = 101304;
+
+const int __MAC_10_14 = 101400;
+
+const int __MAC_10_14_1 = 101401;
+
+const int __MAC_10_14_4 = 101404;
+
+const int __MAC_10_14_6 = 101406;
+
+const int __MAC_10_15 = 101500;
+
+const int __MAC_10_15_1 = 101501;
+
+const int __MAC_10_15_4 = 101504;
+
+const int __MAC_10_16 = 101600;
+
+const int __MAC_11_0 = 110000;
+
+const int __MAC_11_1 = 110100;
+
+const int __MAC_11_3 = 110300;
+
+const int __IPHONE_2_0 = 20000;
+
+const int __IPHONE_2_1 = 20100;
+
+const int __IPHONE_2_2 = 20200;
+
+const int __IPHONE_3_0 = 30000;
+
+const int __IPHONE_3_1 = 30100;
+
+const int __IPHONE_3_2 = 30200;
+
+const int __IPHONE_4_0 = 40000;
+
+const int __IPHONE_4_1 = 40100;
+
+const int __IPHONE_4_2 = 40200;
+
+const int __IPHONE_4_3 = 40300;
+
+const int __IPHONE_5_0 = 50000;
+
+const int __IPHONE_5_1 = 50100;
+
+const int __IPHONE_6_0 = 60000;
+
+const int __IPHONE_6_1 = 60100;
+
+const int __IPHONE_7_0 = 70000;
+
+const int __IPHONE_7_1 = 70100;
+
+const int __IPHONE_8_0 = 80000;
+
+const int __IPHONE_8_1 = 80100;
+
+const int __IPHONE_8_2 = 80200;
+
+const int __IPHONE_8_3 = 80300;
+
+const int __IPHONE_8_4 = 80400;
+
+const int __IPHONE_9_0 = 90000;
+
+const int __IPHONE_9_1 = 90100;
+
+const int __IPHONE_9_2 = 90200;
+
+const int __IPHONE_9_3 = 90300;
+
+const int __IPHONE_10_0 = 100000;
+
+const int __IPHONE_10_1 = 100100;
+
+const int __IPHONE_10_2 = 100200;
+
+const int __IPHONE_10_3 = 100300;
+
+const int __IPHONE_11_0 = 110000;
+
+const int __IPHONE_11_1 = 110100;
+
+const int __IPHONE_11_2 = 110200;
+
+const int __IPHONE_11_3 = 110300;
+
+const int __IPHONE_11_4 = 110400;
+
+const int __IPHONE_12_0 = 120000;
+
+const int __IPHONE_12_1 = 120100;
+
+const int __IPHONE_12_2 = 120200;
+
+const int __IPHONE_12_3 = 120300;
+
+const int __IPHONE_12_4 = 120400;
+
+const int __IPHONE_13_0 = 130000;
+
+const int __IPHONE_13_1 = 130100;
+
+const int __IPHONE_13_2 = 130200;
+
+const int __IPHONE_13_3 = 130300;
+
+const int __IPHONE_13_4 = 130400;
+
+const int __IPHONE_13_5 = 130500;
+
+const int __IPHONE_13_6 = 130600;
+
+const int __IPHONE_13_7 = 130700;
+
+const int __IPHONE_14_0 = 140000;
+
+const int __IPHONE_14_1 = 140100;
+
+const int __IPHONE_14_2 = 140200;
+
+const int __IPHONE_14_3 = 140300;
+
+const int __IPHONE_14_5 = 140500;
+
+const int __TVOS_9_0 = 90000;
+
+const int __TVOS_9_1 = 90100;
+
+const int __TVOS_9_2 = 90200;
+
+const int __TVOS_10_0 = 100000;
+
+const int __TVOS_10_0_1 = 100001;
+
+const int __TVOS_10_1 = 100100;
+
+const int __TVOS_10_2 = 100200;
+
+const int __TVOS_11_0 = 110000;
+
+const int __TVOS_11_1 = 110100;
+
+const int __TVOS_11_2 = 110200;
+
+const int __TVOS_11_3 = 110300;
+
+const int __TVOS_11_4 = 110400;
+
+const int __TVOS_12_0 = 120000;
+
+const int __TVOS_12_1 = 120100;
+
+const int __TVOS_12_2 = 120200;
+
+const int __TVOS_12_3 = 120300;
+
+const int __TVOS_12_4 = 120400;
+
+const int __TVOS_13_0 = 130000;
+
+const int __TVOS_13_2 = 130200;
+
+const int __TVOS_13_3 = 130300;
+
+const int __TVOS_13_4 = 130400;
+
+const int __TVOS_14_0 = 140000;
+
+const int __TVOS_14_1 = 140100;
+
+const int __TVOS_14_2 = 140200;
+
+const int __TVOS_14_3 = 140300;
+
+const int __TVOS_14_5 = 140500;
+
+const int __WATCHOS_1_0 = 10000;
+
+const int __WATCHOS_2_0 = 20000;
+
+const int __WATCHOS_2_1 = 20100;
+
+const int __WATCHOS_2_2 = 20200;
+
+const int __WATCHOS_3_0 = 30000;
+
+const int __WATCHOS_3_1 = 30100;
+
+const int __WATCHOS_3_1_1 = 30101;
+
+const int __WATCHOS_3_2 = 30200;
+
+const int __WATCHOS_4_0 = 40000;
+
+const int __WATCHOS_4_1 = 40100;
+
+const int __WATCHOS_4_2 = 40200;
+
+const int __WATCHOS_4_3 = 40300;
+
+const int __WATCHOS_5_0 = 50000;
+
+const int __WATCHOS_5_1 = 50100;
+
+const int __WATCHOS_5_2 = 50200;
+
+const int __WATCHOS_5_3 = 50300;
+
+const int __WATCHOS_6_0 = 60000;
+
+const int __WATCHOS_6_1 = 60100;
+
+const int __WATCHOS_6_2 = 60200;
+
+const int __WATCHOS_7_0 = 70000;
+
+const int __WATCHOS_7_1 = 70100;
+
+const int __WATCHOS_7_2 = 70200;
+
+const int __WATCHOS_7_3 = 70300;
+
+const int __WATCHOS_7_4 = 70400;
+
+const int MAC_OS_X_VERSION_10_0 = 1000;
+
+const int MAC_OS_X_VERSION_10_1 = 1010;
+
+const int MAC_OS_X_VERSION_10_2 = 1020;
+
+const int MAC_OS_X_VERSION_10_3 = 1030;
+
+const int MAC_OS_X_VERSION_10_4 = 1040;
+
+const int MAC_OS_X_VERSION_10_5 = 1050;
+
+const int MAC_OS_X_VERSION_10_6 = 1060;
+
+const int MAC_OS_X_VERSION_10_7 = 1070;
+
+const int MAC_OS_X_VERSION_10_8 = 1080;
+
+const int MAC_OS_X_VERSION_10_9 = 1090;
+
+const int MAC_OS_X_VERSION_10_10 = 101000;
+
+const int MAC_OS_X_VERSION_10_10_2 = 101002;
+
+const int MAC_OS_X_VERSION_10_10_3 = 101003;
+
+const int MAC_OS_X_VERSION_10_11 = 101100;
+
+const int MAC_OS_X_VERSION_10_11_2 = 101102;
+
+const int MAC_OS_X_VERSION_10_11_3 = 101103;
+
+const int MAC_OS_X_VERSION_10_11_4 = 101104;
+
+const int MAC_OS_X_VERSION_10_12 = 101200;
+
+const int MAC_OS_X_VERSION_10_12_1 = 101201;
+
+const int MAC_OS_X_VERSION_10_12_2 = 101202;
+
+const int MAC_OS_X_VERSION_10_12_4 = 101204;
+
+const int MAC_OS_X_VERSION_10_13 = 101300;
+
+const int MAC_OS_X_VERSION_10_13_1 = 101301;
+
+const int MAC_OS_X_VERSION_10_13_2 = 101302;
+
+const int MAC_OS_X_VERSION_10_13_4 = 101304;
+
+const int MAC_OS_X_VERSION_10_14 = 101400;
+
+const int MAC_OS_X_VERSION_10_14_1 = 101401;
+
+const int MAC_OS_X_VERSION_10_14_4 = 101404;
+
+const int MAC_OS_X_VERSION_10_14_6 = 101406;
+
+const int MAC_OS_X_VERSION_10_15 = 101500;
+
+const int MAC_OS_X_VERSION_10_15_1 = 101501;
+
+const int MAC_OS_X_VERSION_10_16 = 101600;
+
+const int MAC_OS_VERSION_11_0 = 110000;
+
+const int __DRIVERKIT_19_0 = 190000;
+
+const int __DRIVERKIT_20_0 = 200000;
+
+const int __MAC_OS_X_VERSION_MIN_REQUIRED = 110000;
+
+const int __MAC_OS_X_VERSION_MAX_ALLOWED = 110300;
+
+const int __ENABLE_LEGACY_MAC_AVAILABILITY = 1;
+
+const int __DARWIN_FD_SETSIZE = 1024;
+
+const int __DARWIN_NBBY = 8;
+
+const int __DARWIN_NFDBITS = 32;
+
+const int NBBY = 8;
+
+const int NFDBITS = 32;
+
+const int FD_SETSIZE = 1024;
+
+const int CURLOT_FLAG_ALIAS = 1;
+
+const int __GNUC_VA_LIST = 1;
+
+const int __DARWIN_WCHAR_MAX = 2147483647;
+
+const int __DARWIN_WCHAR_MIN = -2147483648;
+
+const int __DARWIN_WEOF = -1;
+
+const int _FORTIFY_SOURCE = 2;
+
+const int NULL = 0;
+
+const int RENAME_SECLUDE = 1;
+
+const int RENAME_SWAP = 2;
+
+const int RENAME_EXCL = 4;
+
+const int __SLBF = 1;
+
+const int __SNBF = 2;
+
+const int __SRD = 4;
+
+const int __SWR = 8;
+
+const int __SRW = 16;
+
+const int __SEOF = 32;
+
+const int __SERR = 64;
+
+const int __SMBF = 128;
+
+const int __SAPP = 256;
+
+const int __SSTR = 512;
+
+const int __SOPT = 1024;
+
+const int __SNPT = 2048;
+
+const int __SOFF = 4096;
+
+const int __SMOD = 8192;
+
+const int __SALC = 16384;
+
+const int __SIGN = 32768;
+
+const int _IOFBF = 0;
+
+const int _IOLBF = 1;
+
+const int _IONBF = 2;
+
+const int BUFSIZ = 1024;
+
+const int EOF = -1;
+
+const int FOPEN_MAX = 20;
+
+const int FILENAME_MAX = 1024;
+
+const String P_tmpdir = '/var/tmp/';
+
+const int L_tmpnam = 1024;
+
+const int TMP_MAX = 308915776;
+
+const int SEEK_SET = 0;
+
+const int SEEK_CUR = 1;
+
+const int SEEK_END = 2;
+
+const int L_ctermid = 1024;
+
+const String LIBCURL_COPYRIGHT =
+    '1996 - 2021 Daniel Stenberg, <daniel@haxx.se>.';
+
+const String LIBCURL_VERSION = '7.76.1';
+
+const int LIBCURL_VERSION_MAJOR = 7;
+
+const int LIBCURL_VERSION_MINOR = 76;
+
+const int LIBCURL_VERSION_PATCH = 1;
+
+const int LIBCURL_VERSION_NUM = 478209;
+
+const String LIBCURL_TIMESTAMP = '2021-04-14';
+
+const String CURL_FORMAT_CURL_OFF_T = 'ld';
+
+const String CURL_FORMAT_CURL_OFF_TU = 'lu';
+
+const int CURL_PULL_SYS_TYPES_H = 1;
+
+const int CURL_PULL_SYS_SOCKET_H = 1;
+
+const int __DARWIN_ALIGNBYTES = 7;
+
+const int __DARWIN_ALIGNBYTES32 = 3;
+
+const int KEV_INET_SUBCLASS = 1;
+
+const int KEV_INET_NEW_ADDR = 1;
+
+const int KEV_INET_CHANGED_ADDR = 2;
+
+const int KEV_INET_ADDR_DELETED = 3;
+
+const int KEV_INET_SIFDSTADDR = 4;
+
+const int KEV_INET_SIFBRDADDR = 5;
+
+const int KEV_INET_SIFNETMASK = 6;
+
+const int KEV_INET_ARPCOLLISION = 7;
+
+const int KEV_INET_PORTINUSE = 8;
+
+const int KEV_INET_ARPRTRFAILURE = 9;
+
+const int KEV_INET_ARPRTRALIVE = 10;
+
+const int KEV_DL_SUBCLASS = 2;
+
+const int KEV_DL_SIFFLAGS = 1;
+
+const int KEV_DL_SIFMETRICS = 2;
+
+const int KEV_DL_SIFMTU = 3;
+
+const int KEV_DL_SIFPHYS = 4;
+
+const int KEV_DL_SIFMEDIA = 5;
+
+const int KEV_DL_SIFGENERIC = 6;
+
+const int KEV_DL_ADDMULTI = 7;
+
+const int KEV_DL_DELMULTI = 8;
+
+const int KEV_DL_IF_ATTACHED = 9;
+
+const int KEV_DL_IF_DETACHING = 10;
+
+const int KEV_DL_IF_DETACHED = 11;
+
+const int KEV_DL_LINK_OFF = 12;
+
+const int KEV_DL_LINK_ON = 13;
+
+const int KEV_DL_PROTO_ATTACHED = 14;
+
+const int KEV_DL_PROTO_DETACHED = 15;
+
+const int KEV_DL_LINK_ADDRESS_CHANGED = 16;
+
+const int KEV_DL_WAKEFLAGS_CHANGED = 17;
+
+const int KEV_DL_IF_IDLE_ROUTE_REFCNT = 18;
+
+const int KEV_DL_IFCAP_CHANGED = 19;
+
+const int KEV_DL_LINK_QUALITY_METRIC_CHANGED = 20;
+
+const int KEV_DL_NODE_PRESENCE = 21;
+
+const int KEV_DL_NODE_ABSENCE = 22;
+
+const int KEV_DL_MASTER_ELECTED = 23;
+
+const int KEV_DL_ISSUES = 24;
+
+const int KEV_DL_IFDELEGATE_CHANGED = 25;
+
+const int KEV_DL_AWDL_RESTRICTED = 26;
+
+const int KEV_DL_AWDL_UNRESTRICTED = 27;
+
+const int KEV_DL_RRC_STATE_CHANGED = 28;
+
+const int KEV_DL_QOS_MODE_CHANGED = 29;
+
+const int KEV_DL_LOW_POWER_MODE_CHANGED = 30;
+
+const int KEV_INET6_SUBCLASS = 6;
+
+const int KEV_INET6_NEW_USER_ADDR = 1;
+
+const int KEV_INET6_CHANGED_ADDR = 2;
+
+const int KEV_INET6_ADDR_DELETED = 3;
+
+const int KEV_INET6_NEW_LL_ADDR = 4;
+
+const int KEV_INET6_NEW_RTADV_ADDR = 5;
+
+const int KEV_INET6_DEFROUTER = 6;
+
+const int KEV_INET6_REQUEST_NAT64_PREFIX = 7;
+
+const int SOCK_STREAM = 1;
+
+const int SOCK_DGRAM = 2;
+
+const int SOCK_RAW = 3;
+
+const int SOCK_RDM = 4;
+
+const int SOCK_SEQPACKET = 5;
+
+const int SO_DEBUG = 1;
+
+const int SO_ACCEPTCONN = 2;
+
+const int SO_REUSEADDR = 4;
+
+const int SO_KEEPALIVE = 8;
+
+const int SO_DONTROUTE = 16;
+
+const int SO_BROADCAST = 32;
+
+const int SO_USELOOPBACK = 64;
+
+const int SO_LINGER = 128;
+
+const int SO_OOBINLINE = 256;
+
+const int SO_REUSEPORT = 512;
+
+const int SO_TIMESTAMP = 1024;
+
+const int SO_TIMESTAMP_MONOTONIC = 2048;
+
+const int SO_DONTTRUNC = 8192;
+
+const int SO_WANTMORE = 16384;
+
+const int SO_WANTOOBFLAG = 32768;
+
+const int SO_SNDBUF = 4097;
+
+const int SO_RCVBUF = 4098;
+
+const int SO_SNDLOWAT = 4099;
+
+const int SO_RCVLOWAT = 4100;
+
+const int SO_SNDTIMEO = 4101;
+
+const int SO_RCVTIMEO = 4102;
+
+const int SO_ERROR = 4103;
+
+const int SO_TYPE = 4104;
+
+const int SO_LABEL = 4112;
+
+const int SO_PEERLABEL = 4113;
+
+const int SO_NREAD = 4128;
+
+const int SO_NKE = 4129;
+
+const int SO_NOSIGPIPE = 4130;
+
+const int SO_NOADDRERR = 4131;
+
+const int SO_NWRITE = 4132;
+
+const int SO_REUSESHAREUID = 4133;
+
+const int SO_NOTIFYCONFLICT = 4134;
+
+const int SO_UPCALLCLOSEWAIT = 4135;
+
+const int SO_LINGER_SEC = 4224;
+
+const int SO_RANDOMPORT = 4226;
+
+const int SO_NP_EXTENSIONS = 4227;
+
+const int SO_NUMRCVPKT = 4370;
+
+const int SO_NET_SERVICE_TYPE = 4374;
+
+const int SO_NETSVC_MARKING_LEVEL = 4377;
+
+const int NET_SERVICE_TYPE_BE = 0;
+
+const int NET_SERVICE_TYPE_BK = 1;
+
+const int NET_SERVICE_TYPE_SIG = 2;
+
+const int NET_SERVICE_TYPE_VI = 3;
+
+const int NET_SERVICE_TYPE_VO = 4;
+
+const int NET_SERVICE_TYPE_RV = 5;
+
+const int NET_SERVICE_TYPE_AV = 6;
+
+const int NET_SERVICE_TYPE_OAM = 7;
+
+const int NET_SERVICE_TYPE_RD = 8;
+
+const int NETSVC_MRKNG_UNKNOWN = 0;
+
+const int NETSVC_MRKNG_LVL_L2 = 1;
+
+const int NETSVC_MRKNG_LVL_L3L2_ALL = 2;
+
+const int NETSVC_MRKNG_LVL_L3L2_BK = 3;
+
+const int SAE_ASSOCID_ANY = 0;
+
+const int SAE_ASSOCID_ALL = 4294967295;
+
+const int SAE_CONNID_ANY = 0;
+
+const int SAE_CONNID_ALL = 4294967295;
+
+const int CONNECT_RESUME_ON_READ_WRITE = 1;
+
+const int CONNECT_DATA_IDEMPOTENT = 2;
+
+const int CONNECT_DATA_AUTHENTICATED = 4;
+
+const int SONPX_SETOPTSHUT = 1;
+
+const int SOL_SOCKET = 65535;
+
+const int AF_UNSPEC = 0;
+
+const int AF_UNIX = 1;
+
+const int AF_LOCAL = 1;
+
+const int AF_INET = 2;
+
+const int AF_IMPLINK = 3;
+
+const int AF_PUP = 4;
+
+const int AF_CHAOS = 5;
+
+const int AF_NS = 6;
+
+const int AF_ISO = 7;
+
+const int AF_OSI = 7;
+
+const int AF_ECMA = 8;
+
+const int AF_DATAKIT = 9;
+
+const int AF_CCITT = 10;
+
+const int AF_SNA = 11;
+
+const int AF_DECnet = 12;
+
+const int AF_DLI = 13;
+
+const int AF_LAT = 14;
+
+const int AF_HYLINK = 15;
+
+const int AF_APPLETALK = 16;
+
+const int AF_ROUTE = 17;
+
+const int AF_LINK = 18;
+
+const int pseudo_AF_XTP = 19;
+
+const int AF_COIP = 20;
+
+const int AF_CNT = 21;
+
+const int pseudo_AF_RTIP = 22;
+
+const int AF_IPX = 23;
+
+const int AF_SIP = 24;
+
+const int pseudo_AF_PIP = 25;
+
+const int AF_NDRV = 27;
+
+const int AF_ISDN = 28;
+
+const int AF_E164 = 28;
+
+const int pseudo_AF_KEY = 29;
+
+const int AF_INET6 = 30;
+
+const int AF_NATM = 31;
+
+const int AF_SYSTEM = 32;
+
+const int AF_NETBIOS = 33;
+
+const int AF_PPP = 34;
+
+const int pseudo_AF_HDRCMPLT = 35;
+
+const int AF_RESERVED_36 = 36;
+
+const int AF_IEEE80211 = 37;
+
+const int AF_UTUN = 38;
+
+const int AF_VSOCK = 40;
+
+const int AF_MAX = 41;
+
+const int SOCK_MAXADDRLEN = 255;
+
+const int _SS_MAXSIZE = 128;
+
+const int _SS_ALIGNSIZE = 8;
+
+const int _SS_PAD1SIZE = 6;
+
+const int _SS_PAD2SIZE = 112;
+
+const int PF_UNSPEC = 0;
+
+const int PF_LOCAL = 1;
+
+const int PF_UNIX = 1;
+
+const int PF_INET = 2;
+
+const int PF_IMPLINK = 3;
+
+const int PF_PUP = 4;
+
+const int PF_CHAOS = 5;
+
+const int PF_NS = 6;
+
+const int PF_ISO = 7;
+
+const int PF_OSI = 7;
+
+const int PF_ECMA = 8;
+
+const int PF_DATAKIT = 9;
+
+const int PF_CCITT = 10;
+
+const int PF_SNA = 11;
+
+const int PF_DECnet = 12;
+
+const int PF_DLI = 13;
+
+const int PF_LAT = 14;
+
+const int PF_HYLINK = 15;
+
+const int PF_APPLETALK = 16;
+
+const int PF_ROUTE = 17;
+
+const int PF_LINK = 18;
+
+const int PF_XTP = 19;
+
+const int PF_COIP = 20;
+
+const int PF_CNT = 21;
+
+const int PF_SIP = 24;
+
+const int PF_IPX = 23;
+
+const int PF_RTIP = 22;
+
+const int PF_PIP = 25;
+
+const int PF_NDRV = 27;
+
+const int PF_ISDN = 28;
+
+const int PF_KEY = 29;
+
+const int PF_INET6 = 30;
+
+const int PF_NATM = 31;
+
+const int PF_SYSTEM = 32;
+
+const int PF_NETBIOS = 33;
+
+const int PF_PPP = 34;
+
+const int PF_RESERVED_36 = 36;
+
+const int PF_UTUN = 38;
+
+const int PF_VSOCK = 40;
+
+const int PF_MAX = 41;
+
+const int NET_MAXID = 41;
+
+const int NET_RT_DUMP = 1;
+
+const int NET_RT_FLAGS = 2;
+
+const int NET_RT_IFLIST = 3;
+
+const int NET_RT_STAT = 4;
+
+const int NET_RT_TRASH = 5;
+
+const int NET_RT_IFLIST2 = 6;
+
+const int NET_RT_DUMP2 = 7;
+
+const int NET_RT_FLAGS_PRIV = 10;
+
+const int NET_RT_MAXID = 11;
+
+const int SOMAXCONN = 128;
+
+const int MSG_OOB = 1;
+
+const int MSG_PEEK = 2;
+
+const int MSG_DONTROUTE = 4;
+
+const int MSG_EOR = 8;
+
+const int MSG_TRUNC = 16;
+
+const int MSG_CTRUNC = 32;
+
+const int MSG_WAITALL = 64;
+
+const int MSG_DONTWAIT = 128;
+
+const int MSG_EOF = 256;
+
+const int MSG_WAITSTREAM = 512;
+
+const int MSG_FLUSH = 1024;
+
+const int MSG_HOLD = 2048;
+
+const int MSG_SEND = 4096;
+
+const int MSG_HAVEMORE = 8192;
+
+const int MSG_RCVMORE = 16384;
+
+const int MSG_NEEDSA = 65536;
+
+const int MSG_NOSIGNAL = 524288;
+
+const int SCM_RIGHTS = 1;
+
+const int SCM_TIMESTAMP = 2;
+
+const int SCM_CREDS = 3;
+
+const int SCM_TIMESTAMP_MONOTONIC = 4;
+
+const int SHUT_RD = 0;
+
+const int SHUT_WR = 1;
+
+const int SHUT_RDWR = 2;
+
+const int __DARWIN_CLK_TCK = 100;
+
+const int CHAR_BIT = 8;
+
+const int MB_LEN_MAX = 6;
+
+const int CLK_TCK = 100;
+
+const int SCHAR_MAX = 127;
+
+const int SCHAR_MIN = -128;
+
+const int UCHAR_MAX = 255;
+
+const int CHAR_MAX = 127;
+
+const int CHAR_MIN = -128;
+
+const int USHRT_MAX = 65535;
+
+const int SHRT_MAX = 32767;
+
+const int SHRT_MIN = -32768;
+
+const int UINT_MAX = 4294967295;
+
+const int INT_MAX = 2147483647;
+
+const int INT_MIN = -2147483648;
+
+const int ULONG_MAX = -1;
+
+const int LONG_MAX = 9223372036854775807;
+
+const int LONG_MIN = -9223372036854775808;
+
+const int ULLONG_MAX = -1;
+
+const int LLONG_MAX = 9223372036854775807;
+
+const int LLONG_MIN = -9223372036854775808;
+
+const int LONG_BIT = 64;
+
+const int SSIZE_MAX = 9223372036854775807;
+
+const int WORD_BIT = 32;
+
+const int SIZE_T_MAX = -1;
+
+const int UQUAD_MAX = -1;
+
+const int QUAD_MAX = 9223372036854775807;
+
+const int QUAD_MIN = -9223372036854775808;
+
+const int ARG_MAX = 1048576;
+
+const int CHILD_MAX = 266;
+
+const int GID_MAX = 2147483647;
+
+const int LINK_MAX = 32767;
+
+const int MAX_CANON = 1024;
+
+const int MAX_INPUT = 1024;
+
+const int NAME_MAX = 255;
+
+const int NGROUPS_MAX = 16;
+
+const int UID_MAX = 2147483647;
+
+const int OPEN_MAX = 10240;
+
+const int PATH_MAX = 1024;
+
+const int PIPE_BUF = 512;
+
+const int BC_BASE_MAX = 99;
+
+const int BC_DIM_MAX = 2048;
+
+const int BC_SCALE_MAX = 99;
+
+const int BC_STRING_MAX = 1000;
+
+const int CHARCLASS_NAME_MAX = 14;
+
+const int COLL_WEIGHTS_MAX = 2;
+
+const int EQUIV_CLASS_MAX = 2;
+
+const int EXPR_NEST_MAX = 32;
+
+const int LINE_MAX = 2048;
+
+const int RE_DUP_MAX = 255;
+
+const int NZERO = 20;
+
+const int _POSIX_ARG_MAX = 4096;
+
+const int _POSIX_CHILD_MAX = 25;
+
+const int _POSIX_LINK_MAX = 8;
+
+const int _POSIX_MAX_CANON = 255;
+
+const int _POSIX_MAX_INPUT = 255;
+
+const int _POSIX_NAME_MAX = 14;
+
+const int _POSIX_NGROUPS_MAX = 8;
+
+const int _POSIX_OPEN_MAX = 20;
+
+const int _POSIX_PATH_MAX = 256;
+
+const int _POSIX_PIPE_BUF = 512;
+
+const int _POSIX_SSIZE_MAX = 32767;
+
+const int _POSIX_STREAM_MAX = 8;
+
+const int _POSIX_TZNAME_MAX = 6;
+
+const int _POSIX2_BC_BASE_MAX = 99;
+
+const int _POSIX2_BC_DIM_MAX = 2048;
+
+const int _POSIX2_BC_SCALE_MAX = 99;
+
+const int _POSIX2_BC_STRING_MAX = 1000;
+
+const int _POSIX2_EQUIV_CLASS_MAX = 2;
+
+const int _POSIX2_EXPR_NEST_MAX = 32;
+
+const int _POSIX2_LINE_MAX = 2048;
+
+const int _POSIX2_RE_DUP_MAX = 255;
+
+const int _POSIX_AIO_LISTIO_MAX = 2;
+
+const int _POSIX_AIO_MAX = 1;
+
+const int _POSIX_DELAYTIMER_MAX = 32;
+
+const int _POSIX_MQ_OPEN_MAX = 8;
+
+const int _POSIX_MQ_PRIO_MAX = 32;
+
+const int _POSIX_RTSIG_MAX = 8;
+
+const int _POSIX_SEM_NSEMS_MAX = 256;
+
+const int _POSIX_SEM_VALUE_MAX = 32767;
+
+const int _POSIX_SIGQUEUE_MAX = 32;
+
+const int _POSIX_TIMER_MAX = 32;
+
+const int _POSIX_CLOCKRES_MIN = 20000000;
+
+const int _POSIX_THREAD_DESTRUCTOR_ITERATIONS = 4;
+
+const int _POSIX_THREAD_KEYS_MAX = 128;
+
+const int _POSIX_THREAD_THREADS_MAX = 64;
+
+const int PTHREAD_DESTRUCTOR_ITERATIONS = 4;
+
+const int PTHREAD_KEYS_MAX = 512;
+
+const int PTHREAD_STACK_MIN = 8192;
+
+const int _POSIX_HOST_NAME_MAX = 255;
+
+const int _POSIX_LOGIN_NAME_MAX = 9;
+
+const int _POSIX_SS_REPL_MAX = 4;
+
+const int _POSIX_SYMLINK_MAX = 255;
+
+const int _POSIX_SYMLOOP_MAX = 8;
+
+const int _POSIX_TRACE_EVENT_NAME_MAX = 30;
+
+const int _POSIX_TRACE_NAME_MAX = 8;
+
+const int _POSIX_TRACE_SYS_MAX = 8;
+
+const int _POSIX_TRACE_USER_EVENT_MAX = 32;
+
+const int _POSIX_TTY_NAME_MAX = 9;
+
+const int _POSIX2_CHARCLASS_NAME_MAX = 14;
+
+const int _POSIX2_COLL_WEIGHTS_MAX = 2;
+
+const int _POSIX_RE_DUP_MAX = 255;
+
+const int OFF_MIN = -9223372036854775808;
+
+const int OFF_MAX = 9223372036854775807;
+
+const int PASS_MAX = 128;
+
+const int NL_ARGMAX = 9;
+
+const int NL_LANGMAX = 14;
+
+const int NL_MSGMAX = 32767;
+
+const int NL_NMAX = 1;
+
+const int NL_SETMAX = 255;
+
+const int NL_TEXTMAX = 2048;
+
+const int _XOPEN_IOV_MAX = 16;
+
+const int IOV_MAX = 1024;
+
+const int _XOPEN_NAME_MAX = 255;
+
+const int _XOPEN_PATH_MAX = 1024;
+
+const int CLOCKS_PER_SEC = 1000000;
+
+const int CLOCK_REALTIME = 0;
+
+const int CLOCK_MONOTONIC = 6;
+
+const int CLOCK_MONOTONIC_RAW = 4;
+
+const int CLOCK_MONOTONIC_RAW_APPROX = 5;
+
+const int CLOCK_UPTIME_RAW = 8;
+
+const int CLOCK_UPTIME_RAW_APPROX = 9;
+
+const int CLOCK_PROCESS_CPUTIME_ID = 12;
+
+const int CLOCK_THREAD_CPUTIME_ID = 16;
+
+const int TIME_UTC = 1;
+
+const int ITIMER_REAL = 0;
+
+const int ITIMER_VIRTUAL = 1;
+
+const int ITIMER_PROF = 2;
+
+const int DST_NONE = 0;
+
+const int DST_USA = 1;
+
+const int DST_AUST = 2;
+
+const int DST_WET = 3;
+
+const int DST_MET = 4;
+
+const int DST_EET = 5;
+
+const int DST_CAN = 6;
+
+const int CURL_SOCKET_BAD = -1;
+
+const int CURLSSLBACKEND_LIBRESSL = 1;
+
+const int CURLSSLBACKEND_BORINGSSL = 1;
+
+const int CURLSSLBACKEND_CYASSL = 7;
+
+const int CURLSSLBACKEND_DARWINSSL = 9;
+
+const int CURL_HTTPPOST_FILENAME = 1;
+
+const int CURL_HTTPPOST_READFILE = 2;
+
+const int CURL_HTTPPOST_PTRNAME = 4;
+
+const int CURL_HTTPPOST_PTRCONTENTS = 8;
+
+const int CURL_HTTPPOST_BUFFER = 16;
+
+const int CURL_HTTPPOST_PTRBUFFER = 32;
+
+const int CURL_HTTPPOST_CALLBACK = 64;
+
+const int CURL_HTTPPOST_LARGE = 128;
+
+const int CURL_PROGRESSFUNC_CONTINUE = 268435457;
+
+const int CURL_MAX_READ_SIZE = 524288;
+
+const int CURL_MAX_WRITE_SIZE = 16384;
+
+const int CURL_MAX_HTTP_HEADER = 102400;
+
+const int CURL_WRITEFUNC_PAUSE = 268435457;
+
+const int CURLFINFOFLAG_KNOWN_FILENAME = 1;
+
+const int CURLFINFOFLAG_KNOWN_FILETYPE = 2;
+
+const int CURLFINFOFLAG_KNOWN_TIME = 4;
+
+const int CURLFINFOFLAG_KNOWN_PERM = 8;
+
+const int CURLFINFOFLAG_KNOWN_UID = 16;
+
+const int CURLFINFOFLAG_KNOWN_GID = 32;
+
+const int CURLFINFOFLAG_KNOWN_SIZE = 64;
+
+const int CURLFINFOFLAG_KNOWN_HLINKCOUNT = 128;
+
+const int CURL_CHUNK_BGN_FUNC_OK = 0;
+
+const int CURL_CHUNK_BGN_FUNC_FAIL = 1;
+
+const int CURL_CHUNK_BGN_FUNC_SKIP = 2;
+
+const int CURL_CHUNK_END_FUNC_OK = 0;
+
+const int CURL_CHUNK_END_FUNC_FAIL = 1;
+
+const int CURL_FNMATCHFUNC_MATCH = 0;
+
+const int CURL_FNMATCHFUNC_NOMATCH = 1;
+
+const int CURL_FNMATCHFUNC_FAIL = 2;
+
+const int CURL_SEEKFUNC_OK = 0;
+
+const int CURL_SEEKFUNC_FAIL = 1;
+
+const int CURL_SEEKFUNC_CANTSEEK = 2;
+
+const int CURL_READFUNC_ABORT = 268435456;
+
+const int CURL_READFUNC_PAUSE = 268435457;
+
+const int CURL_TRAILERFUNC_OK = 0;
+
+const int CURL_TRAILERFUNC_ABORT = 1;
+
+const int CURL_SOCKOPT_OK = 0;
+
+const int CURL_SOCKOPT_ERROR = 1;
+
+const int CURL_SOCKOPT_ALREADY_CONNECTED = 2;
+
+const int CURLE_OBSOLETE16 = 16;
+
+const int CURLE_OBSOLETE10 = 10;
+
+const int CURLE_OBSOLETE12 = 12;
+
+const int CURLOPT_ENCODING = 10102;
+
+const int CURLE_FTP_WEIRD_SERVER_REPLY = 8;
+
+const int CURLE_SSL_CACERT = 60;
+
+const int CURLE_UNKNOWN_TELNET_OPTION = 48;
+
+const int CURLE_SSL_PEER_CERTIFICATE = 60;
+
+const int CURLE_OBSOLETE = 50;
+
+const int CURLE_BAD_PASSWORD_ENTERED = 46;
+
+const int CURLE_BAD_CALLING_ORDER = 44;
+
+const int CURLE_FTP_USER_PASSWORD_INCORRECT = 10;
+
+const int CURLE_FTP_CANT_RECONNECT = 16;
+
+const int CURLE_FTP_COULDNT_GET_SIZE = 32;
+
+const int CURLE_FTP_COULDNT_SET_ASCII = 29;
+
+const int CURLE_FTP_WEIRD_USER_REPLY = 12;
+
+const int CURLE_FTP_WRITE_ERROR = 20;
+
+const int CURLE_LIBRARY_NOT_FOUND = 40;
+
+const int CURLE_MALFORMAT_USER = 24;
+
+const int CURLE_SHARE_IN_USE = 57;
+
+const int CURLE_URL_MALFORMAT_USER = 4;
+
+const int CURLE_FTP_ACCESS_DENIED = 9;
+
+const int CURLE_FTP_COULDNT_SET_BINARY = 17;
+
+const int CURLE_FTP_QUOTE_ERROR = 21;
+
+const int CURLE_TFTP_DISKFULL = 70;
+
+const int CURLE_TFTP_EXISTS = 73;
+
+const int CURLE_HTTP_RANGE_ERROR = 33;
+
+const int CURLE_FTP_SSL_FAILED = 64;
+
+const int CURLE_OPERATION_TIMEOUTED = 28;
+
+const int CURLE_HTTP_NOT_FOUND = 22;
+
+const int CURLE_HTTP_PORT_FAILED = 45;
+
+const int CURLE_FTP_COULDNT_STOR_FILE = 25;
+
+const int CURLE_FTP_PARTIAL_FILE = 18;
+
+const int CURLE_FTP_BAD_DOWNLOAD_RESUME = 36;
+
+const int CURLE_ALREADY_COMPLETE = 99999;
+
+const int CURLOPT_FILE = 10001;
+
+const int CURLOPT_INFILE = 10009;
+
+const int CURLOPT_WRITEHEADER = 10029;
+
+const int CURLOPT_WRITEINFO = 10040;
+
+const int CURLOPT_CLOSEPOLICY = 72;
+
+const int CURLAUTH_NONE = 0;
+
+const int CURLAUTH_BASIC = 1;
+
+const int CURLAUTH_DIGEST = 2;
+
+const int CURLAUTH_NEGOTIATE = 4;
+
+const int CURLAUTH_GSSNEGOTIATE = 4;
+
+const int CURLAUTH_GSSAPI = 4;
+
+const int CURLAUTH_NTLM = 8;
+
+const int CURLAUTH_DIGEST_IE = 16;
+
+const int CURLAUTH_NTLM_WB = 32;
+
+const int CURLAUTH_BEARER = 64;
+
+const int CURLAUTH_AWS_SIGV4 = 128;
+
+const int CURLAUTH_ONLY = 2147483648;
+
+const int CURLAUTH_ANY = -17;
+
+const int CURLAUTH_ANYSAFE = -18;
+
+const int CURLSSH_AUTH_ANY = -1;
+
+const int CURLSSH_AUTH_NONE = 0;
+
+const int CURLSSH_AUTH_PUBLICKEY = 1;
+
+const int CURLSSH_AUTH_PASSWORD = 2;
+
+const int CURLSSH_AUTH_HOST = 4;
+
+const int CURLSSH_AUTH_KEYBOARD = 8;
+
+const int CURLSSH_AUTH_AGENT = 16;
+
+const int CURLSSH_AUTH_GSSAPI = 32;
+
+const int CURLSSH_AUTH_DEFAULT = -1;
+
+const int CURLGSSAPI_DELEGATION_NONE = 0;
+
+const int CURLGSSAPI_DELEGATION_POLICY_FLAG = 1;
+
+const int CURLGSSAPI_DELEGATION_FLAG = 2;
+
+const int CURL_ERROR_SIZE = 256;
+
+const int CURLSSLOPT_ALLOW_BEAST = 1;
+
+const int CURLSSLOPT_NO_REVOKE = 2;
+
+const int CURLSSLOPT_NO_PARTIALCHAIN = 4;
+
+const int CURLSSLOPT_REVOKE_BEST_EFFORT = 8;
+
+const int CURLSSLOPT_NATIVE_CA = 16;
+
+const int CURL_HET_DEFAULT = 200;
+
+const int CURL_UPKEEP_INTERVAL_DEFAULT = 60000;
+
+const int CURLFTPSSL_NONE = 0;
+
+const int CURLFTPSSL_TRY = 1;
+
+const int CURLFTPSSL_CONTROL = 2;
+
+const int CURLFTPSSL_ALL = 3;
+
+const int CURLFTPSSL_LAST = 4;
+
+const int CURLHEADER_UNIFIED = 0;
+
+const int CURLHEADER_SEPARATE = 1;
+
+const int CURLALTSVC_READONLYFILE = 4;
+
+const int CURLALTSVC_H1 = 8;
+
+const int CURLALTSVC_H2 = 16;
+
+const int CURLALTSVC_H3 = 32;
+
+const int CURLHSTS_ENABLE = 1;
+
+const int CURLHSTS_READONLYFILE = 2;
+
+const int CURLPROTO_HTTP = 1;
+
+const int CURLPROTO_HTTPS = 2;
+
+const int CURLPROTO_FTP = 4;
+
+const int CURLPROTO_FTPS = 8;
+
+const int CURLPROTO_SCP = 16;
+
+const int CURLPROTO_SFTP = 32;
+
+const int CURLPROTO_TELNET = 64;
+
+const int CURLPROTO_LDAP = 128;
+
+const int CURLPROTO_LDAPS = 256;
+
+const int CURLPROTO_DICT = 512;
+
+const int CURLPROTO_FILE = 1024;
+
+const int CURLPROTO_TFTP = 2048;
+
+const int CURLPROTO_IMAP = 4096;
+
+const int CURLPROTO_IMAPS = 8192;
+
+const int CURLPROTO_POP3 = 16384;
+
+const int CURLPROTO_POP3S = 32768;
+
+const int CURLPROTO_SMTP = 65536;
+
+const int CURLPROTO_SMTPS = 131072;
+
+const int CURLPROTO_RTSP = 262144;
+
+const int CURLPROTO_RTMP = 524288;
+
+const int CURLPROTO_RTMPT = 1048576;
+
+const int CURLPROTO_RTMPE = 2097152;
+
+const int CURLPROTO_RTMPTE = 4194304;
+
+const int CURLPROTO_RTMPS = 8388608;
+
+const int CURLPROTO_RTMPTS = 16777216;
+
+const int CURLPROTO_GOPHER = 33554432;
+
+const int CURLPROTO_SMB = 67108864;
+
+const int CURLPROTO_SMBS = 134217728;
+
+const int CURLPROTO_MQTT = 268435456;
+
+const int CURLPROTO_GOPHERS = 536870912;
+
+const int CURLPROTO_ALL = -1;
+
+const int CURLOPTTYPE_LONG = 0;
+
+const int CURLOPTTYPE_OBJECTPOINT = 10000;
+
+const int CURLOPTTYPE_FUNCTIONPOINT = 20000;
+
+const int CURLOPTTYPE_OFF_T = 30000;
+
+const int CURLOPTTYPE_BLOB = 40000;
+
+const int CURLOPTTYPE_STRINGPOINT = 10000;
+
+const int CURLOPTTYPE_SLISTPOINT = 10000;
+
+const int CURLOPTTYPE_CBPOINT = 10000;
+
+const int CURLOPTTYPE_VALUES = 0;
+
+const int CURLOPT_PROGRESSDATA = 10057;
+
+const int CURLOPT_SERVER_RESPONSE_TIMEOUT = 112;
+
+const int CURLOPT_POST301 = 161;
+
+const int CURLOPT_SSLKEYPASSWD = 10026;
+
+const int CURLOPT_FTPAPPEND = 50;
+
+const int CURLOPT_FTPLISTONLY = 48;
+
+const int CURLOPT_FTP_SSL = 119;
+
+const int CURLOPT_SSLCERTPASSWD = 10026;
+
+const int CURLOPT_KRB4LEVEL = 10063;
+
+const int CURL_IPRESOLVE_WHATEVER = 0;
+
+const int CURL_IPRESOLVE_V4 = 1;
+
+const int CURL_IPRESOLVE_V6 = 2;
+
+const int CURLOPT_RTSPHEADER = 10023;
+
+const int CURL_HTTP_VERSION_2 = 3;
+
+const int CURL_REDIR_GET_ALL = 0;
+
+const int CURL_REDIR_POST_301 = 1;
+
+const int CURL_REDIR_POST_302 = 2;
+
+const int CURL_REDIR_POST_303 = 4;
+
+const int CURL_REDIR_POST_ALL = 7;
+
+const int CURL_ZERO_TERMINATED = -1;
+
+const int CURLINFO_STRING = 1048576;
+
+const int CURLINFO_LONG = 2097152;
+
+const int CURLINFO_DOUBLE = 3145728;
+
+const int CURLINFO_SLIST = 4194304;
+
+const int CURLINFO_PTR = 4194304;
+
+const int CURLINFO_SOCKET = 5242880;
+
+const int CURLINFO_OFF_T = 6291456;
+
+const int CURLINFO_MASK = 1048575;
+
+const int CURLINFO_TYPEMASK = 15728640;
+
+const int CURLINFO_HTTP_CODE = 2097154;
+
+const int CURL_GLOBAL_SSL = 1;
+
+const int CURL_GLOBAL_WIN32 = 2;
+
+const int CURL_GLOBAL_ALL = 3;
+
+const int CURL_GLOBAL_NOTHING = 0;
+
+const int CURL_GLOBAL_DEFAULT = 3;
+
+const int CURL_GLOBAL_ACK_EINTR = 4;
+
+const int CURLVERSION_NOW = 8;
+
+const int CURL_VERSION_IPV6 = 1;
+
+const int CURL_VERSION_KERBEROS4 = 2;
+
+const int CURL_VERSION_SSL = 4;
+
+const int CURL_VERSION_LIBZ = 8;
+
+const int CURL_VERSION_NTLM = 16;
+
+const int CURL_VERSION_GSSNEGOTIATE = 32;
+
+const int CURL_VERSION_DEBUG = 64;
+
+const int CURL_VERSION_ASYNCHDNS = 128;
+
+const int CURL_VERSION_SPNEGO = 256;
+
+const int CURL_VERSION_LARGEFILE = 512;
+
+const int CURL_VERSION_IDN = 1024;
+
+const int CURL_VERSION_SSPI = 2048;
+
+const int CURL_VERSION_CONV = 4096;
+
+const int CURL_VERSION_CURLDEBUG = 8192;
+
+const int CURL_VERSION_TLSAUTH_SRP = 16384;
+
+const int CURL_VERSION_NTLM_WB = 32768;
+
+const int CURL_VERSION_HTTP2 = 65536;
+
+const int CURL_VERSION_GSSAPI = 131072;
+
+const int CURL_VERSION_KERBEROS5 = 262144;
+
+const int CURL_VERSION_UNIX_SOCKETS = 524288;
+
+const int CURL_VERSION_PSL = 1048576;
+
+const int CURL_VERSION_HTTPS_PROXY = 2097152;
+
+const int CURL_VERSION_MULTI_SSL = 4194304;
+
+const int CURL_VERSION_BROTLI = 8388608;
+
+const int CURL_VERSION_ALTSVC = 16777216;
+
+const int CURL_VERSION_HTTP3 = 33554432;
+
+const int CURL_VERSION_ZSTD = 67108864;
+
+const int CURL_VERSION_UNICODE = 134217728;
+
+const int CURL_VERSION_HSTS = 268435456;
+
+const int CURL_VERSION_GSASL = 536870912;
+
+const int CURLPAUSE_RECV = 1;
+
+const int CURLPAUSE_RECV_CONT = 0;
+
+const int CURLPAUSE_SEND = 4;
+
+const int CURLPAUSE_SEND_CONT = 0;
+
+const int CURLPAUSE_ALL = 5;
+
+const int CURLPAUSE_CONT = 0;
+
+const int CURL_BLOB_COPY = 1;
+
+const int CURL_BLOB_NOCOPY = 0;
+
+const int CURLM_CALL_MULTI_SOCKET = -1;
+
+const int CURLPIPE_NOTHING = 0;
+
+const int CURLPIPE_HTTP1 = 1;
+
+const int CURLPIPE_MULTIPLEX = 2;
+
+const int CURL_WAIT_POLLIN = 1;
+
+const int CURL_WAIT_POLLPRI = 2;
+
+const int CURL_WAIT_POLLOUT = 4;
+
+const int CURL_POLL_NONE = 0;
+
+const int CURL_POLL_IN = 1;
+
+const int CURL_POLL_OUT = 2;
+
+const int CURL_POLL_INOUT = 3;
+
+const int CURL_POLL_REMOVE = 4;
+
+const int CURL_SOCKET_TIMEOUT = -1;
+
+const int CURL_CSELECT_IN = 1;
+
+const int CURL_CSELECT_OUT = 2;
+
+const int CURL_CSELECT_ERR = 4;
+
+const int CURL_PUSH_OK = 0;
+
+const int CURL_PUSH_DENY = 1;
+
+const int CURL_PUSH_ERROROUT = 2;
+
+const int CURLU_DEFAULT_PORT = 1;
+
+const int CURLU_NO_DEFAULT_PORT = 2;
+
+const int CURLU_DEFAULT_SCHEME = 4;
+
+const int CURLU_NON_SUPPORT_SCHEME = 8;
+
+const int CURLU_PATH_AS_IS = 16;
+
+const int CURLU_DISALLOW_USER = 32;
+
+const int CURLU_URLDECODE = 64;
+
+const int CURLU_URLENCODE = 128;
+
+const int CURLU_APPENDQUERY = 256;
+
+const int CURLU_GUESS_SCHEME = 512;
+
+const int CURLU_NO_AUTHORITY = 1024;
+
+typedef _c___darwin_check_fd_set_overflow = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart___darwin_check_fd_set_overflow = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  int arg2,
+);
+
+typedef _c_fread = ffi.Uint64 Function(
+  ffi.Pointer<ffi.Void> arg0,
+  ffi.Uint64 arg1,
+  ffi.Uint64 arg2,
+  ffi.Pointer<ffi.Int32> arg3,
+);
+
+typedef _dart_fread = int Function(
+  ffi.Pointer<ffi.Void> arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int32> arg3,
+);
+
+typedef _c_fwrite = ffi.Uint64 Function(
+  ffi.Pointer<ffi.Void> arg0,
+  ffi.Uint64 arg1,
+  ffi.Uint64 arg2,
+  ffi.Pointer<ffi.Int32> arg3,
+);
+
+typedef _dart_fwrite = int Function(
+  ffi.Pointer<ffi.Void> arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int32> arg3,
+);
+
+typedef _c_strcasecmp = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_strcasecmp = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_strncasecmp = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Uint64 arg2,
+);
+
+typedef _dart_strncasecmp = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+);
+
+typedef _c_curl_easy_option_by_name = ffi.Pointer<ffi.Int32> Function(
+  ffi.Pointer<ffi.Int8> name,
+);
+
+typedef _dart_curl_easy_option_by_name = ffi.Pointer<ffi.Int32> Function(
+  ffi.Pointer<ffi.Int8> name,
+);
+
+typedef _c_curl_easy_option_by_id = ffi.Pointer<ffi.Int32> Function(
+  ffi.Int32 id,
+);
+
+typedef _dart_curl_easy_option_by_id = ffi.Pointer<ffi.Int32> Function(
+  int id,
+);
+
+typedef _c_curl_easy_option_next = ffi.Pointer<ffi.Int32> Function(
+  ffi.Pointer<curl_easyoption> prev,
+);
+
+typedef _dart_curl_easy_option_next = ffi.Pointer<ffi.Int32> Function(
+  ffi.Pointer<curl_easyoption> prev,
+);
+
+typedef _c_renameat = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Int32 arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+);
+
+typedef _dart_renameat = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+);
+
+typedef _c_renamex_np = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Uint32 arg2,
+);
+
+typedef _dart_renamex_np = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+);
+
+typedef _c_renameatx_np = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Int32 arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+  ffi.Uint32 arg4,
+);
+
+typedef _dart_renameatx_np = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+  int arg4,
+);
+
+typedef _c_clearerr = ffi.Void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_clearerr = void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_fclose = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_fclose = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_feof = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_feof = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_ferror = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_ferror = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_fflush = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_fflush = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_fgetc = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_fgetc = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_fgetpos = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int64> arg1,
+);
+
+typedef _dart_fgetpos = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int64> arg1,
+);
+
+typedef _c_fgets = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Int32 arg1,
+  ffi.Pointer<FILE> arg2,
+);
+
+typedef _dart_fgets = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  int arg1,
+  ffi.Pointer<FILE> arg2,
+);
+
+typedef _c_fopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> __filename,
+  ffi.Pointer<ffi.Int8> __mode,
+);
+
+typedef _dart_fopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> __filename,
+  ffi.Pointer<ffi.Int8> __mode,
+);
+
+typedef _c_fprintf = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_fprintf = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_fputc = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart_fputc = int Function(
+  int arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_fputs = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart_fputs = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_freopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<FILE> arg2,
+);
+
+typedef _dart_freopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<FILE> arg2,
+);
+
+typedef _c_fscanf = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_fscanf = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_fseek = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Int64 arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart_fseek = int Function(
+  ffi.Pointer<FILE> arg0,
+  int arg1,
+  int arg2,
+);
+
+typedef _c_fsetpos = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int64> arg1,
+);
+
+typedef _dart_fsetpos = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int64> arg1,
+);
+
+typedef _c_ftell = ffi.Int64 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_ftell = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_getc = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_getc = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_getchar = ffi.Int32 Function();
+
+typedef _dart_getchar = int Function();
+
+typedef _c_gets = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_gets = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_perror = ffi.Void Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_perror = void Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_printf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_printf = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_putc = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart_putc = int Function(
+  int arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_putchar = ffi.Int32 Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_putchar = int Function(
+  int arg0,
+);
+
+typedef _c_puts = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_puts = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_remove = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_remove = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_rename = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> __old,
+  ffi.Pointer<ffi.Int8> __new,
+);
+
+typedef _dart_rename = int Function(
+  ffi.Pointer<ffi.Int8> __old,
+  ffi.Pointer<ffi.Int8> __new,
+);
+
+typedef _c_rewind = ffi.Void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_rewind = void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_scanf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_scanf = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_setbuf = ffi.Void Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_setbuf = void Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_setvbuf = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Int32 arg2,
+  ffi.Uint64 arg3,
+);
+
+typedef _dart_setvbuf = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+  int arg3,
+);
+
+typedef _c_sprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_sprintf = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_sscanf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_sscanf = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_tmpfile = ffi.Pointer<FILE> Function();
+
+typedef _dart_tmpfile = ffi.Pointer<FILE> Function();
+
+typedef _c_tmpnam = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_tmpnam = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_ungetc = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart_ungetc = int Function(
+  int arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_vfprintf = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart_vfprintf = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c_vprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<__va_list_tag> arg1,
+);
+
+typedef _dart_vprintf = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<__va_list_tag> arg1,
+);
+
+typedef _c_vsprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart_vsprintf = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c_ctermid = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_ctermid = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_fdopen = ffi.Pointer<FILE> Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_fdopen = ffi.Pointer<FILE> Function(
+  int arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_fileno = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_fileno = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_pclose = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_pclose = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_popen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_popen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c___srget = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart___srget = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c___svfscanf = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart___svfscanf = int Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c___swbuf = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart___swbuf = int Function(
+  int arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_flockfile = ffi.Void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_flockfile = void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_ftrylockfile = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_ftrylockfile = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_funlockfile = ffi.Void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_funlockfile = void Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_getc_unlocked = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_getc_unlocked = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_getchar_unlocked = ffi.Int32 Function();
+
+typedef _dart_getchar_unlocked = int Function();
+
+typedef _c_putc_unlocked = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart_putc_unlocked = int Function(
+  int arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_putchar_unlocked = ffi.Int32 Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_putchar_unlocked = int Function(
+  int arg0,
+);
+
+typedef _c_getw = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_getw = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_putw = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _dart_putw = int Function(
+  int arg0,
+  ffi.Pointer<FILE> arg1,
+);
+
+typedef _c_tempnam = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> __dir,
+  ffi.Pointer<ffi.Int8> __prefix,
+);
+
+typedef _dart_tempnam = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> __dir,
+  ffi.Pointer<ffi.Int8> __prefix,
+);
+
+typedef _c_fseeko = ffi.Int32 Function(
+  ffi.Pointer<FILE> __stream,
+  ffi.Int64 __offset,
+  ffi.Int32 __whence,
+);
+
+typedef _dart_fseeko = int Function(
+  ffi.Pointer<FILE> __stream,
+  int __offset,
+  int __whence,
+);
+
+typedef _c_ftello = ffi.Int64 Function(
+  ffi.Pointer<FILE> __stream,
+);
+
+typedef _dart_ftello = int Function(
+  ffi.Pointer<FILE> __stream,
+);
+
+typedef _c_snprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> __str,
+  ffi.Uint64 __size,
+  ffi.Pointer<ffi.Int8> __format,
+);
+
+typedef _dart_snprintf = int Function(
+  ffi.Pointer<ffi.Int8> __str,
+  int __size,
+  ffi.Pointer<ffi.Int8> __format,
+);
+
+typedef _c_vfscanf = ffi.Int32 Function(
+  ffi.Pointer<FILE> __stream,
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart_vfscanf = int Function(
+  ffi.Pointer<FILE> __stream,
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c_vscanf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg1,
+);
+
+typedef _dart_vscanf = int Function(
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg1,
+);
+
+typedef _c_vsnprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> __str,
+  ffi.Uint64 __size,
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg3,
+);
+
+typedef _dart_vsnprintf = int Function(
+  ffi.Pointer<ffi.Int8> __str,
+  int __size,
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg3,
+);
+
+typedef _c_vsscanf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> __str,
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart_vsscanf = int Function(
+  ffi.Pointer<ffi.Int8> __str,
+  ffi.Pointer<ffi.Int8> __format,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c_dprintf = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_dprintf = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_vdprintf = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart_vdprintf = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c_getdelim = ffi.Int64 Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> __linep,
+  ffi.Pointer<ffi.Uint64> __linecapp,
+  ffi.Int32 __delimiter,
+  ffi.Pointer<FILE> __stream,
+);
+
+typedef _dart_getdelim = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> __linep,
+  ffi.Pointer<ffi.Uint64> __linecapp,
+  int __delimiter,
+  ffi.Pointer<FILE> __stream,
+);
+
+typedef _c_getline = ffi.Int64 Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> __linep,
+  ffi.Pointer<ffi.Uint64> __linecapp,
+  ffi.Pointer<FILE> __stream,
+);
+
+typedef _dart_getline = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> __linep,
+  ffi.Pointer<ffi.Uint64> __linecapp,
+  ffi.Pointer<FILE> __stream,
+);
+
+typedef _c_fmemopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Void> __buf,
+  ffi.Uint64 __size,
+  ffi.Pointer<ffi.Int8> __mode,
+);
+
+typedef _dart_fmemopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Void> __buf,
+  int __size,
+  ffi.Pointer<ffi.Int8> __mode,
+);
+
+typedef _c_open_memstream = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> __bufp,
+  ffi.Pointer<ffi.Uint64> __sizep,
+);
+
+typedef _dart_open_memstream = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> __bufp,
+  ffi.Pointer<ffi.Uint64> __sizep,
+);
+
+typedef _c_asprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_asprintf = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_ctermid_r = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_ctermid_r = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_fgetln = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Uint64> arg1,
+);
+
+typedef _dart_fgetln = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Uint64> arg1,
+);
+
+typedef _c_fmtcheck = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_fmtcheck = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_fpurge = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_fpurge = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_setbuffer = ffi.Void Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart_setbuffer = void Function(
+  ffi.Pointer<FILE> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+);
+
+typedef _c_setlinebuf = ffi.Int32 Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _dart_setlinebuf = int Function(
+  ffi.Pointer<FILE> arg0,
+);
+
+typedef _c_vasprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _dart_vasprintf = int Function(
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<__va_list_tag> arg2,
+);
+
+typedef _c_zopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart_zopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  int arg2,
+);
+
+typedef _typedefC_6 = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Pointer<ffi.Int8>,
+  ffi.Int32,
+);
+
+typedef _typedefC_7 = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Pointer<ffi.Int8>,
+  ffi.Int32,
+);
+
+typedef _typedefC_8 = ffi.Int64 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Int64,
+  ffi.Int32,
+);
+
+typedef _typedefC_9 = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+);
+
+typedef _c_funopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Void> arg0,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_6>> arg1,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_7>> arg2,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_8>> arg3,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_9>> arg4,
+);
+
+typedef _dart_funopen = ffi.Pointer<FILE> Function(
+  ffi.Pointer<ffi.Void> arg0,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_6>> arg1,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_7>> arg2,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_8>> arg3,
+  ffi.Pointer<ffi.NativeFunction<_typedefC_9>> arg4,
+);
+
+typedef _c___sprintf_chk = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Int32 arg1,
+  ffi.Uint64 arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+);
+
+typedef _dart___sprintf_chk = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+);
+
+typedef _c___snprintf_chk = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Uint64 arg1,
+  ffi.Int32 arg2,
+  ffi.Uint64 arg3,
+  ffi.Pointer<ffi.Int8> arg4,
+);
+
+typedef _dart___snprintf_chk = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  int arg1,
+  int arg2,
+  int arg3,
+  ffi.Pointer<ffi.Int8> arg4,
+);
+
+typedef _c___vsprintf_chk = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Int32 arg1,
+  ffi.Uint64 arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+  ffi.Pointer<__va_list_tag> arg4,
+);
+
+typedef _dart___vsprintf_chk = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int8> arg3,
+  ffi.Pointer<__va_list_tag> arg4,
+);
+
+typedef _c___vsnprintf_chk = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Uint64 arg1,
+  ffi.Int32 arg2,
+  ffi.Uint64 arg3,
+  ffi.Pointer<ffi.Int8> arg4,
+  ffi.Pointer<__va_list_tag> arg5,
+);
+
+typedef _dart___vsnprintf_chk = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  int arg1,
+  int arg2,
+  int arg3,
+  ffi.Pointer<ffi.Int8> arg4,
+  ffi.Pointer<__va_list_tag> arg5,
+);
+
+typedef _c_accept = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Pointer<ffi.Uint32> arg2,
+);
+
+typedef _dart_accept = int Function(
+  int arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Pointer<ffi.Uint32> arg2,
+);
+
+typedef _c_bind = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Uint32 arg2,
+);
+
+typedef _dart_bind = int Function(
+  int arg0,
+  ffi.Pointer<sockaddr> arg1,
+  int arg2,
+);
+
+typedef _c_connect = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Uint32 arg2,
+);
+
+typedef _dart_connect = int Function(
+  int arg0,
+  ffi.Pointer<sockaddr> arg1,
+  int arg2,
+);
+
+typedef _c_getpeername = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Pointer<ffi.Uint32> arg2,
+);
+
+typedef _dart_getpeername = int Function(
+  int arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Pointer<ffi.Uint32> arg2,
+);
+
+typedef _c_getsockname = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Pointer<ffi.Uint32> arg2,
+);
+
+typedef _dart_getsockname = int Function(
+  int arg0,
+  ffi.Pointer<sockaddr> arg1,
+  ffi.Pointer<ffi.Uint32> arg2,
+);
+
+typedef _c_getsockopt = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+  ffi.Int32 arg2,
+  ffi.Pointer<ffi.Void> arg3,
+  ffi.Pointer<ffi.Uint32> arg4,
+);
+
+typedef _dart_getsockopt = int Function(
+  int arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Void> arg3,
+  ffi.Pointer<ffi.Uint32> arg4,
+);
+
+typedef _c_listen = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+);
+
+typedef _dart_listen = int Function(
+  int arg0,
+  int arg1,
+);
+
+typedef _c_recv = ffi.Int64 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  ffi.Uint64 arg2,
+  ffi.Int32 arg3,
+);
+
+typedef _dart_recv = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  int arg2,
+  int arg3,
+);
+
+typedef _c_recvfrom = ffi.Int64 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  ffi.Uint64 arg2,
+  ffi.Int32 arg3,
+  ffi.Pointer<sockaddr> arg4,
+  ffi.Pointer<ffi.Uint32> arg5,
+);
+
+typedef _dart_recvfrom = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  int arg2,
+  int arg3,
+  ffi.Pointer<sockaddr> arg4,
+  ffi.Pointer<ffi.Uint32> arg5,
+);
+
+typedef _c_recvmsg = ffi.Int64 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<msghdr> arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart_recvmsg = int Function(
+  int arg0,
+  ffi.Pointer<msghdr> arg1,
+  int arg2,
+);
+
+typedef _c_send = ffi.Int64 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  ffi.Uint64 arg2,
+  ffi.Int32 arg3,
+);
+
+typedef _dart_send = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  int arg2,
+  int arg3,
+);
+
+typedef _c_sendmsg = ffi.Int64 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<msghdr> arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart_sendmsg = int Function(
+  int arg0,
+  ffi.Pointer<msghdr> arg1,
+  int arg2,
+);
+
+typedef _c_sendto = ffi.Int64 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  ffi.Uint64 arg2,
+  ffi.Int32 arg3,
+  ffi.Pointer<sockaddr> arg4,
+  ffi.Uint32 arg5,
+);
+
+typedef _dart_sendto = int Function(
+  int arg0,
+  ffi.Pointer<ffi.Void> arg1,
+  int arg2,
+  int arg3,
+  ffi.Pointer<sockaddr> arg4,
+  int arg5,
+);
+
+typedef _c_setsockopt = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+  ffi.Int32 arg2,
+  ffi.Pointer<ffi.Void> arg3,
+  ffi.Uint32 arg4,
+);
+
+typedef _dart_setsockopt = int Function(
+  int arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Void> arg3,
+  int arg4,
+);
+
+typedef _c_shutdown = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+);
+
+typedef _dart_shutdown = int Function(
+  int arg0,
+  int arg1,
+);
+
+typedef _c_sockatmark = ffi.Int32 Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_sockatmark = int Function(
+  int arg0,
+);
+
+typedef _c_socket = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+  ffi.Int32 arg2,
+);
+
+typedef _dart_socket = int Function(
+  int arg0,
+  int arg1,
+  int arg2,
+);
+
+typedef _c_socketpair = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+  ffi.Int32 arg2,
+  ffi.Pointer<ffi.Int32> arg3,
+);
+
+typedef _dart_socketpair = int Function(
+  int arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int32> arg3,
+);
+
+typedef _c_sendfile = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Int32 arg1,
+  ffi.Int64 arg2,
+  ffi.Pointer<ffi.Int64> arg3,
+  ffi.Pointer<sf_hdtr> arg4,
+  ffi.Int32 arg5,
+);
+
+typedef _dart_sendfile = int Function(
+  int arg0,
+  int arg1,
+  int arg2,
+  ffi.Pointer<ffi.Int64> arg3,
+  ffi.Pointer<sf_hdtr> arg4,
+  int arg5,
+);
+
+typedef _c_pfctlinput = ffi.Void Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sockaddr> arg1,
+);
+
+typedef _dart_pfctlinput = void Function(
+  int arg0,
+  ffi.Pointer<sockaddr> arg1,
+);
+
+typedef _c_connectx = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<sa_endpoints_t> arg1,
+  ffi.Uint32 arg2,
+  ffi.Uint32 arg3,
+  ffi.Pointer<iovec> arg4,
+  ffi.Uint32 arg5,
+  ffi.Pointer<ffi.Uint64> arg6,
+  ffi.Pointer<ffi.Uint32> arg7,
+);
+
+typedef _dart_connectx = int Function(
+  int arg0,
+  ffi.Pointer<sa_endpoints_t> arg1,
+  int arg2,
+  int arg3,
+  ffi.Pointer<iovec> arg4,
+  int arg5,
+  ffi.Pointer<ffi.Uint64> arg6,
+  ffi.Pointer<ffi.Uint32> arg7,
+);
+
+typedef _c_disconnectx = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Uint32 arg1,
+  ffi.Uint32 arg2,
+);
+
+typedef _dart_disconnectx = int Function(
+  int arg0,
+  int arg1,
+  int arg2,
+);
+
+typedef _c_asctime = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _dart_asctime = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _c_clock = ffi.Uint64 Function();
+
+typedef _dart_clock = int Function();
+
+typedef _c_ctime = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _dart_ctime = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _c_difftime = ffi.Double Function(
+  ffi.Int64 arg0,
+  ffi.Int64 arg1,
+);
+
+typedef _dart_difftime = double Function(
+  int arg0,
+  int arg1,
+);
+
+typedef _c_getdate = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _dart_getdate = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+);
+
+typedef _c_gmtime = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _dart_gmtime = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _c_localtime = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _dart_localtime = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _c_mktime = ffi.Int64 Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _dart_mktime = int Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _c_strftime = ffi.Uint64 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Uint64 arg1,
+  ffi.Pointer<ffi.Int8> arg2,
+  ffi.Pointer<tm> arg3,
+);
+
+typedef _dart_strftime = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  int arg1,
+  ffi.Pointer<ffi.Int8> arg2,
+  ffi.Pointer<tm> arg3,
+);
+
+typedef _c_strptime = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<tm> arg2,
+);
+
+typedef _dart_strptime = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+  ffi.Pointer<tm> arg2,
+);
+
+typedef _c_time = ffi.Int64 Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _dart_time = int Function(
+  ffi.Pointer<ffi.Int64> arg0,
+);
+
+typedef _c_tzset = ffi.Void Function();
+
+typedef _dart_tzset = void Function();
+
+typedef _c_asctime_r = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<tm> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_asctime_r = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<tm> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_ctime_r = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_ctime_r = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_gmtime_r = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+  ffi.Pointer<tm> arg1,
+);
+
+typedef _dart_gmtime_r = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+  ffi.Pointer<tm> arg1,
+);
+
+typedef _c_localtime_r = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+  ffi.Pointer<tm> arg1,
+);
+
+typedef _dart_localtime_r = ffi.Pointer<tm> Function(
+  ffi.Pointer<ffi.Int64> arg0,
+  ffi.Pointer<tm> arg1,
+);
+
+typedef _c_posix2time = ffi.Int64 Function(
+  ffi.Int64 arg0,
+);
+
+typedef _dart_posix2time = int Function(
+  int arg0,
+);
+
+typedef _c_tzsetwall = ffi.Void Function();
+
+typedef _dart_tzsetwall = void Function();
+
+typedef _c_time2posix = ffi.Int64 Function(
+  ffi.Int64 arg0,
+);
+
+typedef _dart_time2posix = int Function(
+  int arg0,
+);
+
+typedef _c_timelocal = ffi.Int64 Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _dart_timelocal = int Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _c_timegm = ffi.Int64 Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _dart_timegm = int Function(
+  ffi.Pointer<tm> arg0,
+);
+
+typedef _c_nanosleep = ffi.Int32 Function(
+  ffi.Pointer<timespec> __rqtp,
+  ffi.Pointer<timespec> __rmtp,
+);
+
+typedef _dart_nanosleep = int Function(
+  ffi.Pointer<timespec> __rqtp,
+  ffi.Pointer<timespec> __rmtp,
+);
+
+typedef _c_clock_getres = ffi.Int32 Function(
+  ffi.Int32 __clock_id,
+  ffi.Pointer<timespec> __res,
+);
+
+typedef _dart_clock_getres = int Function(
+  int __clock_id,
+  ffi.Pointer<timespec> __res,
+);
+
+typedef _c_clock_gettime = ffi.Int32 Function(
+  ffi.Int32 __clock_id,
+  ffi.Pointer<timespec> __tp,
+);
+
+typedef _dart_clock_gettime = int Function(
+  int __clock_id,
+  ffi.Pointer<timespec> __tp,
+);
+
+typedef _c_clock_gettime_nsec_np = ffi.Uint64 Function(
+  ffi.Int32 __clock_id,
+);
+
+typedef _dart_clock_gettime_nsec_np = int Function(
+  int __clock_id,
+);
+
+typedef _c_clock_settime = ffi.Int32 Function(
+  ffi.Int32 __clock_id,
+  ffi.Pointer<timespec> __tp,
+);
+
+typedef _dart_clock_settime = int Function(
+  int __clock_id,
+  ffi.Pointer<timespec> __tp,
+);
+
+typedef _c_timespec_get = ffi.Int32 Function(
+  ffi.Pointer<timespec> ts,
+  ffi.Int32 base,
+);
+
+typedef _dart_timespec_get = int Function(
+  ffi.Pointer<timespec> ts,
+  int base,
+);
+
+typedef _c_adjtime = ffi.Int32 Function(
+  ffi.Pointer<timeval> arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _dart_adjtime = int Function(
+  ffi.Pointer<timeval> arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _c_futimes = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _dart_futimes = int Function(
+  int arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _c_lutimes = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _dart_lutimes = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _c_settimeofday = ffi.Int32 Function(
+  ffi.Pointer<timeval> arg0,
+  ffi.Pointer<timezone_1> arg1,
+);
+
+typedef _dart_settimeofday = int Function(
+  ffi.Pointer<timeval> arg0,
+  ffi.Pointer<timezone_1> arg1,
+);
+
+typedef _c_getitimer = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<itimerval> arg1,
+);
+
+typedef _dart_getitimer = int Function(
+  int arg0,
+  ffi.Pointer<itimerval> arg1,
+);
+
+typedef _c_gettimeofday = ffi.Int32 Function(
+  ffi.Pointer<timeval> arg0,
+  ffi.Pointer<ffi.Void> arg1,
+);
+
+typedef _dart_gettimeofday = int Function(
+  ffi.Pointer<timeval> arg0,
+  ffi.Pointer<ffi.Void> arg1,
+);
+
+typedef _c_select = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<fd_set> arg1,
+  ffi.Pointer<fd_set> arg2,
+  ffi.Pointer<fd_set> arg3,
+  ffi.Pointer<timeval> arg4,
+);
+
+typedef _dart_select = int Function(
+  int arg0,
+  ffi.Pointer<fd_set> arg1,
+  ffi.Pointer<fd_set> arg2,
+  ffi.Pointer<fd_set> arg3,
+  ffi.Pointer<timeval> arg4,
+);
+
+typedef _c_setitimer = ffi.Int32 Function(
+  ffi.Int32 arg0,
+  ffi.Pointer<itimerval> arg1,
+  ffi.Pointer<itimerval> arg2,
+);
+
+typedef _dart_setitimer = int Function(
+  int arg0,
+  ffi.Pointer<itimerval> arg1,
+  ffi.Pointer<itimerval> arg2,
+);
+
+typedef _c_utimes = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _dart_utimes = int Function(
+  ffi.Pointer<ffi.Int8> arg0,
+  ffi.Pointer<timeval> arg1,
+);
+
+typedef _c_curl_strequal = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> s1,
+  ffi.Pointer<ffi.Int8> s2,
+);
+
+typedef _dart_curl_strequal = int Function(
+  ffi.Pointer<ffi.Int8> s1,
+  ffi.Pointer<ffi.Int8> s2,
+);
+
+typedef _c_curl_strnequal = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> s1,
+  ffi.Pointer<ffi.Int8> s2,
+  ffi.Uint64 n,
+);
+
+typedef _dart_curl_strnequal = int Function(
+  ffi.Pointer<ffi.Int8> s1,
+  ffi.Pointer<ffi.Int8> s2,
+  int n,
+);
+
+typedef _c_curl_mime_init = ffi.Pointer<curl_mime> Function(
+  ffi.Pointer<ffi.Void> easy,
+);
+
+typedef _dart_curl_mime_init = ffi.Pointer<curl_mime> Function(
+  ffi.Pointer<ffi.Void> easy,
+);
+
+typedef _c_curl_mime_free = ffi.Void Function(
+  ffi.Pointer<curl_mime> mime,
+);
+
+typedef _dart_curl_mime_free = void Function(
+  ffi.Pointer<curl_mime> mime,
+);
+
+typedef _c_curl_mime_addpart = ffi.Pointer<curl_mimepart> Function(
+  ffi.Pointer<curl_mime> mime,
+);
+
+typedef _dart_curl_mime_addpart = ffi.Pointer<curl_mimepart> Function(
+  ffi.Pointer<curl_mime> mime,
+);
+
+typedef _c_curl_mime_name = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> name,
+);
+
+typedef _dart_curl_mime_name = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> name,
+);
+
+typedef _c_curl_mime_filename = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> filename,
+);
+
+typedef _dart_curl_mime_filename = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> filename,
+);
+
+typedef _c_curl_mime_type = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> mimetype,
+);
+
+typedef _dart_curl_mime_type = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> mimetype,
+);
+
+typedef _c_curl_mime_encoder = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> encoding,
+);
+
+typedef _dart_curl_mime_encoder = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> encoding,
+);
+
+typedef _c_curl_mime_data = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> data,
+  ffi.Uint64 datasize,
+);
+
+typedef _dart_curl_mime_data = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> data,
+  int datasize,
+);
+
+typedef _c_curl_mime_filedata = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> filename,
+);
+
+typedef _dart_curl_mime_filedata = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<ffi.Int8> filename,
+);
+
+typedef curl_read_callback = ffi.Uint64 Function(
+  ffi.Pointer<ffi.Int8>,
+  ffi.Uint64,
+  ffi.Uint64,
+  ffi.Pointer<ffi.Void>,
+);
+
+typedef curl_seek_callback = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Int64,
+  ffi.Int32,
+);
+
+typedef curl_free_callback = ffi.Void Function(
+  ffi.Pointer<ffi.Void>,
+);
+
+typedef _c_curl_mime_data_cb = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Int64 datasize,
+  ffi.Pointer<ffi.NativeFunction<curl_read_callback>> readfunc,
+  ffi.Pointer<ffi.NativeFunction<curl_seek_callback>> seekfunc,
+  ffi.Pointer<ffi.NativeFunction<curl_free_callback>> freefunc,
+  ffi.Pointer<ffi.Void> arg,
+);
+
+typedef _dart_curl_mime_data_cb = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  int datasize,
+  ffi.Pointer<ffi.NativeFunction<curl_read_callback>> readfunc,
+  ffi.Pointer<ffi.NativeFunction<curl_seek_callback>> seekfunc,
+  ffi.Pointer<ffi.NativeFunction<curl_free_callback>> freefunc,
+  ffi.Pointer<ffi.Void> arg,
+);
+
+typedef _c_curl_mime_subparts = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<curl_mime> subparts,
+);
+
+typedef _dart_curl_mime_subparts = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<curl_mime> subparts,
+);
+
+typedef _c_curl_mime_headers = ffi.Int32 Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<curl_slist> headers,
+  ffi.Int32 take_ownership,
+);
+
+typedef _dart_curl_mime_headers = int Function(
+  ffi.Pointer<curl_mimepart> part_1,
+  ffi.Pointer<curl_slist> headers,
+  int take_ownership,
+);
+
+typedef _c_curl_formadd = ffi.Int32 Function(
+  ffi.Pointer<ffi.Pointer<curl_httppost>> httppost,
+  ffi.Pointer<ffi.Pointer<curl_httppost>> last_post,
+);
+
+typedef _dart_curl_formadd = int Function(
+  ffi.Pointer<ffi.Pointer<curl_httppost>> httppost,
+  ffi.Pointer<ffi.Pointer<curl_httppost>> last_post,
+);
+
+typedef curl_formget_callback = ffi.Uint64 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Pointer<ffi.Int8>,
+  ffi.Uint64,
+);
+
+typedef _c_curl_formget = ffi.Int32 Function(
+  ffi.Pointer<curl_httppost> form,
+  ffi.Pointer<ffi.Void> arg,
+  ffi.Pointer<ffi.NativeFunction<curl_formget_callback>> append,
+);
+
+typedef _dart_curl_formget = int Function(
+  ffi.Pointer<curl_httppost> form,
+  ffi.Pointer<ffi.Void> arg,
+  ffi.Pointer<ffi.NativeFunction<curl_formget_callback>> append,
+);
+
+typedef _c_curl_formfree = ffi.Void Function(
+  ffi.Pointer<curl_httppost> form,
+);
+
+typedef _dart_curl_formfree = void Function(
+  ffi.Pointer<curl_httppost> form,
+);
+
+typedef _c_curl_getenv = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> variable,
+);
+
+typedef _dart_curl_getenv = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> variable,
+);
+
+typedef _c_curl_version = ffi.Pointer<ffi.Int8> Function();
+
+typedef _dart_curl_version = ffi.Pointer<ffi.Int8> Function();
+
+typedef _c_curl_easy_escape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Void> handle,
+  ffi.Pointer<ffi.Int8> string,
+  ffi.Int32 length,
+);
+
+typedef _dart_curl_easy_escape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Void> handle,
+  ffi.Pointer<ffi.Int8> string,
+  int length,
+);
+
+typedef _c_curl_escape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> string,
+  ffi.Int32 length,
+);
+
+typedef _dart_curl_escape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> string,
+  int length,
+);
+
+typedef _c_curl_easy_unescape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Void> handle,
+  ffi.Pointer<ffi.Int8> string,
+  ffi.Int32 length,
+  ffi.Pointer<ffi.Int32> outlength,
+);
+
+typedef _dart_curl_easy_unescape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Void> handle,
+  ffi.Pointer<ffi.Int8> string,
+  int length,
+  ffi.Pointer<ffi.Int32> outlength,
+);
+
+typedef _c_curl_unescape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> string,
+  ffi.Int32 length,
+);
+
+typedef _dart_curl_unescape = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> string,
+  int length,
+);
+
+typedef _c_curl_free = ffi.Void Function(
+  ffi.Pointer<ffi.Void> p,
+);
+
+typedef _dart_curl_free = void Function(
+  ffi.Pointer<ffi.Void> p,
+);
+
+typedef _c_curl_global_init = ffi.Int32 Function(
+  ffi.Int64 flags,
+);
+
+typedef _dart_curl_global_init = int Function(
+  int flags,
+);
+
+typedef curl_malloc_callback = ffi.Pointer<ffi.Void> Function(
+  ffi.Uint64,
+);
+
+typedef curl_realloc_callback = ffi.Pointer<ffi.Void> Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Uint64,
+);
+
+typedef curl_strdup_callback = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8>,
+);
+
+typedef curl_calloc_callback = ffi.Pointer<ffi.Void> Function(
+  ffi.Uint64,
+  ffi.Uint64,
+);
+
+typedef _c_curl_global_init_mem = ffi.Int32 Function(
+  ffi.Int64 flags,
+  ffi.Pointer<ffi.NativeFunction<curl_malloc_callback>> m,
+  ffi.Pointer<ffi.NativeFunction<curl_free_callback>> f,
+  ffi.Pointer<ffi.NativeFunction<curl_realloc_callback>> r,
+  ffi.Pointer<ffi.NativeFunction<curl_strdup_callback>> s,
+  ffi.Pointer<ffi.NativeFunction<curl_calloc_callback>> c,
+);
+
+typedef _dart_curl_global_init_mem = int Function(
+  int flags,
+  ffi.Pointer<ffi.NativeFunction<curl_malloc_callback>> m,
+  ffi.Pointer<ffi.NativeFunction<curl_free_callback>> f,
+  ffi.Pointer<ffi.NativeFunction<curl_realloc_callback>> r,
+  ffi.Pointer<ffi.NativeFunction<curl_strdup_callback>> s,
+  ffi.Pointer<ffi.NativeFunction<curl_calloc_callback>> c,
+);
+
+typedef _c_curl_global_cleanup = ffi.Void Function();
+
+typedef _dart_curl_global_cleanup = void Function();
+
+typedef _c_curl_global_sslset = ffi.Int32 Function(
+  ffi.Int32 id,
+  ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Pointer<ffi.Pointer<curl_ssl_backend>>> avail,
+);
+
+typedef _dart_curl_global_sslset = int Function(
+  int id,
+  ffi.Pointer<ffi.Int8> name,
+  ffi.Pointer<ffi.Pointer<ffi.Pointer<curl_ssl_backend>>> avail,
+);
+
+typedef _c_curl_slist_append = ffi.Pointer<curl_slist> Function(
+  ffi.Pointer<curl_slist> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _dart_curl_slist_append = ffi.Pointer<curl_slist> Function(
+  ffi.Pointer<curl_slist> arg0,
+  ffi.Pointer<ffi.Int8> arg1,
+);
+
+typedef _c_curl_slist_free_all = ffi.Void Function(
+  ffi.Pointer<curl_slist> arg0,
+);
+
+typedef _dart_curl_slist_free_all = void Function(
+  ffi.Pointer<curl_slist> arg0,
+);
+
+typedef _c_curl_getdate = ffi.Int64 Function(
+  ffi.Pointer<ffi.Int8> p,
+  ffi.Pointer<ffi.Int64> unused,
+);
+
+typedef _dart_curl_getdate = int Function(
+  ffi.Pointer<ffi.Int8> p,
+  ffi.Pointer<ffi.Int64> unused,
+);
+
+typedef _c_curl_share_init = ffi.Pointer<ffi.Void> Function();
+
+typedef _dart_curl_share_init = ffi.Pointer<ffi.Void> Function();
+
+typedef _c_curl_share_setopt = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> arg0,
+  ffi.Int32 option,
+);
+
+typedef _dart_curl_share_setopt = int Function(
+  ffi.Pointer<ffi.Void> arg0,
+  int option,
+);
+
+typedef _c_curl_share_cleanup = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> arg0,
+);
+
+typedef _dart_curl_share_cleanup = int Function(
+  ffi.Pointer<ffi.Void> arg0,
+);
+
+typedef _c_curl_version_info = ffi.Pointer<curl_version_info_data> Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_curl_version_info = ffi.Pointer<curl_version_info_data> Function(
+  int arg0,
+);
+
+typedef _c_curl_easy_strerror = ffi.Pointer<ffi.Int8> Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_curl_easy_strerror = ffi.Pointer<ffi.Int8> Function(
+  int arg0,
+);
+
+typedef _c_curl_share_strerror = ffi.Pointer<ffi.Int8> Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_curl_share_strerror = ffi.Pointer<ffi.Int8> Function(
+  int arg0,
+);
+
+typedef _c_curl_easy_pause = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> handle,
+  ffi.Int32 bitmask,
+);
+
+typedef _dart_curl_easy_pause = int Function(
+  ffi.Pointer<ffi.Void> handle,
+  int bitmask,
+);
+
+typedef _c_curl_easy_init = ffi.Pointer<ffi.Void> Function();
+
+typedef _dart_curl_easy_init = ffi.Pointer<ffi.Void> Function();
+
+typedef _c_curl_easy_setopt = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> curl,
+  ffi.Int32 option,
+);
+
+typedef _dart_curl_easy_setopt = int Function(
+  ffi.Pointer<ffi.Void> curl,
+  int option,
+);
+
+typedef _c_curl_easy_perform = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _dart_curl_easy_perform = int Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _c_curl_easy_cleanup = ffi.Void Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _dart_curl_easy_cleanup = void Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _c_curl_easy_getinfo = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> curl,
+  ffi.Int32 info,
+);
+
+typedef _dart_curl_easy_getinfo = int Function(
+  ffi.Pointer<ffi.Void> curl,
+  int info,
+);
+
+typedef _c_curl_easy_duphandle = ffi.Pointer<ffi.Void> Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _dart_curl_easy_duphandle = ffi.Pointer<ffi.Void> Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _c_curl_easy_reset = ffi.Void Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _dart_curl_easy_reset = void Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _c_curl_easy_recv = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> curl,
+  ffi.Pointer<ffi.Void> buffer,
+  ffi.Uint64 buflen,
+  ffi.Pointer<ffi.Uint64> n,
+);
+
+typedef _dart_curl_easy_recv = int Function(
+  ffi.Pointer<ffi.Void> curl,
+  ffi.Pointer<ffi.Void> buffer,
+  int buflen,
+  ffi.Pointer<ffi.Uint64> n,
+);
+
+typedef _c_curl_easy_send = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> curl,
+  ffi.Pointer<ffi.Void> buffer,
+  ffi.Uint64 buflen,
+  ffi.Pointer<ffi.Uint64> n,
+);
+
+typedef _dart_curl_easy_send = int Function(
+  ffi.Pointer<ffi.Void> curl,
+  ffi.Pointer<ffi.Void> buffer,
+  int buflen,
+  ffi.Pointer<ffi.Uint64> n,
+);
+
+typedef _c_curl_easy_upkeep = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _dart_curl_easy_upkeep = int Function(
+  ffi.Pointer<ffi.Void> curl,
+);
+
+typedef _c_curl_multi_init = ffi.Pointer<ffi.Void> Function();
+
+typedef _dart_curl_multi_init = ffi.Pointer<ffi.Void> Function();
+
+typedef _c_curl_multi_add_handle = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Void> curl_handle,
+);
+
+typedef _dart_curl_multi_add_handle = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Void> curl_handle,
+);
+
+typedef _c_curl_multi_remove_handle = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Void> curl_handle,
+);
+
+typedef _dart_curl_multi_remove_handle = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Void> curl_handle,
+);
+
+typedef _c_curl_multi_fdset = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<fd_set> read_fd_set,
+  ffi.Pointer<fd_set> write_fd_set,
+  ffi.Pointer<fd_set> exc_fd_set,
+  ffi.Pointer<ffi.Int32> max_fd,
+);
+
+typedef _dart_curl_multi_fdset = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<fd_set> read_fd_set,
+  ffi.Pointer<fd_set> write_fd_set,
+  ffi.Pointer<fd_set> exc_fd_set,
+  ffi.Pointer<ffi.Int32> max_fd,
+);
+
+typedef _c_curl_multi_wait = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<curl_waitfd> extra_fds,
+  ffi.Uint32 extra_nfds,
+  ffi.Int32 timeout_ms,
+  ffi.Pointer<ffi.Int32> ret,
+);
+
+typedef _dart_curl_multi_wait = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<curl_waitfd> extra_fds,
+  int extra_nfds,
+  int timeout_ms,
+  ffi.Pointer<ffi.Int32> ret,
+);
+
+typedef _c_curl_multi_poll = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<curl_waitfd> extra_fds,
+  ffi.Uint32 extra_nfds,
+  ffi.Int32 timeout_ms,
+  ffi.Pointer<ffi.Int32> ret,
+);
+
+typedef _dart_curl_multi_poll = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<curl_waitfd> extra_fds,
+  int extra_nfds,
+  int timeout_ms,
+  ffi.Pointer<ffi.Int32> ret,
+);
+
+typedef _c_curl_multi_wakeup = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+);
+
+typedef _dart_curl_multi_wakeup = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+);
+
+typedef _c_curl_multi_perform = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _dart_curl_multi_perform = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _c_curl_multi_cleanup = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+);
+
+typedef _dart_curl_multi_cleanup = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+);
+
+typedef _c_curl_multi_info_read = ffi.Pointer<CURLMsg> Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int32> msgs_in_queue,
+);
+
+typedef _dart_curl_multi_info_read = ffi.Pointer<CURLMsg> Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int32> msgs_in_queue,
+);
+
+typedef _c_curl_multi_strerror = ffi.Pointer<ffi.Int8> Function(
+  ffi.Int32 arg0,
+);
+
+typedef _dart_curl_multi_strerror = ffi.Pointer<ffi.Int8> Function(
+  int arg0,
+);
+
+typedef _c_curl_multi_socket = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Int32 s,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _dart_curl_multi_socket = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  int s,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _c_curl_multi_socket_action = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Int32 s,
+  ffi.Int32 ev_bitmask,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _dart_curl_multi_socket_action = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  int s,
+  int ev_bitmask,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _c_curl_multi_socket_all = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _dart_curl_multi_socket_all = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int32> running_handles,
+);
+
+typedef _c_curl_multi_timeout = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int64> milliseconds,
+);
+
+typedef _dart_curl_multi_timeout = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Pointer<ffi.Int64> milliseconds,
+);
+
+typedef _c_curl_multi_setopt = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Int32 option,
+);
+
+typedef _dart_curl_multi_setopt = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  int option,
+);
+
+typedef _c_curl_multi_assign = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  ffi.Int32 sockfd,
+  ffi.Pointer<ffi.Void> sockp,
+);
+
+typedef _dart_curl_multi_assign = int Function(
+  ffi.Pointer<ffi.Void> multi_handle,
+  int sockfd,
+  ffi.Pointer<ffi.Void> sockp,
+);
+
+typedef _c_curl_pushheader_bynum = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<curl_pushheaders> h,
+  ffi.Uint64 num,
+);
+
+typedef _dart_curl_pushheader_bynum = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<curl_pushheaders> h,
+  int num,
+);
+
+typedef _c_curl_pushheader_byname = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<curl_pushheaders> h,
+  ffi.Pointer<ffi.Int8> name,
+);
+
+typedef _dart_curl_pushheader_byname = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<curl_pushheaders> h,
+  ffi.Pointer<ffi.Int8> name,
+);
+
+typedef _c_curl_url = ffi.Pointer<Curl_URL> Function();
+
+typedef _dart_curl_url = ffi.Pointer<Curl_URL> Function();
+
+typedef _c_curl_url_cleanup = ffi.Void Function(
+  ffi.Pointer<Curl_URL> handle,
+);
+
+typedef _dart_curl_url_cleanup = void Function(
+  ffi.Pointer<Curl_URL> handle,
+);
+
+typedef _c_curl_url_dup = ffi.Pointer<Curl_URL> Function(
+  ffi.Pointer<Curl_URL> in_1,
+);
+
+typedef _dart_curl_url_dup = ffi.Pointer<Curl_URL> Function(
+  ffi.Pointer<Curl_URL> in_1,
+);
+
+typedef _c_curl_url_get = ffi.Int32 Function(
+  ffi.Pointer<Curl_URL> handle,
+  ffi.Int32 what,
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> part_1,
+  ffi.Uint32 flags,
+);
+
+typedef _dart_curl_url_get = int Function(
+  ffi.Pointer<Curl_URL> handle,
+  int what,
+  ffi.Pointer<ffi.Pointer<ffi.Int8>> part_1,
+  int flags,
+);
+
+typedef _c_curl_url_set = ffi.Int32 Function(
+  ffi.Pointer<Curl_URL> handle,
+  ffi.Int32 what,
+  ffi.Pointer<ffi.Int8> part_1,
+  ffi.Uint32 flags,
+);
+
+typedef _dart_curl_url_set = int Function(
+  ffi.Pointer<Curl_URL> handle,
+  int what,
+  ffi.Pointer<ffi.Int8> part_1,
+  int flags,
+);
+
+typedef _c_curl_mprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _dart_curl_mprintf = int Function(
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _c_curl_mfprintf = ffi.Int32 Function(
+  ffi.Pointer<FILE> fd,
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _dart_curl_mfprintf = int Function(
+  ffi.Pointer<FILE> fd,
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _c_curl_msprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _dart_curl_msprintf = int Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _c_curl_msnprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  ffi.Uint64 maxlength,
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _dart_curl_msnprintf = int Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  int maxlength,
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _c_curl_mvprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _dart_curl_mvprintf = int Function(
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _c_curl_mvfprintf = ffi.Int32 Function(
+  ffi.Pointer<FILE> fd,
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _dart_curl_mvfprintf = int Function(
+  ffi.Pointer<FILE> fd,
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _c_curl_mvsprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _dart_curl_mvsprintf = int Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _c_curl_mvsnprintf = ffi.Int32 Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  ffi.Uint64 maxlength,
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _dart_curl_mvsnprintf = int Function(
+  ffi.Pointer<ffi.Int8> buffer,
+  int maxlength,
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _c_curl_maprintf = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _dart_curl_maprintf = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> format,
+);
+
+typedef _c_curl_mvaprintf = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _dart_curl_mvaprintf = ffi.Pointer<ffi.Int8> Function(
+  ffi.Pointer<ffi.Int8> format,
+  ffi.Pointer<__va_list_tag> args,
+);
+
+typedef _c__curl_easy_setopt_err_long = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_long = void Function();
+
+typedef _c__curl_easy_setopt_err_curl_off_t = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_curl_off_t = void Function();
+
+typedef _c__curl_easy_setopt_err_string = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_string = void Function();
+
+typedef _c__curl_easy_setopt_err_write_callback = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_write_callback = void Function();
+
+typedef _c__curl_easy_setopt_err_resolver_start_callback = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_resolver_start_callback = void Function();
+
+typedef _c__curl_easy_setopt_err_read_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_read_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_ioctl_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_ioctl_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_sockopt_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_sockopt_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_opensocket_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_opensocket_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_progress_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_progress_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_debug_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_debug_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_ssl_ctx_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_ssl_ctx_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_conv_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_conv_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_seek_cb = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_seek_cb = void Function();
+
+typedef _c__curl_easy_setopt_err_cb_data = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_cb_data = void Function();
+
+typedef _c__curl_easy_setopt_err_error_buffer = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_error_buffer = void Function();
+
+typedef _c__curl_easy_setopt_err_FILE = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_FILE = void Function();
+
+typedef _c__curl_easy_setopt_err_postfields = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_postfields = void Function();
+
+typedef _c__curl_easy_setopt_err_curl_httpost = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_curl_httpost = void Function();
+
+typedef _c__curl_easy_setopt_err_curl_mimepost = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_curl_mimepost = void Function();
+
+typedef _c__curl_easy_setopt_err_curl_slist = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_curl_slist = void Function();
+
+typedef _c__curl_easy_setopt_err_CURLSH = ffi.Void Function();
+
+typedef _dart__curl_easy_setopt_err_CURLSH = void Function();
+
+typedef _c__curl_easy_getinfo_err_string = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_string = void Function();
+
+typedef _c__curl_easy_getinfo_err_long = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_long = void Function();
+
+typedef _c__curl_easy_getinfo_err_double = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_double = void Function();
+
+typedef _c__curl_easy_getinfo_err_curl_slist = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_curl_slist = void Function();
+
+typedef _c__curl_easy_getinfo_err_curl_tlssesssioninfo = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_curl_tlssesssioninfo = void Function();
+
+typedef _c__curl_easy_getinfo_err_curl_certinfo = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_curl_certinfo = void Function();
+
+typedef _c__curl_easy_getinfo_err_curl_socket = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_curl_socket = void Function();
+
+typedef _c__curl_easy_getinfo_err_curl_off_t = ffi.Void Function();
+
+typedef _dart__curl_easy_getinfo_err_curl_off_t = void Function();
+
+typedef _typedefC_1 = ffi.Void Function(
+  ffi.Pointer<ffi.Void>,
+);
+
+typedef _typedefC_2 = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+);
+
+typedef _typedefC_3 = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Pointer<ffi.Int8>,
+  ffi.Int32,
+);
+
+typedef _typedefC_4 = ffi.Int64 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Int64,
+  ffi.Int32,
+);
+
+typedef _typedefC_5 = ffi.Int32 Function(
+  ffi.Pointer<ffi.Void>,
+  ffi.Pointer<ffi.Int8>,
+  ffi.Int32,
+);

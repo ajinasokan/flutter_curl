@@ -10,7 +10,7 @@ enum HTTPVersion {
 
 class _ResponseBuffer {
   String? requestID;
-  ffi.Pointer? slist;
+  ffi.Pointer<curl_slist>? slist;
   final List<int> bodyBuffer = [];
   final List<int> headerBuffer = [];
   int statusCode = 0;
@@ -37,19 +37,20 @@ class _ResponseBuffer {
         headers[key] = headers[key]! + "; " + value;
       }
       if (key == "last-modified") {
-        lastModified = DateTime.fromMillisecondsSinceEpoch(
-            engine.libCurl.getdate(value.toNativeUtf8(), ffi.nullptr) * 1000);
+        lastModified = DateTime.fromMillisecondsSinceEpoch(engine.libCurl
+                .curl_getdate(value.toNativeUtf8().cast(), ffi.nullptr) *
+            1000);
       }
     }
 
     // Pick HTTP version
     HTTPVersion httpVer = <int, HTTPVersion>{
-          consts.CURL_HTTP_VERSION_1_0: HTTPVersion.http1,
-          consts.CURL_HTTP_VERSION_1_1: HTTPVersion.http11,
-          consts.CURL_HTTP_VERSION_2TLS: HTTPVersion.http2,
-          consts.CURL_HTTP_VERSION_2_0: HTTPVersion.http2,
-          consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: HTTPVersion.http2,
-          consts.CURL_HTTP_VERSION_3: HTTPVersion.http3,
+          CURL_HTTP_VERSION_1_0: HTTPVersion.http1,
+          CURL_HTTP_VERSION_1_1: HTTPVersion.http11,
+          CURL_HTTP_VERSION_2TLS: HTTPVersion.http2,
+          CURL_HTTP_VERSION_2_0: HTTPVersion.http2,
+          CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: HTTPVersion.http2,
+          CURL_HTTP_VERSION_3: HTTPVersion.http3,
         }[httpVersion] ??
         HTTPVersion.unknown;
 

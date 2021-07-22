@@ -7,10 +7,9 @@ import 'dart:isolate';
 import 'dart:convert';
 import 'dart:io' show Directory, Platform, File, IOSink, RandomAccessFile;
 import 'package:path/path.dart' as path;
+import 'ffi.dart';
 
-import 'const.dart' as consts;
-
-part 'ffi.dart';
+part 'ffi_ext.dart';
 part 'request.dart';
 part 'request_body.dart';
 part 'response.dart';
