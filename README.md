@@ -11,12 +11,10 @@ Flutter plugin to use [libcurl](https://curl.se/libcurl/) for HTTP calls in Flut
 
 ## Getting started
 
-Add to project using git source:
+Add to project:
 
 ```yaml
-dependencies:
-  ...
-  flutter_curl: ^0.1.0
+flutter pub add flutter_curl
 ```
 
 Example usage:
