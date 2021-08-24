@@ -7,3 +7,6 @@
 build/
 .vscode/
 .idea/
+
+curl.aar
+curl_h3.aar

@@ -14,11 +14,11 @@ buildscript {
 
 rootProject.allprojects {
     repositories {
+        maven {
+            url "${rootProject.buildDir}/flutter_curl/curlmaven"
+        }
         google()
         jcenter()
-        flatDir {
-            dirs "$buildDir/libs"
-        }
     }
 }
 
@@ -35,19 +35,25 @@ android {
     }
 }
 
-def urlFile = { url, name ->
-    File file = new File("$buildDir/libs/${name}")
+def urlImplementation = { url, name ->
+    File file = new File("$buildDir/$name")
     file.parentFile.mkdirs()
     if (!file.exists()) {
+        copy {
+            from "$projectDir/maven"
+            into "$buildDir/curlmaven"
+        }
         new URL(url).withInputStream { downloadStream ->
             file.withOutputStream { fileOut ->
                 fileOut << downloadStream
             }
         }
     }
-    files(file.absolutePath)
+    'com.ajinasokan:flutter_curl:0.0.1'
 }
 
 dependencies {
-    implementation urlFile("https://github.com/ajinasokan/flutter_curl/releases/download/v0.0.1-bins/curl.aar", "curl.aar")
+    implementation urlImplementation(
+        "https://github.com/ajinasokan/flutter_curl/releases/download/v0.0.1-bins/curl.aar", "curlmaven/com/ajinasokan/flutter_curl/0.0.1/flutter_curl-0.0.1.aar"
+    )
 }
