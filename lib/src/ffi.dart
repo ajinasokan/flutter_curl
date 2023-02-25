@@ -260,19 +260,22 @@ class _LibCURL {
 
     easy_setopt_string = _dylib
         .lookup<ffi.NativeFunction<_easy_setopt_string_func>>(
-            'curl_easy_setopt')
+            'curl_easy_setopt_string')
         .asFunction();
 
     easy_setopt_int = _dylib
-        .lookup<ffi.NativeFunction<_easy_setopt_int_func>>('curl_easy_setopt')
+        .lookup<ffi.NativeFunction<_easy_setopt_int_func>>(
+            'curl_easy_setopt_int')
         .asFunction();
 
     easy_setopt_ptr = _dylib
-        .lookup<ffi.NativeFunction<_easy_setopt_ptr_func>>('curl_easy_setopt')
+        .lookup<ffi.NativeFunction<_easy_setopt_ptr_func>>(
+            'curl_easy_setopt_ptr')
         .asFunction();
 
     easy_getinfo = _dylib
-        .lookup<ffi.NativeFunction<_easy_getinfo_func>>('curl_easy_getinfo')
+        .lookup<ffi.NativeFunction<_easy_getinfo_func>>(
+            'curl_easy_getinfo_long')
         .asFunction();
 
     slist_append = _dylib
