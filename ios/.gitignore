@@ -36,3 +36,4 @@ Icon?
 /Flutter/Generated.xcconfig
 /Flutter/flutter_export_environment.sh
 Curl.framework/
+Curl.xcframework/

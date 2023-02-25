@@ -20,15 +20,15 @@ A new flutter plugin project.
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
   s.swift_version = '5.0'
-  s.vendored_frameworks = 'Curl.framework'
+  s.vendored_frameworks = 'Curl.xcframework'
 
   s.prepare_command = <<-CMD
-    if [ ! -d "Curl.framework" ]; then  
-      url=https://github.com/ajinasokan/flutter_curl/releases/download/v0.0.1-bins/Curl.framework.zip
-      file=Curl.framework.zip  
+    if [ ! -d "Curl.xcframework" ]; then  
+      url=https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.3.0%2B1/Curl.xcframework.zip
+      file=Curl.xcframework.zip  
       wget -O $file $url 2>/dev/null || curl -Lo $file $url
-      unzip Curl.framework.zip
-      rm -f Curl.framework.zip
+      unzip Curl.xcframework.zip
+      rm -f Curl.xcframework.zip
     fi
   CMD
 
