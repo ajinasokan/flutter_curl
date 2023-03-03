@@ -7,7 +7,7 @@ Flutter plugin to use [libcurl](https://curl.se/libcurl/) for HTTP calls in Flut
 * HTTP2 with [Nghttp2](https://nghttp2.org)
 * Automatic upgrade to HTTP2 from 1.1 with [ALPN](https://www.keycdn.com/support/alpn) TLS extension
 * [Brotli](https://github.com/google/brotli) compression
-* **Experimental** HTTP3 and alt-svc support ([http3](https://github.com/ajinasokan/flutter_curl/blob/http3/README.md) branch)
+* **Experimental** HTTP3 and alt-svc support
 
 ## Getting started
 

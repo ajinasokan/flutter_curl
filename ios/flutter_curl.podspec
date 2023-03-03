@@ -24,7 +24,7 @@ A new flutter plugin project.
 
   s.prepare_command = <<-CMD
     if [ ! -d "Curl.xcframework" ]; then  
-      url=https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.3.0%2B1/Curl.xcframework.zip
+      url=https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.3.0%2B3/Curl.xcframework.zip
       file=Curl.xcframework.zip  
       wget -O $file $url 2>/dev/null || curl -Lo $file $url
       unzip Curl.xcframework.zip
