@@ -28,7 +28,7 @@ void _serve() async {
   server.startServing(handleRequest, handleStream, onError: (_, __) {});
 }
 
-void handleRequest(req) async {
+void handleRequest(HttpRequest req) async {
   final r = TestRequest();
   r.url = req.uri.toString();
   r.method = req.method;
@@ -42,7 +42,7 @@ void handleRequest(req) async {
     req.response.headers.add(name, values);
   });
   req.response.write(s.body);
-  req.response.close();
+  await req.response.close();
 }
 
 void handleStream(transport.ServerTransportStream stream) async {
@@ -115,6 +115,8 @@ Future<TestResponse> processRequest(TestRequest request) async {
       response.statusCode = 304;
     }
   }
+
+  if (response.statusCode == 304) return response;
 
   String encoding = request.headers["X-Encoding".toLowerCase()];
   if (encoding != null) {
