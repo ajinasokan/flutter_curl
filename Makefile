@@ -1,4 +1,17 @@
 
+clean:
+	rm -rf ios/Curl.xcframework
+	rm -rf macos/Curl.framework
+	flutter clean
+	cd example; flutter clean
+	flutter pub get
+
+runArm:
+	cd example; flutter run -d macos
+
+runx86:
+	cd example; arch -x86_64 flutter run -d macos
+
 setup-maven:
 	rm -rf android/maven
 	mkdir -p android/maven
