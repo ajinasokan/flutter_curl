@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_curl/flutter_curl.dart';
 import 'dart:convert' as convert;
 

@@ -86,7 +86,9 @@ class _Engine {
     // set ip support.
     // TODO: add this to client config?
     const CURL_IPRESOLVE_WHATEVER = 0;
+    // ignore: unused_local_variable
     const CURL_IPRESOLVE_V4 = 1;
+    // ignore: unused_local_variable
     const CURL_IPRESOLVE_V6 = 2;
     libCurl.easy_setopt_int(
       handle,
@@ -308,23 +310,23 @@ class _Engine {
             malloc.allocate(ffi.sizeOf<ffi.Int64>());
         _tempLong.value = 0;
         libCurl.easy_getinfo(
-            msg.easyHandle!, consts.CURLINFO_RESPONSE_CODE, _tempLong);
+            msg.easyHandle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
         buffer.statusCode = _tempLong.value;
         _tempLong.value = 0;
         libCurl.easy_getinfo(
-            msg.easyHandle!, consts.CURLINFO_HTTP_VERSION, _tempLong);
+            msg.easyHandle, consts.CURLINFO_HTTP_VERSION, _tempLong);
         buffer.httpVersion = _tempLong.value;
         malloc.free(_tempLong);
 
         if (msg.result != consts.CURLE_OK) {
           buffer.errorMessage =
-              libCurl.easy_strerror(msg.result!).toDartString();
+              libCurl.easy_strerror(msg.result).toDartString();
         }
 
         // cleanup everything
         libCurl.slist_free_all(connData[requestID]!.slist!);
-        libCurl.multi_remove_handle(multiHandle, msg.easyHandle!);
-        libCurl.easy_cleanup(msg.easyHandle!);
+        libCurl.multi_remove_handle(multiHandle, msg.easyHandle);
+        libCurl.easy_cleanup(msg.easyHandle);
         reqIDs.remove(msg.easyHandle);
         connData.remove(requestID);
         logData[requestID]!.close();

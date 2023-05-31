@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types, unused_element, non_constant_identifier_names
+
 part of 'client.dart';
 
 /// [_CURLEasy] holds handle for a single request
