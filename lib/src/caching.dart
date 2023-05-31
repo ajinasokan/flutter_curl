@@ -3,8 +3,8 @@ import 'package:flutter_curl/flutter_curl.dart';
 import 'dart:convert' as convert;
 
 class HTTPCaching extends HTTPInterceptor {
-  final Future<String> Function(String key) getter;
-  final Future<String> Function(String key, String? value) setter;
+  final Future<String?> Function(String key) getter;
+  final Future<String> Function(String key, String value) setter;
 
   HTTPCaching({
     required this.getter,
@@ -38,13 +38,13 @@ class HTTPCaching extends HTTPInterceptor {
     if (response.statusCode == 304) {
       var data = await getter(dataKey);
       response.statusCode = 200;
-      response.body = convert.utf8.encode(data);
+      response.body = convert.utf8.encode(data!);
       response.headers[":from_cache"] = "true";
     } else if (response.headers.containsKey("etag")) {
-      setter(etagKey, response.headers["etag"]);
+      setter(etagKey, response.headers["etag"]!);
       setter(dataKey, response.text());
     } else if (response.lastModified != null) {
-      setter(dateKey, response.headers["last-modified"]);
+      setter(dateKey, response.headers["last-modified"]!);
       setter(dataKey, response.text());
     }
   }

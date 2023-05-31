@@ -29,7 +29,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -44,7 +44,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -59,7 +59,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -74,7 +74,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -89,7 +89,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -104,7 +104,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-StatusCode": "400",
         },
@@ -121,7 +121,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "xyz",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-StatusCode": "400",
         },
@@ -138,7 +138,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -153,7 +153,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {},
       ));
       c.dispose();
@@ -168,7 +168,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "user-agent": "dart_curl",
         },
@@ -186,7 +186,7 @@ List<Test> tests = [
       await c.init();
       final res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "user-agent": "dart_curl",
         },
@@ -202,7 +202,7 @@ List<Test> tests = [
       final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
-        url: echo.url,
+        url: echo.url!,
         body: curl.RequestBody.raw("hello world".codeUnits),
       ));
       c.dispose();
@@ -216,7 +216,7 @@ List<Test> tests = [
       final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
-        url: echo.url,
+        url: echo.url!,
         body: curl.RequestBody.string("hello world"),
       ));
       c.dispose();
@@ -230,7 +230,7 @@ List<Test> tests = [
       final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
-        url: echo.url,
+        url: echo.url!,
         body: curl.RequestBody.form({
           "age": "10",
           "hello": "world",
@@ -251,7 +251,7 @@ List<Test> tests = [
       final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.post(
-        url: echo.url,
+        url: echo.url!,
         body: curl.RequestBody.multipart([
           curl.Multipart(name: "age", data: "1024"),
           curl.Multipart(name: "hello", data: "world"),
@@ -285,7 +285,7 @@ List<Test> tests = [
       final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.get(
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-Encoding": "br",
         },
@@ -302,7 +302,7 @@ List<Test> tests = [
       final c = curl.Client(verifySSL: false);
       await c.init();
       final res = await c.send(curl.Request.get(
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-Encoding": "gzip",
         },
@@ -320,12 +320,12 @@ List<Test> tests = [
       await c.init();
       final res1Fut = c.send(curl.Request(
         method: "get",
-        url: echo.url + "/hello",
+        url: echo.url! + "/hello",
         headers: {},
       ));
       final res2Fut = c.send(curl.Request(
         method: "get",
-        url: echo.url + "/world",
+        url: echo.url! + "/world",
         headers: {},
       ));
       final res = await Future.wait([res1Fut, res2Fut]);
@@ -351,7 +351,7 @@ List<Test> tests = [
       await c.init();
       var res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-Etag": "abcd",
         },
@@ -359,7 +359,7 @@ List<Test> tests = [
       final firstStatus = res.statusCode;
       res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-Etag": "abcd",
         },
@@ -386,7 +386,7 @@ List<Test> tests = [
       await c.init();
       var res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-Etag": "abcd",
         },
@@ -394,7 +394,7 @@ List<Test> tests = [
       final firstStatus = res.statusCode;
       res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-Etag": "xyz",
         },
@@ -421,7 +421,7 @@ List<Test> tests = [
       await c.init();
       var res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
         },
@@ -429,7 +429,7 @@ List<Test> tests = [
       final firstStatus = res.statusCode;
       res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
         },
@@ -456,7 +456,7 @@ List<Test> tests = [
       await c.init();
       var res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
         },
@@ -464,7 +464,7 @@ List<Test> tests = [
       final firstStatus = res.statusCode;
       res = await c.send(curl.Request(
         method: "get",
-        url: echo.url,
+        url: echo.url!,
         headers: {
           "X-LastModified": "Wed, 21 Oct 2015 07:28:01 GMT",
         },
@@ -482,22 +482,22 @@ class Test {
   final String title;
   final dynamic Function(Map<String, dynamic>) exec;
   final dynamic Function(Map<String, dynamic>) expect;
-  final dynamic Function(Map<String, dynamic>) beforeTest;
-  final dynamic Function(Map<String, dynamic>) afterTest;
+  final dynamic Function(Map<String, dynamic>)? beforeTest;
+  final dynamic Function(Map<String, dynamic>)? afterTest;
   final Map<String, dynamic> context = {};
-  bool passed;
+  bool? passed;
 
   Test({
-    this.title,
-    this.exec,
-    this.expect,
+    required this.title,
+    required this.exec,
+    required this.expect,
     this.beforeTest,
     this.afterTest,
   });
 
   Future<void> run() async {
     if (beforeTest != null) {
-      var beforeTestRes = beforeTest(context);
+      var beforeTestRes = beforeTest!(context);
       if (beforeTestRes is Future) beforeTestRes = await beforeTestRes;
     }
 
@@ -509,12 +509,12 @@ class Test {
 
     passed = execRes == expectRes;
 
-    if (!passed) {
+    if (!passed!) {
       print("expected: $expectRes\ngot: $execRes");
     }
 
     if (afterTest != null) {
-      var afterTestRes = afterTest(context);
+      var afterTestRes = afterTest!(context);
       if (afterTestRes is Future) afterTestRes = await afterTestRes;
     }
   }

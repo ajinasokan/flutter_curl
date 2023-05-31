@@ -9,12 +9,12 @@ class _CURLMulti extends ffi.Opaque {}
 /// [_CURLMsg] holds the status about a single request
 class _CURLMsg extends ffi.Struct {
   @ffi.Int32()
-  external int? messageType;
+  external int messageType;
 
-  external ffi.Pointer<_CURLEasy>? easyHandle;
+  external ffi.Pointer<_CURLEasy> easyHandle;
 
   @ffi.Int32()
-  external int? result;
+  external int result;
 
   factory _CURLMsg.allocate(
           int msg, ffi.Pointer<_CURLEasy> easyHandle, int result) =>

@@ -5,8 +5,8 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:http2/transport.dart' as transport;
 import 'package:http2/multiprotocol_server.dart' as http2;
 
-http2.MultiProtocolHttpServer server;
-String url;
+http2.MultiProtocolHttpServer? server;
+String? url;
 
 Future<void> startTestServer() async {
   var context = SecurityContext()
@@ -20,12 +20,12 @@ Future<void> startTestServer() async {
     0,
     context,
   );
-  url = 'https://localhost:${server.port}';
+  url = 'https://localhost:${server!.port}';
   _serve();
 }
 
 void _serve() async {
-  server.startServing(handleRequest, handleStream, onError: (_, __) {});
+  server!.startServing(handleRequest, handleStream, onError: (_, __) {});
 }
 
 void handleRequest(HttpRequest req) async {
@@ -59,11 +59,11 @@ void handleStream(transport.ServerTransportStream stream) async {
     }
     if (message.endStream) break;
   }
-  req.method = req.headers[":method"];
+  req.method = req.headers[":method"]!;
   req.url = Uri(
     scheme: req.headers[":scheme"],
-    host: req.headers[":authority"].split(":")[0],
-    port: int.parse(req.headers[":authority"].split(":")[1]),
+    host: req.headers[":authority"]!.split(":")[0],
+    port: int.parse(req.headers[":authority"]!.split(":")[1]),
     path: req.headers[":path"],
   ).toString();
   final s = await processRequest(req);
@@ -79,8 +79,8 @@ void handleStream(transport.ServerTransportStream stream) async {
 }
 
 class TestRequest {
-  String url;
-  String method;
+  String url = "";
+  String method = "";
   Map<String, String> headers = {};
   List<int> body = [];
 }
@@ -93,11 +93,11 @@ class TestResponse {
 
 Future<TestResponse> processRequest(TestRequest request) async {
   final response = TestResponse();
-  String customStatusCode = request.headers["X-StatusCode".toLowerCase()];
+  String? customStatusCode = request.headers["X-StatusCode".toLowerCase()];
   if (customStatusCode != null)
     response.statusCode = int.parse(customStatusCode);
 
-  String customEtag = request.headers["X-Etag".toLowerCase()];
+  String? customEtag = request.headers["X-Etag".toLowerCase()];
   if (customEtag != null) {
     response.headers["etag"] = customEtag;
     if (customEtag == request.headers["If-None-Match".toLowerCase()]) {
@@ -105,12 +105,12 @@ Future<TestResponse> processRequest(TestRequest request) async {
     }
   }
 
-  String customLastModified = request.headers["X-LastModified".toLowerCase()];
+  String? customLastModified = request.headers["X-LastModified".toLowerCase()];
   if (customLastModified != null) {
     response.headers["last-modified"] = customLastModified;
     if (request.headers["if-modified-since"] != null &&
         HttpDate.parse(customLastModified).millisecondsSinceEpoch <=
-            HttpDate.parse(request.headers["if-modified-since"])
+            HttpDate.parse(request.headers["if-modified-since"]!)
                 .millisecondsSinceEpoch) {
       response.statusCode = 304;
     }
@@ -118,7 +118,7 @@ Future<TestResponse> processRequest(TestRequest request) async {
 
   if (response.statusCode == 304) return response;
 
-  String encoding = request.headers["X-Encoding".toLowerCase()];
+  String? encoding = request.headers["X-Encoding".toLowerCase()];
   if (encoding != null) {
     if (encoding == "gzip") {
       response.headers["content-encoding"] = "gzip";
@@ -142,7 +142,7 @@ Future<TestResponse> processRequest(TestRequest request) async {
 }
 
 Future<void> stopTestServer() async {
-  await server.close(force: true);
+  await server!.close(force: true);
   server = null;
   url = null;
 }
