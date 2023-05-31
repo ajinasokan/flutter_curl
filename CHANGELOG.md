@@ -1,3 +1,7 @@
+# 0.3.0
+
+* Flutter 3.10 migration
+
 # 0.2.0
 
 * Upgraded `ffi` dependency
