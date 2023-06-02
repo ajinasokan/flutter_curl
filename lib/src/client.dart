@@ -79,6 +79,7 @@ class Client {
         _completers.remove(item._requestID);
       } else if (item is LogInfo) {
         _logs.add(item);
+        if (verbose) print(item.content);
       }
     });
     return completer.future;
