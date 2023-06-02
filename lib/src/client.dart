@@ -27,6 +27,7 @@ class Client {
   final String? userAgent;
   final Duration timeout;
   final Duration connectTimeout;
+  final Duration connectionMaxAge;
   final List<HTTPInterceptor> interceptors;
   final String? cookiePath;
   final bool verifySSL;
@@ -58,6 +59,7 @@ class Client {
     this.interceptors = const [],
     this.timeout = Duration.zero,
     this.connectTimeout = const Duration(seconds: 300),
+    this.connectionMaxAge = const Duration(seconds: 118), // curl default
     this.altSvcCache,
   });
 
@@ -100,6 +102,7 @@ class Client {
       req._altSvcCache ??= altSvcCache;
       req.timeout ??= timeout;
       req.connectTimeout ??= connectTimeout;
+      req.connectionMaxAge ??= connectionMaxAge;
       req.userAgent ??= userAgent;
       req.verbose = req.verbose ?? verbose;
       req.verifySSL = req.verifySSL ?? verifySSL;

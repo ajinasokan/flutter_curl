@@ -66,6 +66,11 @@ class _Engine {
       consts.CURLOPT_CONNECTTIMEOUT_MS,
       req.connectTimeout!.inMilliseconds,
     );
+    libCurl.easy_setopt_int(
+      handle,
+      consts.CURLOPT_MAXAGE_CONN,
+      req.connectionMaxAge!.inSeconds,
+    );
 
     // set cookie path
     if (req._cookiePath != null) {

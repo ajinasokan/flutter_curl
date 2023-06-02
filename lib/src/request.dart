@@ -20,6 +20,7 @@ class Request {
   String? _altSvcCache;
   Duration? timeout;
   Duration? connectTimeout;
+  Duration? connectionMaxAge;
   String? _downloadPath;
 
   Request({
@@ -32,6 +33,7 @@ class Request {
     this.httpVersions,
     this.timeout,
     this.connectTimeout,
+    this.connectionMaxAge,
   }) : id = "${++_id}";
 
   factory Request.get({
