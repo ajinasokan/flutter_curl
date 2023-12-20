@@ -10,3 +10,5 @@ build/
 
 curl.aar
 curl_h3.aar
+
+.fvm/flutter_sdk
