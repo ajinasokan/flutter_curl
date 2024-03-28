@@ -56,6 +56,13 @@ class _Engine {
         req.userAgent!.toNativeUtf8(),
       );
     }
+    if (req.proxy != null) {
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_PROXY,
+        req.proxy!.toNativeUtf8(),
+      );
+    }
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_TIMEOUT_MS,

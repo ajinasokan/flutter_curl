@@ -474,6 +474,25 @@ List<Test> tests = [
     },
     expect: (ctx) => true,
   ),
+  // TODO: a simple http echo proxy to mock this
+  // Test(
+  //   title: "http proxy",
+  //   exec: (ctx) async {
+  //     final c = curl.Client(
+  //       verifySSL: false,
+  //     );
+  //     await c.init();
+  //     var res = await c.send(curl.Request(
+  //       method: "GET",
+  //       url: "http://canhazip.com",
+  //       proxy: "<proxy http://ip:port>",
+  //     ));
+  //     final ip = res.text().trim();
+  //     c.dispose();
+  //     return ip == "<proxy ip>";
+  //   },
+  //   expect: (ctx) => true,
+  // ),
 ];
 
 // TODO: http3, altsvc

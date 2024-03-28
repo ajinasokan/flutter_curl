@@ -29,6 +29,10 @@ class _ResponseBuffer {
     DateTime? lastModified;
     for (var item in items) {
       int pos = item.indexOf(": ");
+      // when requesting https over http proxy there are two proto responses
+      // `HTTP/1.1 200 OK` and `HTTP/2 200`
+      // this skips non header lines from the buffer
+      if (pos == -1) continue;
       String key = item.substring(0, pos).toLowerCase();
       String value = item.substring(pos + 2);
       if (headers[key] == null) {

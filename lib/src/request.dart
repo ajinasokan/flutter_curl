@@ -12,6 +12,7 @@ class Request {
   final Map<String, String> headers;
   final RequestBody? body;
   String? userAgent;
+  String? proxy;
   bool? verbose;
   bool? verifySSL;
   List<HTTPVersion>? httpVersions;
@@ -34,6 +35,8 @@ class Request {
     this.timeout,
     this.connectTimeout,
     this.connectionMaxAge,
+    this.userAgent,
+    this.proxy,
   }) : id = "${++_id}";
 
   factory Request.get({

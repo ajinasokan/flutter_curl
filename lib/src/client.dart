@@ -25,6 +25,7 @@ class Client {
 
   final bool verbose;
   final String? userAgent;
+  final String? proxy;
   final Duration timeout;
   final Duration connectTimeout;
   final Duration connectionMaxAge;
@@ -49,6 +50,7 @@ class Client {
     this.verbose = false,
     this.verifySSL = true,
     this.userAgent,
+    this.proxy,
     this.cookiePath,
     this.httpVersions = const [
       HTTPVersion.http1,
@@ -104,6 +106,7 @@ class Client {
       req.connectTimeout ??= connectTimeout;
       req.connectionMaxAge ??= connectionMaxAge;
       req.userAgent ??= userAgent;
+      req.proxy ??= proxy;
       req.verbose = req.verbose ?? verbose;
       req.verifySSL = req.verifySSL ?? verifySSL;
       req.httpVersions = req.httpVersions ?? httpVersions;
