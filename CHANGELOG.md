@@ -1,3 +1,9 @@
+# 0.5.1
+
+* Bundling CA certificates and is used by default
+* Fixed HTTP3 TLS issue in iOS
+* Certificate pinning
+
 # 0.5.0
 
 * Upgraded all binary dependencies

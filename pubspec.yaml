@@ -1,6 +1,6 @@
 name: flutter_curl
 description: Flutter plugin to use libcurl for HTTP calls in Android, iOS and macOS with support for HTTP2, ALPN, brotli compression and experimental support for HTTP3 and alt-svc.
-version: 0.5.0
+version: 0.5.1
 homepage: https://github.com/ajinasokan/flutter_curl
 
 environment:
