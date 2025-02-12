@@ -24,7 +24,7 @@ A new flutter plugin project.
 
   s.prepare_command = <<-CMD
     if [ ! -d "Curl.framework" ]; then  
-      url=https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.3.0%2B3/Curl.framework.zip
+      url=https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.5.0/Curl.framework.zip
       file=Curl.framework.zip  
       wget -O $file $url 2>/dev/null || curl -Lo $file $url
       unzip Curl.framework.zip

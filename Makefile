@@ -2,15 +2,15 @@
 clean:
 	rm -rf ios/Curl.xcframework
 	rm -rf macos/Curl.framework
-	flutter clean
-	cd example; flutter clean
-	flutter pub get
+	fvm flutter clean
+	cd example; fvm flutter clean
+	fvm flutter pub get
 
 runArm:
-	cd example; flutter run -d macos
+	cd example; fvm flutter run -d macos
 
 runx86:
-	cd example; arch -x86_64 flutter run -d macos
+	cd example; arch -x86_64 fvm flutter run -d macos
 
 setup-maven:
 	rm -rf android/maven

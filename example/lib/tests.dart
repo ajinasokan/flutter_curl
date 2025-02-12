@@ -9,7 +9,7 @@ List<Test> tests = [
   Test(
     title: "create curl client",
     exec: (ctx) async {
-      final c = curl.Client();
+      final c = curl.Client(verbose: true);
       ctx["ref"] = c;
       await c.init();
       return c.runtimeType;
@@ -23,6 +23,7 @@ List<Test> tests = [
     title: "http 1.1",
     exec: (ctx) async {
       final c = curl.Client(
+        verbose: true,
         verifySSL: false,
         httpVersions: [curl.HTTPVersion.http11],
       );
