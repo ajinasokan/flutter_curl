@@ -1,3 +1,7 @@
+# 0.5.0
+
+* Upgraded all binary dependencies
+
 # 0.3.0
 
 * Flutter 3.10 migration
