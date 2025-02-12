@@ -54,6 +54,61 @@ List<Test> tests = [
     expect: (ctx) => curl.HTTPVersion.http2,
   ),
   Test(
+    title: "remote http 1.1",
+    exec: (ctx) async {
+      final c = curl.Client(
+        verbose: true,
+        httpVersions: [curl.HTTPVersion.http11],
+      );
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "GET",
+        url: "https://canhazip.com",
+        headers: {},
+      ));
+      c.dispose();
+      return res.httpVersion;
+    },
+    expect: (ctx) => curl.HTTPVersion.http11,
+  ),
+  Test(
+    title: "remote http 2",
+    exec: (ctx) async {
+      final c = curl.Client(
+        verbose: true,
+        httpVersions: [curl.HTTPVersion.http2],
+      );
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "GET",
+        url: "https://canhazip.com",
+        headers: {},
+      ));
+      print(res.text());
+      c.dispose();
+      return res.httpVersion;
+    },
+    expect: (ctx) => curl.HTTPVersion.http2,
+  ),
+  Test(
+    title: "remote http 3",
+    exec: (ctx) async {
+      final c = curl.Client(
+        verbose: true,
+        httpVersions: [curl.HTTPVersion.http3],
+      );
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "GET",
+        url: "https://canhazip.com",
+        headers: {},
+      ));
+      c.dispose();
+      return res.httpVersion;
+    },
+    expect: (ctx) => curl.HTTPVersion.http3,
+  ),
+  Test(
     title: "ssl verification",
     exec: (ctx) async {
       final c = curl.Client(); // verifySSL: true

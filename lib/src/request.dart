@@ -19,6 +19,7 @@ class Request {
 
   String? _cookiePath;
   String? _altSvcCache;
+  String? _certPath;
   Duration? timeout;
   Duration? connectTimeout;
   Duration? connectionMaxAge;

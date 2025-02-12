@@ -137,6 +137,17 @@ class _Engine {
       );
     }
 
+    // in iOS BoringSSL doesn't use SecureTransport. so use the certs from
+    // curl instead.
+    // TODO: verify this is fine in appstore
+    if (req._certPath != null) {
+      libCurl.easy_setopt_string(
+        handle,
+        consts.CURLOPT_CAINFO,
+        req._certPath!.toNativeUtf8(),
+      );
+    }
+
     // set alt-svc cache path
     if (req._altSvcCache != null) {
       libCurl.easy_setopt_string(
