@@ -34,7 +34,7 @@ Client client = Client(
 await client.init();
 
 // Send request
-final res = await c.send(Request(
+final res = await client.send(Request(
       method: "GET",
       url: "https://ajinasokan.com/",
       headers: {
@@ -53,7 +53,6 @@ final res = await c.send(Request(
       //      filename: "filename.txt",
       //    ),
       //  ]),
-    },
 ));
 
 // Read response
