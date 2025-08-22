@@ -1,3 +1,8 @@
+# 0.6.0
+
+* Removed deprected registerWith handler
+* Exposed libcurl error codes as `Response.errorCode` for debugging
+
 # 0.5.1
 
 * Bundling CA certificates and is used by default
