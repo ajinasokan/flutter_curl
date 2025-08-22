@@ -15,6 +15,7 @@ class _ResponseBuffer {
   final List<int> headerBuffer = [];
   int statusCode = 0;
   int httpVersion = 0;
+  int? errorCode;
   String? errorMessage;
 
   Response toResponse(_Engine engine) {
@@ -62,6 +63,7 @@ class _ResponseBuffer {
       body: bodyBuffer,
       headers: headers,
       httpVersion: httpVer,
+      errorCode: errorCode,
       errorMessage: errorMessage,
       lastModified: lastModified,
     ).._requestID = requestID;
@@ -77,6 +79,7 @@ class Response {
   final Map<String, String> headers;
   final HTTPVersion httpVersion;
   final String? errorMessage;
+  final int? errorCode;
   final DateTime? lastModified;
 
   Response({
@@ -84,6 +87,7 @@ class Response {
     required this.headers,
     required this.body,
     required this.httpVersion,
+    required this.errorCode,
     required this.errorMessage,
     required this.lastModified,
   });

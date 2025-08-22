@@ -342,6 +342,7 @@ class _Engine {
         malloc.free(_tempLong);
 
         if (msg.result != consts.CURLE_OK) {
+          buffer.errorCode = msg.result;
           buffer.errorMessage =
               libCurl.easy_strerror(msg.result).toDartString();
         }
