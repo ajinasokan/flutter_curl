@@ -197,25 +197,12 @@ class _Engine {
       req.followRedirects! ? 1 : 0,
     );
 
-    if (req.followRedirects!) {
-      // Limit the number of redirects to avoid infinite redirect chains
-      libCurl.easy_setopt_int(
-        handle,
-        consts.CURLOPT_MAXREDIRS,
-        10,
-      );
+    libCurl.easy_setopt_int(
+      handle,
+      consts.CURLOPT_MAXREDIRS,
+      req.maxRedirects,
+    );
 
-      libCurl.easy_setopt_string(
-        handle,
-        consts.CURLOPT_REDIR_PROTOCOLS_STR,
-        "http,https".toNativeUtf8(),
-      );
-      libCurl.easy_setopt_string(
-        handle,
-        consts.CURLOPT_PROTOCOLS_STR,
-        "http,https".toNativeUtf8(),
-      );
-    }
     // add the headers
     connData[req.id]!.slist = ffi.nullptr;
     String? encodingHeader = "";

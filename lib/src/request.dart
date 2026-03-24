@@ -16,6 +16,7 @@ class Request {
   bool? verbose;
   bool? verifySSL;
   bool? followRedirects;
+  int maxRedirects = 5;
   List<HTTPVersion>? httpVersions;
 
   String? _cookiePath;
@@ -34,6 +35,7 @@ class Request {
     this.verbose,
     this.verifySSL,
     this.followRedirects,
+    this.maxRedirects = 5,
     this.httpVersions,
     this.timeout,
     this.connectTimeout,
