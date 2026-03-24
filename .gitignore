@@ -13,3 +13,5 @@ curl_h3.aar
 
 # FVM Version Cache
 .fvm/
+.junie
+.claude

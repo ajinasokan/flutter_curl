@@ -34,6 +34,7 @@ class Client {
   final List<HTTPInterceptor> interceptors;
   final String? cookiePath;
   final bool verifySSL;
+  final bool followRedirects;
   final String? altSvcCache;
   final List<HTTPVersion> httpVersions;
   String? libPath;
@@ -52,6 +53,7 @@ class Client {
   Client({
     this.verbose = false,
     this.verifySSL = true,
+    this.followRedirects = false,
     this.userAgent,
     this.proxy,
     this.cookiePath,
@@ -130,6 +132,7 @@ class Client {
       req.proxy ??= proxy;
       req.verbose = req.verbose ?? verbose;
       req.verifySSL = req.verifySSL ?? verifySSL;
+      req.followRedirects = req.followRedirects ?? followRedirects;
       req.httpVersions = req.httpVersions ?? httpVersions;
       _queue[req.id] = req;
 
