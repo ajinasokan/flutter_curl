@@ -214,8 +214,8 @@ class _Engine {
     }
 
     // add post body
-    if (req.method.toLowerCase() == "post" ||
-        req.method.toLowerCase() == "put") {
+    if ((req.method.toLowerCase() == "post" ||
+        req.method.toLowerCase() == "put") && req.body != null) {
       if (req.body!._type == _BodyType.string) {
         libCurl.easy_setopt_string(
           handle,
