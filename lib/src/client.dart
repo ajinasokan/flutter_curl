@@ -26,6 +26,7 @@ class Client {
   late Map<String, Completer> _completers;
 
   final bool verbose;
+  final void Function(String)? logWriter;
   final String? userAgent;
   final String? proxy;
   final Duration timeout;
@@ -51,6 +52,7 @@ class Client {
 
   Client({
     this.verbose = false,
+    this.logWriter,
     this.verifySSL = true,
     this.userAgent,
     this.proxy,
@@ -88,7 +90,7 @@ class Client {
         _completers.remove(item._requestID);
       } else if (item is LogInfo) {
         _logs.add(item);
-        if (verbose) print(item.content);
+        if (verbose) (logWriter ?? print)(item.content?.trim() ?? '');
       }
     });
     return completer.future;
