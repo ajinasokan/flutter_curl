@@ -25,7 +25,7 @@ List<Test> tests = [
       final c = curl.Client(
         verbose: true,
         verifySSL: false,
-        httpVersions: [curl.HTTPVersion.http11],
+        httpVersion: curl.HTTPVersion.http11,
       );
       await c.init();
       final res = await c.send(curl.Request(
@@ -58,7 +58,7 @@ List<Test> tests = [
     exec: (ctx) async {
       final c = curl.Client(
         verbose: true,
-        httpVersions: [curl.HTTPVersion.http11],
+        httpVersion: curl.HTTPVersion.http11,
       );
       await c.init();
       final res = await c.send(curl.Request(
@@ -76,7 +76,7 @@ List<Test> tests = [
     exec: (ctx) async {
       final c = curl.Client(
         verbose: true,
-        httpVersions: [curl.HTTPVersion.http2],
+        httpVersion: curl.HTTPVersion.http2,
       );
       await c.init();
       final res = await c.send(curl.Request(
@@ -95,7 +95,7 @@ List<Test> tests = [
     exec: (ctx) async {
       final c = curl.Client(
         verbose: true,
-        httpVersions: [curl.HTTPVersion.http3],
+        httpVersion: curl.HTTPVersion.http3,
       );
       await c.init();
       final res = await c.send(curl.Request(

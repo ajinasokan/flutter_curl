@@ -108,34 +108,23 @@ class _Engine {
       CURL_IPRESOLVE_WHATEVER,
     );
 
-    // enable support for all http versions
+    // set http version
     // READ: https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
-    if (req.httpVersions!.isNotEmpty) {
-      int flag = 0;
-      if (req.httpVersions!.contains(HTTPVersion.http1)) {
-        flag |= consts.CURL_HTTP_VERSION_1_0;
-      }
-      if (req.httpVersions!.contains(HTTPVersion.http11)) {
-        flag |= consts.CURL_HTTP_VERSION_1_1;
-      }
-      if (req.httpVersions!.contains(HTTPVersion.http2)) {
-        flag |= consts.CURL_HTTP_VERSION_2_0;
-      }
-      if (req.httpVersions!.contains(HTTPVersion.http3)) {
-        flag |= consts.CURL_HTTP_VERSION_3;
-      }
-      libCurl.easy_setopt_int(
-        handle,
-        consts.CURLOPT_HTTP_VERSION,
-        flag,
-      );
-    } else {
-      libCurl.easy_setopt_int(
-        handle,
-        consts.CURLOPT_HTTP_VERSION,
-        consts.CURL_HTTP_VERSION_NONE, // let curl figure it out
-      );
-    }
+    final httpVersionFlag = switch (req.httpVersion!) {
+      HTTPVersion.none => consts.CURL_HTTP_VERSION_NONE,
+      HTTPVersion.http1 => consts.CURL_HTTP_VERSION_1_0,
+      HTTPVersion.http11 => consts.CURL_HTTP_VERSION_1_1,
+      HTTPVersion.http2 => consts.CURL_HTTP_VERSION_2_0,
+      HTTPVersion.http2tls => consts.CURL_HTTP_VERSION_2TLS,
+      HTTPVersion.http2PriorKnowledge => consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,
+      HTTPVersion.http3 => consts.CURL_HTTP_VERSION_3,
+      HTTPVersion.http3Only => consts.CURL_HTTP_VERSION_3ONLY,
+    };
+    libCurl.easy_setopt_int(
+      handle,
+      consts.CURLOPT_HTTP_VERSION,
+      httpVersionFlag,
+    );
 
     // in iOS BoringSSL doesn't use SecureTransport. so use the certs from
     // curl instead.

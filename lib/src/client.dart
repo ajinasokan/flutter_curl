@@ -36,7 +36,7 @@ class Client {
   final String? cookiePath;
   final bool verifySSL;
   final String? altSvcCache;
-  final List<HTTPVersion> httpVersions;
+  final HTTPVersion httpVersion;
   String? libPath;
   String? certPath;
 
@@ -57,11 +57,7 @@ class Client {
     this.userAgent,
     this.proxy,
     this.cookiePath,
-    this.httpVersions = const [
-      HTTPVersion.http1,
-      HTTPVersion.http11,
-      HTTPVersion.http2,
-    ],
+    this.httpVersion = HTTPVersion.none,
     this.libPath,
     this.interceptors = const [],
     this.timeout = Duration.zero,
@@ -132,7 +128,7 @@ class Client {
       req.proxy ??= proxy;
       req.verbose = req.verbose ?? verbose;
       req.verifySSL = req.verifySSL ?? verifySSL;
-      req.httpVersions = req.httpVersions ?? httpVersions;
+      req.httpVersion = req.httpVersion ?? httpVersion;
       _queue[req.id] = req;
 
       final completer = Completer<Response>();

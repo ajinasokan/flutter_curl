@@ -15,7 +15,7 @@ class Request {
   String? proxy;
   bool? verbose;
   bool? verifySSL;
-  List<HTTPVersion>? httpVersions;
+  HTTPVersion? httpVersion;
 
   String? _cookiePath;
   String? _altSvcCache;
@@ -32,7 +32,7 @@ class Request {
     this.body,
     this.verbose,
     this.verifySSL,
-    this.httpVersions,
+    this.httpVersion,
     this.timeout,
     this.connectTimeout,
     this.connectionMaxAge,

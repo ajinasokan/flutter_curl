@@ -1,11 +1,22 @@
 part of 'client.dart';
 
 enum HTTPVersion {
-  unknown,
+  // let curl decide
+  none,
+  // HTTP/1.0
   http1,
+  // HTTP/1.1
   http11,
+  // HTTP/2 via ALPN negotiation
   http2,
+  // HTTP/2 over TLS, HTTP/1.1 for plain HTTP
+  http2tls,
+  // HTTP/2 without HTTP/1.1 Upgrade
+  http2PriorKnowledge,
+  // HTTP/3 with fallback to HTTP/2 or HTTP/1.1
   http3,
+  // HTTP/3 only, no fallback
+  http3Only,
 }
 
 class _ResponseBuffer {
@@ -51,12 +62,13 @@ class _ResponseBuffer {
     HTTPVersion httpVer = <int, HTTPVersion>{
           consts.CURL_HTTP_VERSION_1_0: HTTPVersion.http1,
           consts.CURL_HTTP_VERSION_1_1: HTTPVersion.http11,
-          consts.CURL_HTTP_VERSION_2TLS: HTTPVersion.http2,
           consts.CURL_HTTP_VERSION_2_0: HTTPVersion.http2,
-          consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: HTTPVersion.http2,
+          consts.CURL_HTTP_VERSION_2TLS: HTTPVersion.http2tls,
+          consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: HTTPVersion.http2PriorKnowledge,
           consts.CURL_HTTP_VERSION_3: HTTPVersion.http3,
+          consts.CURL_HTTP_VERSION_3ONLY: HTTPVersion.http3Only,
         }[httpVersion] ??
-        HTTPVersion.unknown;
+        HTTPVersion.none;
 
     return Response(
       statusCode: statusCode,
