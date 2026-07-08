@@ -1,8 +1,8 @@
 import Flutter
 import UIKit
 
-public class SwiftFlutterCurlPlugin: NSObject, FlutterPlugin {
-  public static func register(with registrar: FlutterPluginRegistrar) {
+@objc public class SwiftFlutterCurlPlugin: NSObject, FlutterPlugin {
+  @objc public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_curl", binaryMessenger: registrar.messenger())
     let instance = SwiftFlutterCurlPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)

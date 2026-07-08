@@ -3,7 +3,7 @@ import 'dart:ffi' as ffi;
 import 'package:ffi/ffi.dart';
 import 'dart:isolate';
 import 'dart:convert';
-import 'dart:io' show Platform, File, IOSink, RandomAccessFile;
+import 'dart:io' show Platform, File, Directory, IOSink, RandomAccessFile;
 import 'package:path/path.dart' as path;
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
@@ -103,6 +103,7 @@ class Client {
         await rootBundle.load("packages/flutter_curl/certs/cacert.pem");
     List<int> bytes =
         data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    await Directory(path.dirname(certPath)).create(recursive: true);
     await File(certPath).writeAsBytes(bytes);
     return certPath;
   }
