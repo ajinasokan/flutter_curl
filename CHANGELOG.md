@@ -1,3 +1,8 @@
+# 0.9.0
+
+* Swift Package Manager (SPM) support
+* Updated Curl binary
+
 # 0.8.0
 
 * Updated Curl binary

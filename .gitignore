@@ -13,3 +13,4 @@ curl_h3.aar
 
 # FVM Version Cache
 .fvm/
+example/ios/Flutter/ephemeral/*
