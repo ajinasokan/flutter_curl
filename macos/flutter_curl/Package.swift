@@ -18,8 +18,8 @@ let package = Package(
         // Pre-built curl binary downloaded from GitHub releases
         .binaryTarget(
             name: "Curl",
-            url: "https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.9.0/Curl.macos.xcframework.zip",
-            checksum: "7e0a6d3124712e3b63cdddef46b66fab4d9cdb18768024b9e3b3ba2d9812bec3"
+            url: "https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.9.1/Curl.macos.xcframework.zip",
+            checksum: "5b04d539b2c41c628659b62938775861a06cf7e0b6f215831f4cfc0e6d3c5157"
         ),
         // Objective-C target — registers the plugin and links curl
         .target(

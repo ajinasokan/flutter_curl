@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "flutter_curl",
     platforms: [
-        .iOS("12.0"),
+        .iOS("12.2"),
     ],
     products: [
         .library(name: "flutter-curl", targets: ["flutter_curl_objc", "flutter_curl_swift"]),
@@ -18,8 +18,8 @@ let package = Package(
         // Pre-built curl binary downloaded from GitHub releases
         .binaryTarget(
             name: "Curl",
-            url: "https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.9.0/Curl.ios.xcframework.zip",
-            checksum: "bd0592f554166dd77588d124168b2b60f1f27c80b4d7555f6a237c5e7d4bcd95"
+            url: "https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.9.1/Curl.ios.xcframework.zip",
+            checksum: "a996b7be47a20c15abdc101f1ec58d360902b7f22d113e21c10424ebe00d8ac0"
         ),
         // Objective-C target — registers the plugin and links curl
         .target(

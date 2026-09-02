@@ -1,3 +1,9 @@
+# 0.9.1
+
+* Fixed crash in iOS and macOS release builds. Curl now ships as a dynamic
+  framework, so all of its symbols stay in the app's export table
+* Minimum iOS version is now 12.2, to match the Curl framework
+
 # 0.9.0
 
 * Swift Package Manager (SPM) support
