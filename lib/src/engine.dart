@@ -19,16 +19,19 @@ class _Engine {
   }
 
   void send(Request req) {
-    if (req.verbose!) {
-      print(libCurl.version().toDartString());
-    }
-
     final handle = libCurl.easy_init();
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
     connData[req.id]!.requestID = req.id;
 
     logData[req.id] = StreamController<LogInfo>();
+
+    if (req.verbose!) {
+      logData[req.id]!.add(LogInfo(
+        requestID: req.id,
+        content: libCurl.version().toDartString(),
+      ));
+    }
 
     if (req.body?._type == _BodyType.file) {
       uploadFiles[req.id] = File(req.body!._file).openSync();
