@@ -42,6 +42,26 @@ android {
     }
 }
 
+// Download url into dest, retrying up to 3 times on failure.
+def downloadWithRetry = { String url, File dest ->
+    for (int i = 1; i <= 3; i++) {
+        try {
+            println "[flutter_curl] downloading ${url} (attempt ${i}/3)"
+            def conn = new URL(url).openConnection() as HttpURLConnection
+            conn.connectTimeout = 30 * 1000
+            conn.readTimeout = 60 * 1000
+            conn.instanceFollowRedirects = true
+            conn.inputStream.withStream { is ->
+                dest.withOutputStream { os -> os << is }
+            }
+            println "[flutter_curl] downloaded ${dest.name} (${dest.length()} bytes)"
+            return
+        } catch (Exception e) {
+            println "[flutter_curl] download attempt ${i}/3 failed: ${e}"
+        }
+    }
+}
+
 def urlImplementation = { url, name ->
     File file = new File("$buildDir/$name")
     file.parentFile.mkdirs()
@@ -50,11 +70,9 @@ def urlImplementation = { url, name ->
             from "$projectDir/maven"
             into "$buildDir/curlmaven"
         }
-        new URL(url).withInputStream { downloadStream ->
-            file.withOutputStream { fileOut ->
-                fileOut << downloadStream
-            }
-        }
+        downloadWithRetry(url, file)
+    } else {
+        println "[flutter_curl] using cached ${file}"
     }
     'com.ajinasokan:flutter_curl:0.0.1'
 }
