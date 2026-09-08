@@ -64,7 +64,8 @@ class _ResponseBuffer {
           consts.CURL_HTTP_VERSION_1_1: HTTPVersion.http11,
           consts.CURL_HTTP_VERSION_2_0: HTTPVersion.http2,
           consts.CURL_HTTP_VERSION_2TLS: HTTPVersion.http2tls,
-          consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE: HTTPVersion.http2PriorKnowledge,
+          consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+              HTTPVersion.http2PriorKnowledge,
           consts.CURL_HTTP_VERSION_3: HTTPVersion.http3,
           consts.CURL_HTTP_VERSION_3ONLY: HTTPVersion.http3Only,
         }[httpVersion] ??

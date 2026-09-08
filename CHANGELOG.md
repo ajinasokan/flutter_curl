@@ -1,3 +1,8 @@
+# 0.9.2
+
+* Android fetches the Curl binary through Gradle
+* In verbose mode the curl version goes to the request log stream
+
 # 0.9.1
 
 * Fixed crash in iOS and macOS release builds. Curl now ships as a dynamic

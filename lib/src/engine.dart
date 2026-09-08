@@ -119,7 +119,8 @@ class _Engine {
       HTTPVersion.http11 => consts.CURL_HTTP_VERSION_1_1,
       HTTPVersion.http2 => consts.CURL_HTTP_VERSION_2_0,
       HTTPVersion.http2tls => consts.CURL_HTTP_VERSION_2TLS,
-      HTTPVersion.http2PriorKnowledge => consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,
+      HTTPVersion.http2PriorKnowledge =>
+        consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,
       HTTPVersion.http3 => consts.CURL_HTTP_VERSION_3,
       HTTPVersion.http3Only => consts.CURL_HTTP_VERSION_3ONLY,
     };
@@ -218,7 +219,8 @@ class _Engine {
 
     // add post body
     if ((req.method.toLowerCase() == "post" ||
-        req.method.toLowerCase() == "put") && req.body != null) {
+            req.method.toLowerCase() == "put") &&
+        req.body != null) {
       if (req.body!._type == _BodyType.string) {
         libCurl.easy_setopt_string(
           handle,
