@@ -12,10 +12,24 @@ buildscript {
     }
 }
 
+// Prebuilt libcurl aar, published as a release asset on
+// github.com/ajinasokan/flutter_curl_binary.
+def curlBinaryVersion = '0.9.1'
+
+// GitHub's release URLs fit an Ivy pattern, so Gradle can fetch the aar as an
+// ordinary dependency: it handles redirects, proxies and retries, and caches the
+// download in ~/.gradle/caches so a clean build does not hit the network again.
 rootProject.allprojects {
     repositories {
-        maven {
-            url "${rootProject.buildDir}/flutter_curl/curlmaven"
+        ivy {
+            url = 'https://github.com'
+            patternLayout {
+                artifact '[organisation]/[module]/releases/download/[revision]/[artifact].[ext]'
+            }
+            // Release assets ship on their own, with no pom or ivy.xml beside them.
+            metadataSources { artifact() }
+            // Without this every dependency in the app would be looked up on github.com.
+            content { includeModule('ajinasokan', 'flutter_curl_binary') }
         }
         google()
         mavenCentral()
@@ -42,43 +56,13 @@ android {
     }
 }
 
-// Download url into dest, retrying up to 3 times on failure.
-def downloadWithRetry = { String url, File dest ->
-    for (int i = 1; i <= 3; i++) {
-        try {
-            println "[flutter_curl] downloading ${url} (attempt ${i}/3)"
-            def conn = new URL(url).openConnection() as HttpURLConnection
-            conn.connectTimeout = 30 * 1000
-            conn.readTimeout = 60 * 1000
-            conn.instanceFollowRedirects = true
-            conn.inputStream.withStream { is ->
-                dest.withOutputStream { os -> os << is }
-            }
-            println "[flutter_curl] downloaded ${dest.name} (${dest.length()} bytes)"
-            return
-        } catch (Exception e) {
-            println "[flutter_curl] download attempt ${i}/3 failed: ${e}"
-        }
-    }
-}
-
-def urlImplementation = { url, name ->
-    File file = new File("$buildDir/$name")
-    file.parentFile.mkdirs()
-    if (!file.exists()) {
-        copy {
-            from "$projectDir/maven"
-            into "$buildDir/curlmaven"
-        }
-        downloadWithRetry(url, file)
-    } else {
-        println "[flutter_curl] using cached ${file}"
-    }
-    'com.ajinasokan:flutter_curl:0.0.1'
-}
-
 dependencies {
-    implementation urlImplementation(
-        "https://github.com/ajinasokan/flutter_curl_binary/releases/download/0.9.1/Curl.aar", "curlmaven/com/ajinasokan/flutter_curl/0.0.1/flutter_curl-0.0.1.aar"
-    )
+    implementation(group: 'ajinasokan', name: 'flutter_curl_binary', version: curlBinaryVersion) {
+        // The asset is named Curl.aar, which the module name alone would not give us.
+        artifact {
+            name = 'Curl'
+            type = 'aar'
+            extension = 'aar'
+        }
+    }
 }
