@@ -11,3 +11,8 @@ runArm:
 
 runx86:
 	cd example; arch -x86_64 fvm flutter run -d macos
+
+certs:
+	curl -fsSL https://curl.se/ca/cacert.pem -o certs/cacert.pem
+
+.PHONY: clean runArm runx86 certs

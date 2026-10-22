@@ -98,7 +98,6 @@ class Client {
   Future<String> _getCertPath() async {
     final tempDir = await paths.getTemporaryDirectory();
     var certPath = path.join(tempDir.path, "cert.pem");
-    if (File(certPath).existsSync()) return certPath;
     ByteData data =
         await rootBundle.load("packages/flutter_curl/certs/cacert.pem");
     List<int> bytes =
