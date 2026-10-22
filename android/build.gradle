@@ -14,7 +14,7 @@ buildscript {
 
 // Prebuilt libcurl aar, published as a release asset on
 // github.com/ajinasokan/flutter_curl_binary.
-def curlBinaryVersion = '0.9.1'
+def curlBinaryVersion = '0.9.2'
 
 // GitHub's release URLs fit an Ivy pattern, so Gradle can fetch the aar as an
 // ordinary dependency: it handles redirects, proxies and retries, and caches the
