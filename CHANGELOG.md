@@ -1,3 +1,9 @@
+# 0.9.3
+
+* Updated Curl binary
+* Updated CA certificate bundle. Drops emSign ECC Root CA - G3, emSign Root
+  CA - C1 and emSign ECC Root CA - C3
+
 # 0.9.2
 
 * Android fetches the Curl binary through Gradle
