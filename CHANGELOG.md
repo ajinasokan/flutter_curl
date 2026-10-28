@@ -1,3 +1,7 @@
+# 0.9.4
+
+* Fixed date and file size data lengths 32-bit ARM devices
+
 # 0.9.3
 
 * Updated Curl binary
