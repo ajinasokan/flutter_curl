@@ -12,26 +12,41 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // tests share their context map, so overlapping runs clobber each other
+  bool running = false;
+
   void runTests() async {
-    await startTestServer();
-    tests.forEach((t) {
-      t.passed = null;
-    });
-    setState(() {});
-    for (var t in tests) {
-      await t.run();
+    if (running) return;
+    running = true;
+    try {
+      await startTestServer();
+      tests.forEach((t) {
+        t.passed = null;
+      });
       setState(() {});
+      for (var t in tests) {
+        await t.run();
+        setState(() {});
+      }
+      await stopTestServer();
+    } finally {
+      running = false;
     }
-    await stopTestServer();
   }
 
   void runTest(Test t) async {
-    await startTestServer();
-    t.passed = null;
-    setState(() {});
-    await t.run();
-    setState(() {});
-    await stopTestServer();
+    if (running) return;
+    running = true;
+    try {
+      await startTestServer();
+      t.passed = null;
+      setState(() {});
+      await t.run();
+      setState(() {});
+      await stopTestServer();
+    } finally {
+      running = false;
+    }
   }
 
   String get title {

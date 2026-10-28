@@ -95,7 +95,7 @@ List<Test> tests = [
     exec: (ctx) async {
       final c = curl.Client(
         verbose: true,
-        httpVersion: curl.HTTPVersion.http3,
+        httpVersion: curl.HTTPVersion.http3Only,
       );
       await c.init();
       final res = await c.send(curl.Request(
