@@ -26,7 +26,7 @@ class RequestBody {
 
   factory RequestBody.file(String path) {
     return RequestBody._()
-      .._type = _BodyType.raw
+      .._type = _BodyType.file
       .._file = path;
   }
 

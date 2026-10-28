@@ -531,6 +531,91 @@ List<Test> tests = [
     expect: (ctx) => true,
   ),
   // TODO: a simple http echo proxy to mock this
+  Test(
+    title: "last modified date",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url!,
+        headers: {
+          "X-LastModified": "Wed, 21 Oct 2015 07:28:00 GMT",
+        },
+      ));
+      c.dispose();
+      return res.lastModified?.millisecondsSinceEpoch;
+    },
+    expect: (ctx) => DateTime.utc(2015, 10, 21, 7, 28).millisecondsSinceEpoch,
+  ),
+  Test(
+    title: "invalid last modified date",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "get",
+        url: echo.url!,
+        headers: {
+          "X-LastModified": "not a date",
+        },
+      ));
+      c.dispose();
+      return res.lastModified;
+    },
+    expect: (ctx) => null,
+  ),
+  Test(
+    title: "put file",
+    exec: (ctx) async {
+      final dir = await paths.getTemporaryDirectory();
+      final file = File("${dir.path}/upload.txt");
+      await file.writeAsString("hello world");
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final res = await c.send(curl.Request(
+        method: "put",
+        url: echo.url!,
+        body: curl.RequestBody.file(file.path),
+      ));
+      c.dispose();
+      await file.delete();
+      return json.decode(res.text())["body"];
+    },
+    expect: (ctx) => "hello world",
+  ),
+  // Test(
+  //   title: "put file over 4gb size",
+  //   exec: (ctx) async {
+  //     // sparse file, so it takes no disk space. 2^32 + 1 reads as 1 if
+  //     // the size gets cut to 32 bits anywhere on the way to curl
+  //     const size = 4294967297;
+  //     final dir = await paths.getTemporaryDirectory();
+  //     final file = File("${dir.path}/upload_large.bin");
+  //     final raf = await file.open(mode: FileMode.write);
+  //     await raf.truncate(size);
+  //     await raf.close();
+  //     final c = curl.Client(
+  //       verifySSL: false,
+  //       httpVersion: curl.HTTPVersion.http11,
+  //     );
+  //     await c.init();
+  //     // the server answers with an error without reading the body, which
+  //     // makes curl stop before sending it. echo still reports the headers
+  //     final res = await c.send(curl.Request(
+  //       method: "put",
+  //       url: echo.url!,
+  //       headers: {
+  //         "X-StatusCode": "400",
+  //       },
+  //       body: curl.RequestBody.file(file.path),
+  //     ));
+  //     c.dispose();
+  //     await file.delete();
+  //     return json.decode(res.text())["headers"]["content-length"];
+  //   },
+  //   expect: (ctx) => "4294967297",
+  // ),
   // Test(
   //   title: "http proxy",
   //   exec: (ctx) async {
