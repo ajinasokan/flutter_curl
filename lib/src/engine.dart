@@ -245,7 +245,7 @@ class _Engine {
           consts.CURLOPT_UPLOAD,
           1,
         );
-        libCurl.easy_setopt_int(
+        libCurl.easy_setopt_off_t(
           handle,
           consts.CURLOPT_INFILESIZE_LARGE,
           uploadFiles[req.id]!.lengthSync(),

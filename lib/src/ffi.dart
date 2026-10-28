@@ -82,6 +82,12 @@ typedef _easy_setopt_int_func = ffi.Void Function(
     ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Int32);
 typedef _easy_setopt_int = void Function(ffi.Pointer<_CURLEasy>, int, int);
 
+// curl_off_t is 64-bit on every platform, so call curl_easy_setopt
+// directly instead of going through the long based wrapper
+typedef _easy_setopt_off_t_func = ffi.Int32 Function(
+    ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.VarArgs<(ffi.Int64,)>);
+typedef _easy_setopt_off_t = int Function(ffi.Pointer<_CURLEasy>, int, int);
+
 typedef _easy_setopt_ptr_func = ffi.Void Function(
     ffi.Pointer<_CURLEasy>, ffi.Int32, ffi.Pointer);
 typedef _easy_setopt_ptr = void Function(
@@ -179,6 +185,7 @@ class _LibCURL {
   late _easy_setopt_string easy_setopt_string;
   late _easy_setopt_int easy_setopt_int;
   late _easy_setopt_ptr easy_setopt_ptr;
+  late _easy_setopt_off_t easy_setopt_off_t;
   late _easy_getinfo easy_getinfo;
 
   late _slist_append slist_append;
@@ -274,6 +281,11 @@ class _LibCURL {
     easy_setopt_ptr = _dylib
         .lookup<ffi.NativeFunction<_easy_setopt_ptr_func>>(
             'curl_easy_setopt_ptr')
+        .asFunction();
+
+    easy_setopt_off_t = _dylib
+        .lookup<ffi.NativeFunction<_easy_setopt_off_t_func>>(
+            'curl_easy_setopt')
         .asFunction();
 
     easy_getinfo = _dylib
