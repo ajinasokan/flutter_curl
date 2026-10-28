@@ -31,9 +31,10 @@ final class _CURLMsg extends ffi.Struct {
 typedef _version_func = ffi.Pointer<Utf8> Function();
 typedef _version = ffi.Pointer<Utf8> Function();
 
-typedef _getdate_func = ffi.Int64 Function(
-    ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
-typedef _getdate = int Function(ffi.Pointer<Utf8>, ffi.Pointer<ffi.Int64>);
+// time_t is 32-bit on armv7 Android, so it is bound as Long
+typedef _getdate_func = ffi.Long Function(
+    ffi.Pointer<Utf8>, ffi.Pointer<ffi.Long>);
+typedef _getdate = int Function(ffi.Pointer<Utf8>, ffi.Pointer<ffi.Long>);
 
 typedef _multi_init_func = ffi.Pointer<_CURLMulti> Function();
 typedef _multi_init = ffi.Pointer<_CURLMulti> Function();

@@ -53,8 +53,12 @@ class _ResponseBuffer {
         headers[key] = headers[key]! + "; " + value;
       }
       if (key == "last-modified") {
-        lastModified = DateTime.fromMillisecondsSinceEpoch(
-            engine.libCurl.getdate(value.toNativeUtf8(), ffi.nullptr) * 1000);
+        final nativeValue = value.toNativeUtf8();
+        final time = engine.libCurl.getdate(nativeValue, ffi.nullptr);
+        malloc.free(nativeValue);
+        lastModified = time == -1
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(time * 1000);
       }
     }
 
