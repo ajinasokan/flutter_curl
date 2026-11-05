@@ -65,6 +65,40 @@ res.headers.forEach((key, value) {
 print(res.text());
 ```
 
+## WebSocket
+
+Open a `ws://` or `wss://` URL with `connect`. Headers, proxy, cookies and SSL
+options work the same as for HTTP requests. Interceptors are skipped.
+
+```dart
+final ws = await client.connect(Request(
+  url: "wss://example.com/socket",
+  headers: {"sec-websocket-protocol": "chat"},
+));
+
+ws.messages.listen((message) {
+  if (message.isText) {
+    print(message.text);
+  } else {
+    print(message.data); // Uint8List
+  }
+});
+
+ws.sendText("hello");
+ws.sendBinary([1, 2, 3]);
+
+await ws.close(1000, "bye");
+print("${ws.closeCode} ${ws.closeReason}");
+```
+
+`connect` throws `WebSocketException` when the server refuses the upgrade. Its
+`response` holds the status code and headers. The `messages` stream ends with a
+`WebSocketException` when the connection drops without a close frame.
+
+Each message is buffered whole before it reaches the stream. WebSocket always
+runs over HTTP/1.1, whatever `httpVersion` the client uses. Linux uses an
+older libcurl build. If that build lacks WebSocket support, `connect` throws.
+
 ## How it works
 
 This plugin uses custom built libcurl libraries distributed via [releases](https://github.com/ajinasokan/flutter_curl/releases). If you would like to build these by yourself follow [instructions](https://github.com/curl/curl/blob/master/docs/HTTP3.md) in cURL project. The configuration used for above mentioned builds is:

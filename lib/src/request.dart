@@ -24,6 +24,7 @@ class Request {
   Duration? connectTimeout;
   Duration? connectionMaxAge;
   String? _downloadPath;
+  bool _websocket = false;
 
   Request({
     required this.url,

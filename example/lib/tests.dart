@@ -584,6 +584,158 @@ List<Test> tests = [
     },
     expect: (ctx) => "hello world",
   ),
+  Test(
+    title: "websocket text",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      ws.sendText("hello");
+      final res = await ws.messages.first;
+      await ws.close();
+      c.dispose();
+      return res.text;
+    },
+    expect: (ctx) => "hello",
+  ),
+  Test(
+    title: "websocket binary",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      ws.sendBinary([1, 2, 3]);
+      final res = await ws.messages.first;
+      await ws.close();
+      c.dispose();
+      return "${res.isText} ${res.data}";
+    },
+    expect: (ctx) => "false [1, 2, 3]",
+  ),
+  Test(
+    title: "websocket 1mb message",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      final data = List.generate(1 << 20, (i) => i & 0xff);
+      ws.sendBinary(data);
+      final res = await ws.messages.first;
+      await ws.close();
+      c.dispose();
+      return res.data.length == data.length &&
+          List.generate(data.length, (i) => res.data[i] == data[i])
+              .every((e) => e);
+    },
+    expect: (ctx) => true,
+  ),
+  Test(
+    title: "websocket message order",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      for (var i = 0; i < 100; i++) {
+        ws.sendText("$i");
+      }
+      final res = await ws.messages.take(100).map((m) => m.text).toList();
+      await ws.close();
+      c.dispose();
+      return res.join(",");
+    },
+    expect: (ctx) => List.generate(100, (i) => "$i").join(","),
+  ),
+  Test(
+    title: "websocket headers and protocol",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(
+        url: echo.wsUrl!,
+        headers: {"x-test": "yes", "sec-websocket-protocol": "chat"},
+      ));
+      ws.sendText("header");
+      final res = await ws.messages.first;
+      await ws.close();
+      c.dispose();
+      return "${res.text} ${ws.response.headers["sec-websocket-protocol"]}";
+    },
+    expect: (ctx) => "yes chat",
+  ),
+  Test(
+    title: "websocket client close",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      await ws.close(4000, "bye");
+      c.dispose();
+      return ws.closeCode;
+    },
+    expect: (ctx) => 4000,
+  ),
+  Test(
+    title: "websocket server close",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      ws.sendText("close");
+      await ws.done;
+      c.dispose();
+      return "${ws.closeCode} ${ws.closeReason}";
+    },
+    expect: (ctx) => "4001 server close",
+  ),
+  Test(
+    title: "websocket refused",
+    exec: (ctx) async {
+      final c = curl.Client(verifySSL: false);
+      await c.init();
+      int? status;
+      try {
+        await c.connect(curl.Request(url: "${echo.wsUrl!}/missing"));
+      } on curl.WebSocketException catch (e) {
+        status = e.response?.statusCode;
+      }
+      c.dispose();
+      return status;
+    },
+    expect: (ctx) => 404,
+  ),
+  Test(
+    title: "websocket ssl verification",
+    exec: (ctx) async {
+      final c = curl.Client();
+      await c.init();
+      String? error;
+      try {
+        await c.connect(curl.Request(url: echo.wsUrl!));
+      } on curl.WebSocketException catch (e) {
+        error = e.message;
+      }
+      c.dispose();
+      return error;
+    },
+    expect: (ctx) => "SSL peer certificate or SSH remote key was not OK",
+  ),
+  Test(
+    title: "websocket with http2 client",
+    exec: (ctx) async {
+      final c = curl.Client(
+        verifySSL: false,
+        httpVersion: curl.HTTPVersion.http2,
+      );
+      await c.init();
+      final ws = await c.connect(curl.Request(url: echo.wsUrl!));
+      ws.sendText("hello");
+      final res = await ws.messages.first;
+      await ws.close();
+      c.dispose();
+      return res.text;
+    },
+    expect: (ctx) => "hello",
+  ),
   // Test(
   //   title: "put file over 4gb size",
   //   exec: (ctx) async {

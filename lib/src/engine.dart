@@ -12,6 +12,8 @@ class _Engine {
   static Map<String, RandomAccessFile> uploadFiles = {};
   static Map<String, ffi.Pointer<_CURLMime>> mimes = {};
   static Map<ffi.Pointer<_CURLEasy>, String> reqIDs = {};
+  static Map<String, _WSConnection> sockets = {};
+  static List<Object> wsEvents = [];
 
   void init({String? libPath}) {
     libCurl.init(libPath: libPath);
@@ -19,6 +21,14 @@ class _Engine {
   }
 
   void send(Request req) {
+    if (req._websocket && !libCurl.webSocket) {
+      wsEvents.add(_WSClosed(
+        req.id,
+        error: "libcurl is built without WebSocket support",
+      ));
+      return;
+    }
+
     final handle = libCurl.easy_init();
     reqIDs[handle] = req.id;
     connData[req.id] = _ResponseBuffer();
@@ -39,6 +49,10 @@ class _Engine {
 
     if (req._downloadPath != null) {
       downloadFiles[req.id] = File(req._downloadPath!).openWrite();
+    }
+
+    if (req._websocket) {
+      sockets[req.id] = _WSConnection(req.id, handle, this);
     }
 
     // set basic request params
@@ -66,10 +80,11 @@ class _Engine {
         req.proxy!.toNativeUtf8(),
       );
     }
+    // a total timeout would cut off a long lived WebSocket
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_TIMEOUT_MS,
-      req.timeout!.inMilliseconds,
+      req._websocket ? 0 : req.timeout!.inMilliseconds,
     );
     libCurl.easy_setopt_int(
       handle,
@@ -113,17 +128,20 @@ class _Engine {
 
     // set http version
     // READ: https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
-    final httpVersionFlag = switch (req.httpVersion!) {
-      HTTPVersion.none => consts.CURL_HTTP_VERSION_NONE,
-      HTTPVersion.http1 => consts.CURL_HTTP_VERSION_1_0,
-      HTTPVersion.http11 => consts.CURL_HTTP_VERSION_1_1,
-      HTTPVersion.http2 => consts.CURL_HTTP_VERSION_2_0,
-      HTTPVersion.http2tls => consts.CURL_HTTP_VERSION_2TLS,
-      HTTPVersion.http2PriorKnowledge =>
-        consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,
-      HTTPVersion.http3 => consts.CURL_HTTP_VERSION_3,
-      HTTPVersion.http3Only => consts.CURL_HTTP_VERSION_3ONLY,
-    };
+    // WebSocket upgrade is done only over HTTP/1.1
+    final httpVersionFlag = req._websocket
+        ? consts.CURL_HTTP_VERSION_1_1
+        : switch (req.httpVersion!) {
+            HTTPVersion.none => consts.CURL_HTTP_VERSION_NONE,
+            HTTPVersion.http1 => consts.CURL_HTTP_VERSION_1_0,
+            HTTPVersion.http11 => consts.CURL_HTTP_VERSION_1_1,
+            HTTPVersion.http2 => consts.CURL_HTTP_VERSION_2_0,
+            HTTPVersion.http2tls => consts.CURL_HTTP_VERSION_2TLS,
+            HTTPVersion.http2PriorKnowledge =>
+              consts.CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE,
+            HTTPVersion.http3 => consts.CURL_HTTP_VERSION_3,
+            HTTPVersion.http3Only => consts.CURL_HTTP_VERSION_3ONLY,
+          };
     libCurl.easy_setopt_int(
       handle,
       consts.CURLOPT_HTTP_VERSION,
@@ -282,7 +300,9 @@ class _Engine {
     libCurl.easy_setopt_ptr(
       handle,
       consts.CURLOPT_WRITEFUNCTION,
-      ffi.Pointer.fromFunction<_WriteFunc>(_dataWriteFunc, 0),
+      req._websocket
+          ? ffi.Pointer.fromFunction<_WriteFunc>(_wsWriteFunc, 0)
+          : ffi.Pointer.fromFunction<_WriteFunc>(_dataWriteFunc, 0),
     );
 
     libCurl.easy_setopt_string(
@@ -341,27 +361,21 @@ class _Engine {
               libCurl.easy_strerror(msg.result).toDartString();
         }
 
-        // cleanup everything
-        libCurl.slist_free_all(connData[requestID]!.slist!);
-        libCurl.multi_remove_handle(multiHandle, msg.easyHandle);
-        libCurl.easy_cleanup(msg.easyHandle);
-        reqIDs.remove(msg.easyHandle);
-        connData.remove(requestID);
-        logData[requestID]!.close();
+        _release(msg.easyHandle, requestID);
 
-        if (uploadFiles.containsKey(requestID)) {
-          uploadFiles[requestID]!.closeSync();
-          uploadFiles.remove(requestID);
-        }
-
-        if (mimes.containsKey(requestID)) {
-          libCurl.mime_free(mimes[requestID]!);
-          mimes.remove(requestID);
-        }
-
-        if (downloadFiles.containsKey(requestID)) {
-          downloadFiles[requestID]!.close();
-          downloadFiles.remove(requestID);
+        final socket = sockets.remove(requestID);
+        if (socket != null) {
+          socket.freeOutbox();
+          wsEvents.add(_WSClosed(
+            requestID,
+            code: socket.closeCode,
+            reason: socket.closeReason,
+            error: socket.closeReceived
+                ? null
+                : buffer.errorMessage ?? "connection closed",
+            response: socket.open ? null : buffer.toResponse(this),
+          ));
+          return null;
         }
 
         return buffer.toResponse(this);
@@ -370,27 +384,140 @@ class _Engine {
     return null;
   }
 
+  /// [_release] removes the handle from the queue and frees the C
+  /// resources of the request
+  void _release(ffi.Pointer<_CURLEasy> handle, String requestID) {
+    libCurl.slist_free_all(connData[requestID]!.slist!);
+    libCurl.multi_remove_handle(multiHandle, handle);
+    libCurl.easy_cleanup(handle);
+    reqIDs.remove(handle);
+    connData.remove(requestID);
+    logData[requestID]!.close();
+
+    if (uploadFiles.containsKey(requestID)) {
+      uploadFiles[requestID]!.closeSync();
+      uploadFiles.remove(requestID);
+    }
+
+    if (mimes.containsKey(requestID)) {
+      libCurl.mime_free(mimes[requestID]!);
+      mimes.remove(requestID);
+    }
+
+    if (downloadFiles.containsKey(requestID)) {
+      downloadFiles[requestID]!.close();
+      downloadFiles.remove(requestID);
+    }
+  }
+
+  void wsSend(_WSSend item) {
+    sockets[item.id]?.queue(item.data, item.flags);
+  }
+
+  void wsClose(_WSClose item) {
+    sockets[item.id]?.queueClose(item.code, item.reason);
+  }
+
+  /// [flush] sends the queued WebSocket frames and ends the connections
+  /// that finished the close handshake
+  ffi.Pointer<ffi.Size> _sent = malloc.allocate(ffi.sizeOf<ffi.Size>());
+  void flush() {
+    for (var socket in sockets.values.toList()) {
+      String? error;
+      while (socket.outbox.isNotEmpty) {
+        final frame = socket.outbox.first;
+        final result = _sendFrame(socket, frame);
+        if (result == consts.CURLE_AGAIN) break;
+        if (result != consts.CURLE_OK) {
+          error = libCurl.easy_strerror(result).toDartString();
+          break;
+        }
+        if (frame.flags & consts.CURLWS_CLOSE != 0) {
+          socket.closeSentAt = DateTime.now();
+        }
+        malloc.free(frame.data);
+        socket.outbox.removeAt(0);
+      }
+
+      if (error != null) {
+        _finish(socket, error);
+      } else if (socket.closeSentAt != null && socket.closeReceived) {
+        _finish(socket, null);
+      } else if (socket.closeSentAt != null &&
+          DateTime.now().difference(socket.closeSentAt!) > _closeTimeout) {
+        _finish(socket, "timed out waiting for close frame");
+      }
+    }
+  }
+
+  static const _closeTimeout = Duration(seconds: 5);
+
+  /// [_sendFrame] sends the rest of the frame. curl may take only a part
+  /// of it per call.
+  int _sendFrame(_WSConnection socket, _WSFrame frame) {
+    do {
+      _sent.value = 0;
+      final result = libCurl.ws_send(
+        socket.handle,
+        frame.data + frame.sent,
+        frame.length - frame.sent,
+        _sent,
+        0,
+        frame.flags,
+      );
+      frame.sent += _sent.value;
+      if (result != consts.CURLE_OK) return result;
+    } while (frame.sent < frame.length);
+    return consts.CURLE_OK;
+  }
+
+  void _finish(_WSConnection socket, String? error) {
+    sockets.remove(socket.id);
+    _release(socket.handle, socket.id);
+    socket.freeOutbox();
+    wsEvents.add(_WSClosed(
+      socket.id,
+      code: socket.closeCode,
+      reason: socket.closeReason,
+      error: socket.closeReceived ? null : error,
+    ));
+  }
+
   void dispose() {}
 }
 
 /// [_isolate] function runs in a different isolate and sends
 /// requests and responses to and from libcurl to the main
 /// Flutter isolate
-void _isolate(SendPort sendPort) async {
+void _isolate((SendPort, String?) args) async {
+  final (sendPort, libPath) = args;
   final receivePort = ReceivePort();
   sendPort.send(receivePort.sendPort);
 
   final engine = _Engine();
-  receivePort.listen((req) async {
-    engine.send(req);
-    await for (var data in _Engine.logData[req.id]!.stream) {
-      sendPort.send(data);
+  receivePort.listen((item) async {
+    if (item is _WSSend) {
+      engine.wsSend(item);
+    } else if (item is _WSClose) {
+      engine.wsClose(item);
+    } else if (item is Request) {
+      engine.send(item);
+      final logs = _Engine.logData[item.id];
+      if (logs == null) return;
+      await for (var data in logs.stream) {
+        sendPort.send(data);
+      }
     }
   });
-  engine.init();
+  engine.init(libPath: libPath);
 
   while (true) {
+    engine.flush();
     final res = await engine.perform();
+    for (var event in _Engine.wsEvents) {
+      sendPort.send(event);
+    }
+    _Engine.wsEvents.clear();
     if (res != null) sendPort.send(res);
     await Future.delayed(Duration(milliseconds: 10));
   }
@@ -441,8 +568,60 @@ int _headerWriteFunc(
 ) {
   int realsize = size * nmemb;
 
-  _Engine.connData[requestID.toDartString()]!.headerBuffer
-      .addAll(data.asTypedList(realsize));
+  final _requestID = requestID.toDartString();
+  _Engine.connData[_requestID]!.headerBuffer.addAll(data.asTypedList(realsize));
+
+  // a blank line ends the headers. for a WebSocket that is when the
+  // upgrade is done
+  final socket = _Engine.sockets[_requestID];
+  if (socket != null &&
+      !socket.open &&
+      realsize == 2 &&
+      data[0] == 13 &&
+      data[1] == 10) {
+    final buffer = _Engine.connData[_requestID]!;
+    final libCurl = socket.engine.libCurl;
+    ffi.Pointer<ffi.Int64> _tempLong = malloc.allocate(ffi.sizeOf<ffi.Int64>());
+    _tempLong.value = 0;
+    libCurl.easy_getinfo(
+        socket.handle, consts.CURLINFO_RESPONSE_CODE, _tempLong);
+    buffer.statusCode = _tempLong.value;
+    _tempLong.value = 0;
+    libCurl.easy_getinfo(
+        socket.handle, consts.CURLINFO_HTTP_VERSION, _tempLong);
+    buffer.httpVersion = _tempLong.value;
+    malloc.free(_tempLong);
+
+    if (buffer.statusCode == 101) {
+      socket.open = true;
+      _Engine.wsEvents.add(
+        _WSOpen(_requestID, buffer.toResponse(socket.engine)),
+      );
+    }
+  }
+
+  return realsize;
+}
+
+/// [_wsWriteFunc] collects incoming WebSocket frames
+int _wsWriteFunc(
+  ffi.Pointer<ffi.Uint8> data,
+  int size,
+  int nmemb,
+  ffi.Pointer<Utf8> requestID,
+) {
+  int realsize = size * nmemb;
+
+  final _requestID = requestID.toDartString();
+  final socket = _Engine.sockets[_requestID]!;
+  // body of a refused upgrade is not WebSocket data
+  if (!socket.open) {
+    _Engine.connData[_requestID]!.bodyBuffer.addAll(data.asTypedList(realsize));
+    return realsize;
+  }
+
+  final meta = socket.engine.libCurl.ws_meta(socket.handle).ref;
+  socket.receive(data.asTypedList(realsize), meta.flags, meta.bytesleft);
 
   return realsize;
 }

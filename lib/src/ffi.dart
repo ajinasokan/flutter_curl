@@ -152,6 +152,38 @@ typedef _curl_mime_data_func = ffi.Int32 Function(
 typedef _curl_mime_data = int Function(
     ffi.Pointer<_CURLMimePart>, ffi.Pointer<Utf8>, int);
 
+/// [_CURLWSFrame] holds the metadata of a received WebSocket chunk
+final class _CURLWSFrame extends ffi.Struct {
+  @ffi.Int32()
+  external int age;
+
+  @ffi.Int32()
+  external int flags;
+
+  @ffi.Int64()
+  external int offset;
+
+  @ffi.Int64()
+  external int bytesleft;
+
+  @ffi.Size()
+  external int len;
+}
+
+typedef _ws_send_func = ffi.Int32 Function(
+    ffi.Pointer<_CURLEasy>,
+    ffi.Pointer<ffi.Uint8>,
+    ffi.Size,
+    ffi.Pointer<ffi.Size>,
+    ffi.Int64,
+    ffi.Uint32);
+typedef _ws_send = int Function(ffi.Pointer<_CURLEasy>,
+    ffi.Pointer<ffi.Uint8>, int, ffi.Pointer<ffi.Size>, int, int);
+
+typedef _ws_meta_func = ffi.Pointer<_CURLWSFrame> Function(
+    ffi.Pointer<_CURLEasy>);
+typedef _ws_meta = ffi.Pointer<_CURLWSFrame> Function(ffi.Pointer<_CURLEasy>);
+
 // Callback functions
 
 typedef _ReadFunc = ffi.Int32 Function(
@@ -200,6 +232,11 @@ class _LibCURL {
   late _curl_mime_data mime_data;
   late _curl_mime_name mime_name;
   late _curl_mime_free mime_free;
+
+  // false when libcurl is built without WebSocket support
+  bool webSocket = false;
+  late _ws_send ws_send;
+  late _ws_meta ws_meta;
 
   void init({String? libPath}) {
     // Load the library depending on the platform. If libPath is
@@ -330,5 +367,15 @@ class _LibCURL {
     mime_free = _dylib
         .lookup<ffi.NativeFunction<_curl_mime_free_func>>('curl_mime_free')
         .asFunction();
+
+    webSocket = _dylib.providesSymbol('curl_ws_send');
+    if (webSocket) {
+      ws_send = _dylib
+          .lookup<ffi.NativeFunction<_ws_send_func>>('curl_ws_send')
+          .asFunction();
+      ws_meta = _dylib
+          .lookup<ffi.NativeFunction<_ws_meta_func>>('curl_ws_meta')
+          .asFunction();
+    }
   }
 }

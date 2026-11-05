@@ -16,6 +16,7 @@ part 'request_body.dart';
 part 'response.dart';
 part 'engine.dart';
 part 'log_info.dart';
+part 'websocket.dart';
 
 /// [Client] handles all the HTTP calls. Add [Request] to [Client] and await for [Response]. Call [init] before use and [dispose] after use.
 class Client {
@@ -24,6 +25,8 @@ class Client {
   late StreamSubscription _portSubscription;
   late Map<String, Request> _queue;
   late Map<String, Completer> _completers;
+  late Map<String, Completer<WebSocket>> _connects;
+  late Map<String, WebSocket> _sockets;
 
   final bool verbose;
   final void Function(String)? logWriter;
@@ -69,8 +72,10 @@ class Client {
   Future<void> init() async {
     _queue = {};
     _completers = {};
+    _connects = {};
+    _sockets = {};
     final receivePort = ReceivePort();
-    _engine = await Isolate.spawn(_isolate, receivePort.sendPort);
+    _engine = await Isolate.spawn(_isolate, (receivePort.sendPort, libPath));
     final completer = Completer<void>();
 
     certPath ??= await _getCertPath();
@@ -87,6 +92,21 @@ class Client {
       } else if (item is LogInfo) {
         _logs.add(item);
         if (verbose) (logWriter ?? print)(item.content?.trim() ?? '');
+      } else if (item is _WSOpen) {
+        item.response._request = _queue.remove(item.id);
+        final socket = WebSocket._(item.id, this, item.response);
+        _sockets[item.id] = socket;
+        _connects.remove(item.id)!.complete(socket);
+      } else if (item is _WSMessage) {
+        _sockets[item.id]
+            ?._messages
+            .add(WebSocketMessage._(item.isText, item.data));
+      } else if (item is _WSClosed) {
+        final request = _queue.remove(item.id);
+        item.response?._request = request;
+        _connects.remove(item.id)?.completeError(WebSocketException(
+            item.error ?? "connection closed", item.response));
+        _sockets.remove(item.id)?._finish(item);
       }
     });
     return completer.future;
@@ -118,18 +138,7 @@ class Client {
     }
 
     if (res == null) {
-      req._cookiePath ??= cookiePath;
-      req._altSvcCache ??= altSvcCache;
-      req._certPath ??= certPath;
-      req.timeout ??= timeout;
-      req.connectTimeout ??= connectTimeout;
-      req.connectionMaxAge ??= connectionMaxAge;
-      req.userAgent ??= userAgent;
-      req.proxy ??= proxy;
-      req.verbose = req.verbose ?? verbose;
-      req.verifySSL = req.verifySSL ?? verifySSL;
-      req.httpVersion = req.httpVersion ?? httpVersion;
-      _queue[req.id] = req;
+      _prepare(req);
 
       final completer = Completer<Response>();
       _completers[req.id] = completer;
@@ -144,6 +153,34 @@ class Client {
     return res!;
   }
 
+  /// [connect] opens a WebSocket to a ws:// or wss:// URL. It throws
+  /// [WebSocketException] when the server does not accept the upgrade.
+  /// Interceptors do not apply.
+  Future<WebSocket> connect(Request req) {
+    req._websocket = true;
+    _prepare(req);
+    final completer = Completer<WebSocket>();
+    _connects[req.id] = completer;
+    _sendPort.send(req);
+    return completer.future;
+  }
+
+  /// [_prepare] fills the request with the client defaults and queues it
+  void _prepare(Request req) {
+    req._cookiePath ??= cookiePath;
+    req._altSvcCache ??= altSvcCache;
+    req._certPath ??= certPath;
+    req.timeout ??= timeout;
+    req.connectTimeout ??= connectTimeout;
+    req.connectionMaxAge ??= connectionMaxAge;
+    req.userAgent ??= userAgent;
+    req.proxy ??= proxy;
+    req.verbose = req.verbose ?? verbose;
+    req.verifySSL = req.verifySSL ?? verifySSL;
+    req.httpVersion = req.httpVersion ?? httpVersion;
+    _queue[req.id] = req;
+  }
+
   Future<Response> download({
     required Request request,
     required String path,
@@ -153,6 +190,12 @@ class Client {
   }
 
   void dispose() {
+    for (var c in _connects.values) {
+      c.completeError(WebSocketException("client disposed"));
+    }
+    for (var s in _sockets.values) {
+      s._finish(_WSClosed(s._id, error: "client disposed"));
+    }
     _portSubscription.cancel();
     _engine.kill();
     _logs.close();

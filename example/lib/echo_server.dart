@@ -7,6 +7,8 @@ import 'package:http2/multiprotocol_server.dart' as http2;
 
 http2.MultiProtocolHttpServer? server;
 String? url;
+HttpServer? wsServer;
+String? wsUrl;
 
 Future<void> startTestServer() async {
   var context = SecurityContext()
@@ -22,6 +24,31 @@ Future<void> startTestServer() async {
   );
   url = 'https://localhost:${server!.port}';
   _serve();
+
+  wsServer = await HttpServer.bindSecure("localhost", 0, context);
+  wsUrl = 'wss://localhost:${wsServer!.port}';
+  wsServer!.listen(handleWebSocket);
+}
+
+/// [handleWebSocket] echoes every message back. "close" makes the server
+/// close the connection. any path other than / is refused with 404.
+void handleWebSocket(HttpRequest req) async {
+  if (req.uri.path != "/") {
+    req.response.statusCode = 404;
+    await req.response.close();
+    return;
+  }
+  final ws = await WebSocketTransformer.upgrade(req,
+      protocolSelector: (protocols) => protocols.first);
+  ws.listen((message) {
+    if (message == "close") {
+      ws.close(4001, "server close");
+    } else if (message == "header") {
+      ws.add(req.headers.value("x-test") ?? "");
+    } else {
+      ws.add(message);
+    }
+  });
 }
 
 void _serve() async {
@@ -145,4 +172,7 @@ Future<void> stopTestServer() async {
   await server!.close(force: true);
   server = null;
   url = null;
+  await wsServer!.close(force: true);
+  wsServer = null;
+  wsUrl = null;
 }
